@@ -1,0 +1,29 @@
+<html>
+	<head>
+		<script src="base.js"></script>
+		<script src="keys.js"></script>
+		<style>
+canvas {
+  image-rendering: optimizeSpeed;             /* Older versions of FF          */
+  image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+  image-rendering: -webkit-optimize-contrast; /* Safari                        */
+  image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+  image-rendering: pixelated;                 /* Awesome future-browsers       */
+  -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+}
+		</style>
+	</head>
+	<body onload="Start();">
+	<pre>
+Dracula has cooked you many pork chops!
+He hid them in the walls of his castle so you can't eat them.
+Do find them all because they are delicious!
+	</pre>
+	Pork chops found: <input readonly="true" id="porkchopinput" value="0" type="text"> out of <input readonly="true" id="maxporkchopinput" value="0" type="text"><br>
+	<a href="#" onclick="CanvasZoom(1)">Zoom in</a> <a href="#" onclick="CanvasZoom(-1)">Zoom out</a><br>
+	<canvas width="256" height="240" style="width: 512; height: 480;" id="screen"></canvas>
+	<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+	END OF PAGE
+	</body>
+</html>

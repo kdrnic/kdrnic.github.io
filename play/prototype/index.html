@@ -1,0 +1,51 @@
+<html>
+	<head>
+		<title>*TOP SECRET* CLASSIFIED - NESdev compo 2016 prototype</title>
+		<style>
+canvas.pixely {
+  image-rendering: optimizeSpeed;             /* Older versions of FF          */
+  image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+  image-rendering: -webkit-optimize-contrast; /* Safari                        */
+  image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+  image-rendering: pixelated;                 /* Awesome future-browsers       */
+  -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+}
+		</style>
+		<script>
+// Half-assed browser compatibility check
+try {
+	[1,2,3,4,5].filter(x=>x%2==1);				// Array.prototype.filter and arrow functions
+	(new AudioContext()).createBufferSource();	// AudioContext and AudioBufferSourceNode
+}
+catch(e) {
+	alert("Your browser is incompatible and likely crap. Consider updating/migrating");
+}
+		</script>
+		<script src="sfxr.js"></script>
+		<script src="base.js"></script>
+		<script src="keycodes.js"></script>
+		<script src="game.js"></script>
+		<script src="bitmapFont.js"></script>
+		<script src="utils.js"></script>
+		<script src="simpleTiled.js"></script>
+		<script src="ntsc.js"></script>
+	</head>
+	<body onload="Start();">
+		<div id="canvasContainer" onclick="SwitchNTSC()">
+			<canvas width="256" height="224" id="screen" style="width: 512; height: 448;" class="pixely"></canvas>
+		</div><br>
+		Click canvas for NTSC filter switch<br>
+		<div style="display: none;">
+		<h3>Music:</h3>
+		<audio controls="controls" loop="true" id="levelTheme">
+			<source src="song1.ogg" type="application/ogg">
+		</audio><br>
+		<audio controls="controls" loop="true" id="bossTheme">
+			<source src="boss1.ogg" type="application/ogg">
+		</audio><br>
+		<audio controls="controls" id="victoryTheme">
+			<source src="victory.ogg" type="application/ogg">
+		</audio><br>
+		</div>
+	</body>
+</html>

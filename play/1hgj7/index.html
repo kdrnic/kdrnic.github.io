@@ -1,0 +1,25 @@
+<html>
+	<head>
+		<title>This week in the world</title>
+		<script>
+// Half-assed browser compatibility check
+try {
+	[1,2,3,4,5].filter(x=>x%2==1);				// Array.prototype.filter and arrow functions
+	(new AudioContext()).createBufferSource();	// AudioContext and AudioBufferSourceNode
+}
+catch(e) {
+	alert("Your browser is incompatible and likely crap. Consider updating/migrating");
+}
+		</script>
+		<script src="base.js"></script>
+		<script src="keycodes.js"></script>
+	</head>
+	<body onload="Start();">
+	<marquee width="640">--- Sweden is a constitutional monarchy ---</marquee><br>
+	<canvas width="640" height="480" id="screen"></canvas><br>
+	<h3>Suggested music:</h3>
+	<audio autoplay loop controls="controls">
+		<source src="moonlight_lqplus.ogg" type="application/ogg">
+	</audio>
+	</body>
+</html>

@@ -1,0 +1,50 @@
+#games {
+	width: 100%;
+	display: block;
+}
+
+#games .game {
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='300'><path d='M 5 105 L 95 5 L 254 175 z' fill='black'/><path d='M 0 100 L 90 0 L 249 170 z' fill='yellow'/></svg>");
+	background-repeat: no-repeat;
+	width: 260px;
+	height: 300px;
+	margin-left: 10px;
+	margin-right: 10px;
+	display: inline-block;
+	overflow: hidden;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.img-container {
+	width: 250px;
+	height: 140px;
+	margin: auto;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	font-size: 130px;
+	color: hotpink;
+	text-shadow: 5px 5px crimson;
+	font-style: normal;
+}
+
+#games .game img {
+	max-width: 250px;
+	max-height: 140px;
+	width: auto;
+	height: auto;
+	border: 2px dashed hotpink;
+}
+
+#games .game .game-title {
+	font-size: 18px;
+	width: 250px;
+	margin: auto;
+	margin-top: 25px;
+}
+
+#games .game .game-description {
+	font-size: 16px;
+	width: 250px;
+	margin: auto;
+}

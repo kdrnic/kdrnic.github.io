@@ -1,0 +1,180 @@
+<html>
+	<head>
+		<script src="base.js"></script>
+		<script src="commonLogic.js"></script>
+		<script src="commonGfx.js"></script>
+		<script src="game.js"></script>
+		<script src="levels.js"></script>
+		<script src="vikings.js"></script>
+		<script src="platforms.js"></script>
+		<script src="enemies.js"></script>
+		<script src="data.js"></script>
+		<script src="keys.js"></script>
+		<script src="miscObjs.js"></script>
+		<!-- YAY! A shitload of .js files -->
+		<script>
+var gravity = 0.25;
+var maxYSpeed = 20;
+		</script>
+		<style>
+.container
+{
+	border: solid black 1px;
+	position: relative;
+	margin: 0 auto;
+	width: 640;
+	height: 480;
+}
+.gameCanvas
+{
+	position: absolute;
+	z-index: 1;
+}
+.menu
+{
+	position: absolute;
+	z-index: 2;
+	width: 640;
+	height: 480;
+	margin: 0 auto;
+}
+.marqueeContainer
+{
+	position: relative;
+	width: 630px;
+	height: 400px;
+	overflow: hidden;
+}
+table.creditsTable
+{
+	width: 320px;
+	background-image: url("alphaBg.png");
+}
+tr.creditsTable
+{
+	width: 100%;
+}
+td.creditsTable
+{
+	width: 50%;
+}
+table.instructionTable
+{
+	width: 600px;
+	margin-left: 20px;
+	background-image: url("alphaBg.png");
+}
+		</style>
+	</head>
+	<body onload="Start();InitGame();">
+		<div class="container">
+			<canvas width="640" height="480" id="canvas" class="gameCanvas"></canvas>
+			<div style="display:none;background-image: url('menuBg.png');" class="menu" id="startMenu">
+				<center>
+					<h1>Ye lost viking</h1>
+					<a href="#" onclick="ClickNewGame()">New game</a><br>
+					<a href="#" onclick="ClickPassword()">Password</a><br>
+					<a href="#" onclick="ClickInstructions()">Instructions</a><br>
+					<a href="#" onclick="ClickCredits()">Credits</a>
+				</center>
+			</div>
+			<div style="display:none;background-image: url('menuBg.png');" class="menu" id="passwordMenu">
+				<center>
+					<h1>Enter password to start level</h1>
+					<input type="password" id="passwordBox"><input type="button" onclick="TryPassword()" value="Start level">
+					<br><br><br><br><br><br><br><br><a href="#" onclick="ClickReturn()">Return to start menu</a>
+				</center>
+			</div>
+			<div style="display:none;background-image: url('alphaBg.png');" class="menu" id="deathScreen">
+				<center>
+					<h1>You failed</h1>
+					<a href="#" onclick="ClickContinue()">Continue</a><br>
+				</center>
+			</div>
+			<div style="background-color: rgb(0,0,0);color: rgb(255,255,255);" class="menu" id="loadingScreen">
+				<center>
+					<h1>Loading</h1>
+					<div style="width: 200; background-color: rgb(0,0,255); height: 20px;"><div id="loadingBar" style="float:left;background-color: rgb(255,0,0);width: 1px; height: 20px; color: rgb(0,0,0);">0% loaded</div></div>
+				</center>
+			</div>
+			<div style="display:none;background-image: url('menuBg.png');" class="menu" id="levelStartScreen">
+			</div>
+			<div style="display:none;background-image: url('menuBg.png');" class="menu" id="creditsScreen">
+				<center>
+					<h3>Credits</h3>
+					<table class="creditsTable">
+						<tr><th>Programing</th></tr>
+							<tr><td><b>drnick</b></td><td>Game logics programmer</td></tr>
+							<tr><td><b>drnick</b></td><td>Engine programmer</td></tr>
+							<tr><td><b>drnick</b></td><td>Graphics programmer</td></tr>
+							<tr><th>Graphics</th></tr>
+							<tr><td><b>drnick</b></td><td>Level graphics artist</td></tr>
+							<tr><td><b>drnick</b></td><td>Character graphics artist</td></tr>
+							<tr><td><b>drnick</b></td><td>GUI graphics artist</td></tr>
+							<tr><th>Game design</th></tr>
+							<tr><td><b>drnick</b></td><td>Level designer</td></tr>
+							<tr><td><b>drnick</b></td><td>Game designer</td></tr>
+							<tr><td><b>Blizzard</b></td><td>Original game concept</td></tr>
+					</table>
+					<br>
+					<a href="http://gameprogrammersnotebook.blogspot.com.br/">drnick's blog</a><br>
+					<a href="http://www.ludumdare.com/compo/author/lucasmaismais/">drnick's Ludum Dare profile</a><br>
+					<br>
+					<a href="#" onclick="ClickReturnCredits()">Return to main menu</a>
+				</center>
+			</div>
+			<div style="display:none;background-image: url('menuBg.png');" class="menu" id="instructions">
+				<center>
+					<h3>Instructions</h3>
+					<div style="height: 350; overflow-y: scroll;">
+						<table class="instructionTable">
+							<tr>
+								<td><img src="instructionImages/keys.png"></td>
+								<td>>Use <b>A</b> to jump, <b>S</b> to use the viking's main ability and <b>D</b> to select another viking. Also, if one of your vikings died and/or you are stuck in a situation, press <b>R</b> to kill all vikings and restart.</td>
+							</tr>
+							<tr>
+								<td><img src="instructionImages/death.png"></td>
+								<td>If one of your vikings die, <b>you won't be able to complete the level</b>. You may continue playing, however.</td>
+							</tr>
+							<tr>
+								<td><img src="instructionImages/sword.png"></td>
+								<td>The <b>green cape</b> viking can use his sword to attack enemies.</td>
+							</tr>
+							<tr>
+								<td><img src="instructionImages/shield.png"></td>
+								<td>The <b>red cape</b> viking can use his shield to protect himself and the others from enemy attacks. Also, he can hold his shield above his head, and the others can then jump on the shield to ride around or to reach higher places.</td>
+							</tr>
+							<tr>
+								<td><img src="instructionImages/arrows.png"></td>
+								<td>The <b>blue cape</b> viking can use his bow and lifetime supply of arrows to attack enemies. However, the arrows don't do as much damage as the sword.</td>
+							</tr>
+							<tr>
+								<td><img src="instructionImages/pterodactyl.png"></td>
+								<td>One can ride the <b>pterodactyl</b> to fly throughout the land.</td>
+							</tr>
+							<tr>
+								<td><img src="instructionImages/alien.png"></td>
+								<td>At the end of the level, the <b>alien</b> awaits to transport you to the next instalment of your quest. All vikings must be under the flying saucer for it to transport them.</td>
+							</tr>
+							<tr>
+								<td><img src="instructionImages/enemy.png"></td>
+								<td>The <b>cavemen</b> fear you. They know you don't belong to their time, and thus will meet you with hostility.</td>
+							</tr>
+						</table>
+					</div>
+					<a href="#" onclick="ClickReturnInstructions()">Return to main menu</a>
+				</center>
+			</div>
+			<div style="display:none;background-image: url('menuBg.png');" class="menu" id="victoryScreen">
+				<center>
+					<h1>You has complete game!</h1>
+					<h1>A winner is you!</h1>
+					<h5>Please go start menu read credits and game manufacturer like much</h5>
+					<br><br><br><br>
+					<a href="#" onclick="ClickReturnVictory()">Return to main menu</a>
+				</center>
+			</div>
+		</div>
+		<h6>If the game fails to load for a lot of time, refreshing may help</h6>
+	</body>
+</html>

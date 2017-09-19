@@ -1,0 +1,21 @@
+<html>
+	<head>
+		<script src="base.js"></script>
+		<script src="keys.js"></script>
+		<script>
+// Half-assed browser compatibility check
+try {
+	[1,2,3,4,5].filter(x=>x%2==1);				// Array.prototype.filter and arrow functions
+	//(new AudioContext()).createBufferSource();	// AudioContext and AudioBufferSourceNode
+}
+catch(e) {
+	alert("Your browser is incompatible and likely crap. Consider updating/migrating");
+}
+		</script>
+	</head>
+	<body onload="Start();">
+	<canvas width="640" height="480" id="screen"></canvas>
+	<br><a href="?improvedPhysics">Play game with improved physics added several months later</a><br>
+	<a href="?">Play game with the slightly broken physics, as first implemented</a>
+	</body>
+</html>

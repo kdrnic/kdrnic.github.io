@@ -1,0 +1,472 @@
+<html>
+	<head>
+		<style>
+#screenArea{
+	position: fixed;
+	background-image: url(loading.gif);
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	margin: 0px;
+	padding: 0px;
+}
+#loadingDiv{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	margin: 0px;
+	padding: 0px;
+	background-image: url(loading.gif);
+	z-index: 3;
+}
+#clickDiv{
+	z-index: 1;
+	bottom: 0px;
+	width: 100%;
+	height: 15vh;
+	background-color: white;
+	color: black;
+	opacity: 0.5;
+	position: absolute;
+	text-align: center;
+}
+.fpsDiv{
+	color: white;
+	width: 120px;
+	height: 24px;
+	position: absolute;
+	z-index: 1;
+}
+#scoreDiv{
+	color: white;
+	position: absolute;
+	float: left;
+	right: 10px;
+	z-index: 1;
+	font-size: 20px;
+	font-style: oblique;
+}
+#gameOverDiv{
+	color: blue;
+	background-color: rgba(255, 0, 0, 0.25);
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: 2;
+	font-size: 50px;
+	text-align: center;
+}
+#gameOverText{
+	
+}
+		</style>
+	</head>
+	<body onload="Start()">
+		<div id="screenArea">
+			<div id="loadingDiv"></div>
+			<div id="scoreDiv"></div>
+			<div id="clickDiv">CLICK HERE TO PLACE</div>
+			<div id="gameOverDiv" style="display: none;"><div id="gameOverText">GAME<BR>OVER</div></div>
+		</div>
+		<script src="three.min.js"></script>
+		<script src="TrackballControls.js"></script>
+		<script src="keycodes.js"></script>
+		<script src="ammo.js"></script>
+		<script>
+var frameTime = 1000 / 60;
+var mouseD = false;
+var physFrame = 0;
+var gfxFrame = 0;
+var oldPhysFrame = 0;
+var oldGfxFrame = 0;
+var physFPS = 60;
+var gfxFPS = 60;
+var pressed = [];
+var numData = 0;
+var numDataLoaded = 0;
+var gameStarted = false;
+var keyUps = [];
+var keyDowns = [];
+var data = {};
+var keyPressed = {};
+var bodyLinks = [];
+var currentRow = null;
+var previousRows = [];
+var clicked = false;
+var highscore = 0;
+
+var force = new Ammo.btVector3(0,0,0);
+
+function SetCookie(cname, cvalue, exdays){
+	var d = new Date();
+	d.setTime(d.getTime() + (exdays*24*60*60*1000));
+	var expires = "expires="+ d.toUTCString();
+	document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+
+function GetCookie(cname){
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(var i = 0; i <ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length,c.length);
+		}
+	}
+	return "";
+}
+
+function Timestamp(){
+	return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
+}
+
+function LoadJsonMesh(filename){
+	numData++;
+	jsonLoader.load(filename, function(geometry, materials){
+		numDataLoaded++;
+		data[filename] = {
+			geometry: geometry,
+			materials: materials
+		};
+	});
+}
+
+function LoadTexture(filename){
+	numData++;
+	textureLoader.load(filename, function(texture){
+		numDataLoaded++;
+		data[filename] = texture;
+	});
+}
+
+function InitPhysics(){
+	var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
+	var dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
+	var overlappingPairCache = new Ammo.btDbvtBroadphase();
+	var solver = new Ammo.btSequentialImpulseConstraintSolver();
+	dynamicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+	force.setValue(0, -10, 0);
+	dynamicsWorld.setGravity(force);
+}
+
+function Start(){
+	var highCookie = GetCookie("highscore");
+	if(highCookie != "") highscore = parseInt(highCookie);
+	
+	window.addEventListener("keyup", function (event){
+		if(keyPressed[event.keyCode]) keyUps[event.keyCode] = true;
+		keyPressed[event.keyCode] = false;
+		if(!(event.ctrlKey || event.shiftKey)) event.preventDefault();
+	});
+	window.addEventListener("keydown", function (event){
+		if(!keyPressed[event.keyCode]) keyDowns[event.keyCode] = true;
+		keyPressed[event.keyCode] = true;
+		if(!(event.ctrlKey || event.shiftKey)) event.preventDefault();
+	});
+	
+	scene = new THREE.Scene();
+	trackCamera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+	activeCamera = trackCamera;
+	renderer = new THREE.WebGLRenderer();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	document.getElementById("screenArea").appendChild(renderer.domElement);
+	var bgC = 0x666699;
+	scene.background = new THREE.Color(bgC);
+	scene.fog = new THREE.Fog(bgC, 0.0025, 30);
+	
+	window.addEventListener("resize", function(){
+		var camera = activeCamera;
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize( window.innerWidth, window.innerHeight );
+	});
+	
+	trackCamera.position.set(0, 0, 8);
+	trackControls = new THREE.TrackballControls(trackCamera, renderer.domElement);
+	trackControls.rotateSpeed = 1.0;
+	trackControls.zoomSpeed = 1.2;
+	trackControls.panSpeed = 0.8;
+	trackControls.noZoom = false;
+	trackControls.noPan = false;
+	trackControls.staticMoving = true;
+	trackControls.dynamicDampingFactor = 0.3;
+	trackControls.keys = [65, 83, 68];
+	
+	jsonLoader = new THREE.JSONLoader();
+	textureLoader = new THREE.TextureLoader();
+	
+	renderer.domElement.style.position = "absolute";
+	
+	document.getElementById("clickDiv").addEventListener("click", function(){ clicked = true; });
+	
+	/*
+	fpsDiv = document.createElement("div");
+	fpsDiv.className = fpsDiv.className + " fpsDiv";
+	document.getElementById("screenArea").appendChild(fpsDiv);
+	*/
+	setInterval(function(){
+		physFPS = physFrame - oldPhysFrame;
+		gfxFPS = gfxFrame - oldGfxFrame;
+		oldPhysFrame = physFrame;
+		oldGfxFrame = gfxFrame;
+		//fpsDiv.innerHTML = physFPS.toString() + " FPS logic <br>" + gfxFPS + " FPS graphics<br>";
+	}, 1000);
+	
+	LoadJsonMesh("stone.json");
+	LoadTexture("rock.png");
+	LoadTexture("grass.png");
+	
+	lastFrameTime = Timestamp();
+	setTimeout(Update, 0.95 * frameTime);
+	requestAnimationFrame(Render);
+}
+
+function BodyTransformToScene(body, object){
+	var t = body.getWorldTransform();
+	var pos = t.getOrigin();
+	var rot = t.getRotation();
+	object.position.set(pos.x(), pos.y(), pos.z());
+	object.quaternion.set(rot.x(), rot.y(), rot.z(), rot.w());
+}
+
+function SceneTransformToBody(object, body){
+	body.getWorldTransform().setOrigin(new Ammo.btVector3(object.position.x, object.position.y, object.position.z));
+	body.getWorldTransform().setRotation(new Ammo.btQuaternion(object.quaternion._x, object.quaternion._y, object.quaternion._z, object.quaternion._w));
+}
+
+function MakeStoneBody(object){
+	var body = new Ammo.btRigidBody(stoneInfo);
+	dynamicsWorld.addRigidBody(body);
+	SceneTransformToBody(object, body);
+	bodyLinks.push({
+		body: body,
+		object: object
+	});
+}
+
+function MakeStaticStoneBody(object){
+	var body = new Ammo.btRigidBody(staticStoneInfo);
+	dynamicsWorld.addRigidBody(body);
+	SceneTransformToBody(object, body);
+}
+
+function MakeRow(){
+	var n = 3;
+	if(previousRows.length > 0) n = previousRows[previousRows.length - 1].length;
+	var row = [];
+	var rowObject = new THREE.Object3D();
+	for(var i = 0; i < 14; i++){
+		var mc = Math.floor(Math.random() * 4);
+		var mr = Math.floor(Math.random() * 2);
+		if(i >= n) mr += 2;
+		var m = stoneTextures[mc][mr];
+		var s = new THREE.Mesh(data["stone.json"].geometry, new THREE.MeshBasicMaterial({map: m}));
+		if(i < n) s.stacked = true;
+		s.rotateY(i * Math.PI * 2 * (1 / 14));
+		s.translateZ(-0.9);
+		rowObject.add(s);
+	}
+	rowObject.position.y = 0.42 * previousRows.length;
+	scene.add(rowObject);
+	currentRow = rowObject;
+	trackControls.target.y = currentRow.position.y;
+	activeCamera.position.y = currentRow.position.y;
+	return rowObject;
+}
+
+function ChildrenToScene(object){
+	var r = object.children.slice();
+	r.forEach(ChildToScene);
+	scene.remove(object);
+	return r;
+}
+
+function ChildToScene(object){
+	var position = new THREE.Vector3();
+	var quaternion = new THREE.Quaternion();
+	var scale = new THREE.Vector3();
+	
+	object.matrixWorld.decompose(position, quaternion, scale);
+	
+	//object.position.copy(object.localToWorld(new THREE.Vector3(0, 0, 0)));
+	
+	object.position.copy(position);
+	object.scale.copy(scale);
+	object.quaternion.copy(quaternion);
+	
+	object.parent.remove(object);
+	scene.add(object);
+}
+
+var removeLoading = false;
+
+function InitGame(){
+	gameStarted = true;
+	scene.add(planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshBasicMaterial({map: data["grass.png"], side: THREE.DoubleSide})));
+	planeMesh.rotateX(Math.PI * 0.5)
+	planeMesh.position.y = -8;
+	
+	var uselessStones = [];
+	stoneTextures = (new Array(4)).fill(0).map(function(el, col){
+		return (new Array(4)).fill(0).map(function(le, row){
+			var m = data["rock.png"].clone();
+			m.offset.x = col * 0.25;
+			m.offset.y = -row * 0.25;
+			m.needsUpdate = true;
+			var s = new THREE.Mesh(data["stone.json"].geometry, new THREE.MeshBasicMaterial({map: m}));
+			s.position.y = 999;
+			scene.add(s);
+			return m;
+		});
+	});
+	
+	InitPhysics();
+	
+	var groundShape = new Ammo.btStaticPlaneShape(new Ammo.btVector3(0, 1, 0), -8);
+	var groundTransform = new Ammo.btTransform();
+	groundTransform.setIdentity();
+	groundTransform.setOrigin(new Ammo.btVector3());
+	var groundMotionState = new Ammo.btDefaultMotionState();
+	var groundInfo = new Ammo.btRigidBodyConstructionInfo(0, groundMotionState, groundShape, new Ammo.btVector3(0, 0, 0));
+	groundBody = new Ammo.btRigidBody(groundInfo);
+	dynamicsWorld.addRigidBody(groundBody);
+	
+	var stoneMesh = new Ammo.btTriangleMesh();;
+	var geo = data["stone.json"].geometry;
+	var _vertices = geo.vertices.map(v => new Ammo.btVector3(v.x, v.y, v.z));
+	geo.faces.forEach(function(face){
+		stoneMesh.addTriangle(_vertices[face.a], _vertices[face.b], _vertices[face.c]);
+	});
+	var stoneShape = new Ammo.btConvexTriangleMeshShape(stoneMesh, true);
+	var stoneInertia = new Ammo.btVector3(0, 0, 0);
+	var stoneMass = 0.5;
+	stoneShape.calculateLocalInertia(stoneMass, stoneInertia);
+	stoneInfo = new Ammo.btRigidBodyConstructionInfo(stoneMass, 0, stoneShape, stoneInertia);
+	stoneInfo.set_m_friction(0.1);
+	staticStoneInfo = new Ammo.btRigidBodyConstructionInfo(0, 0, stoneShape, stoneInertia);
+	
+	removeLoading = true;
+	MakeRow();
+}
+
+function Render(){	
+	gfxFrame++;
+	
+	trackControls.update();
+	
+	renderer.render(scene, activeCamera);
+	
+	requestAnimationFrame(Render);
+}
+
+function Update(){
+	var t = Timestamp();
+	
+	while(t - lastFrameTime < frameTime){
+		t = Timestamp();
+	}
+	if(numDataLoaded != numData){
+		lastFrameTime = Timestamp();
+		setTimeout(Update, 0.95 * frameTime);
+		return;
+	}
+	else{
+		if(!gameStarted) InitGame();
+	}
+	
+	lastFrameTime = Timestamp();
+	
+	physFrame++;
+	
+	ActualUpdate();
+	keyUps = {};
+	keyDowns = {};
+	clicked = false;
+	
+	setTimeout(Update, Math.max((0.95 * frameTime) - (Timestamp() - lastFrameTime), 0));
+}
+
+var rotationSpeed = 0.01;
+var rotationDirection = 1;
+var previousClicked = false;
+var gameOver = false;
+var previousGameOver = false;
+function ActualUpdate(){
+	bodyLinks.forEach(function(b){
+		BodyTransformToScene(b.body, b.object);
+	});
+	dynamicsWorld.stepSimulation(frameTime / 1000, 5);
+	
+	if(removeLoading){
+		document.getElementById("loadingDiv").style.display = "none";
+		removeLoading = false;
+	}
+	
+	if(gameOver){
+		if(!previousGameOver){
+			document.getElementById("gameOverDiv").style.display = "block";
+			previousGameOver = true;
+			SetCookie("highscore", highscore.toString(), 99);
+		}
+	}
+	
+	if(previousClicked){
+		var stones = ChildrenToScene(currentRow);
+		
+		currentRow = [];
+		stones.forEach(function(s){
+			if(s.stacked){
+				if((previousRows.length == 0) || previousRows[previousRows.length - 1].find(function(ps){
+					if(Math.abs(ps.position.x - s.position.x) < 0.001){
+						if(Math.abs(ps.position.z - s.position.z) < 0.001){
+							return true;
+						}
+					}
+					return false;
+				})){
+					MakeStaticStoneBody(s);
+					currentRow.push(s);
+				}
+				else{
+					MakeStoneBody(s);
+				}
+			}
+			else{
+				MakeStoneBody(s);
+			}
+		});
+		
+		if(currentRow.length == 0) gameOver = true;
+		
+		previousRows.push(currentRow);
+		if(!gameOver){
+			MakeRow();
+			currentRow.rotation.y = previousRotation + (Math.PI / 7) * rotationDirection * -1;
+		}
+		rotationDirection *= -1;
+		if(previousRows.length < 10) rotationSpeed *= 1.25;
+		else rotationSpeed += 0.004;
+		previousClicked = false;
+	}
+	
+	if(!gameOver) currentRow.rotateY(rotationSpeed * rotationDirection);
+	if(clicked){
+		if(!gameOver){
+			currentRow.rotation.y = Math.round(currentRow.rotation.y / (Math.PI / 7)) * (Math.PI / 7);
+			
+			previousClicked = true;
+			previousRotation = currentRow.rotation.y;
+		}
+	}
+	if(previousRows.length > highscore) highscore = previousRows.length;
+	document.getElementById("scoreDiv").innerHTML = previousRows.length + " rows<br>Best: " + highscore;
+}
+		</script>
+	</body>
+</html>

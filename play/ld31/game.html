@@ -1,0 +1,53 @@
+<!--
+ADDING CONTENT
+--------------
+	All data that you use must be preloaded, add filename to dataSrcs array
+(defined in data.js), do not add in data.js but instead put
+"dataSrcs.push('filename.ext')" in your own files near where you use said
+files.
+	Entities in the game are objects in the form "{alive: true, Update:
+function() {}, Draw: function() {}}".
+	To add entities to the game, use the AddEntity function. It will also set
+the "alive" property to true.
+-->
+<html>
+	<head>
+		<script src="base.js"></script>
+		<script src="commonGfx.js"></script>
+		<script src="commonLogic.js"></script>
+		<script src="data.js"></script>
+		<script src="keys.js"></script>
+		<script src="tiled.js"></script>
+		<script src="level.js"></script>
+		<script src="hero.js"></script>
+		<script src="roman.js"></script>
+		<script src="pickup.js"></script>
+		<script src="wizard.js"></script>
+		<script src="attack.js"></script>
+		<script src="opening.js"></script>
+	</head>
+	<body onload="Start();OnMoreData();">
+	<div>
+		<div style="float: left">
+			<canvas width="640" height="640" id="canvas" class="gameCanvas"></canvas>
+		</div>
+		<div style="float: right">
+		Story:<br>
+		------<br>
+		You are a brave warrior from a gallic village,<br>
+		currently under attack by the forces of the Roman Empire.<br>
+		Your village has been able to defend itself so far<br>
+		due to the magic strength potion made by the village's druid,<br>
+		however, he is running out of ingredients. Help him!<br>
+		Instructions:<br>
+		-------------<br>
+		Use arrow keys to walk<br>
+		Press Z to attack<br>
+		If loading bar seems stuck for too long<br>
+		(the game should load in under 30 seconds in a decent connection),<br>
+		please press this button: <input value="Force loading finish" type="button" onclick="data.length = dataSrcs.length;InitGame();"><br>
+		This is due to an issue with HTML5 Audio API loading.<br>
+		</div>
+	</div>
+	</body>
+</html>
