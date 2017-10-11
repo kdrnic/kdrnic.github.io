@@ -1,0 +1,271 @@
+<html><head><title>File and compression routines</title><body>
+<h1><a name="File and compression routines">File and compression routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#fix_filename_case">fix_filename_case</a>
+<li><a href="#fix_filename_slashes">fix_filename_slashes</a>
+<li><a href="#fix_filename_path">fix_filename_path</a>
+<li><a href="#replace_filename">replace_filename</a>
+<li><a href="#replace_extension">replace_extension</a>
+<li><a href="#append_filename">append_filename</a>
+<li><a href="#get_filename">get_filename</a>
+<li><a href="#get_extension">get_extension</a>
+<li><a href="#put_backslash">put_backslash</a>
+<li><a href="#file_exists">file_exists</a>
+<li><a href="#exists">exists</a>
+<li><a href="#file_size">file_size</a>
+<li><a href="#file_time">file_time</a>
+<li><a href="#delete_file">delete_file</a>
+<li><a href="#for_each_file">for_each_file</a>
+<li><a href="#packfile_password">packfile_password</a>
+<li><a href="#pack_fopen">pack_fopen</a>
+<li><a href="#pack_fclose">pack_fclose</a>
+<li><a href="#pack_fseek">pack_fseek</a>
+<li><a href="#pack_feof">pack_feof</a>
+<li><a href="#pack_ferror">pack_ferror</a>
+<li><a href="#pack_getc">pack_getc</a>
+<li><a href="#pack_putc">pack_putc</a>
+<li><a href="#pack_igetw">pack_igetw</a>
+<li><a href="#pack_igetl">pack_igetl</a>
+<li><a href="#pack_iputw">pack_iputw</a>
+<li><a href="#pack_iputl">pack_iputl</a>
+<li><a href="#pack_mgetw">pack_mgetw</a>
+<li><a href="#pack_mgetl">pack_mgetl</a>
+<li><a href="#pack_mputw">pack_mputw</a>
+<li><a href="#pack_mputl">pack_mputl</a>
+<li><a href="#pack_fread">pack_fread</a>
+<li><a href="#pack_fwrite">pack_fwrite</a>
+<li><a href="#pack_fgets">pack_fgets</a>
+<li><a href="#pack_fputs">pack_fputs</a>
+<li><a href="#pack_fopen_chunk">pack_fopen_chunk</a>
+<li><a href="#pack_fclose_chunk">pack_fclose_chunk</a>
+</h4></ul>
+<p><br><br>
+<p>
+The following routines implement a fast buffered file I/O system, which 
+supports the reading and writing of compressed files using a ring buffer 
+algorithm based on the LZSS compressor by Haruhiko Okumura. This does not 
+achieve quite such good compression as programs like zip and lha, but 
+unpacking is very fast and it does not require much memory. Packed files 
+always begin with the 32 bit value F_PACK_MAGIC, and autodetect files with 
+the value F_NOPACK_MAGIC.
+<p>
+<b>char *<a name="fix_filename_case">fix_filename_case</a>(char *path);</b><br>
+   Converts a filename to a standardised case. On DOS platforms, they will 
+   be entirely uppercase. Returns a copy of the path parameter.
+<p>
+<b>char *<a name="fix_filename_slashes">fix_filename_slashes</a>(char *path);</b><br>
+   Converts all the directory separators in a filename to a standard 
+   character. On DOS platforms, this is a backslash. Returns a copy of the 
+   path parameter.
+<p>
+<b>char *<a name="fix_filename_path">fix_filename_path</a>(char *dest, char *path, int size);</b><br>
+   Converts a partial filename into a full path, generating up to the 
+   specified maximum number of characters. Returns a copy of the dest 
+   parameter.
+<p>
+<b>char *<a name="replace_filename">replace_filename</a>(char *dest, char *path, char *filename, int size);</b><br>
+   Replaces the specified path+filename with a new filename tail, generating 
+   up to the specified maximum number of characters. Returns a copy of the 
+   dest parameter.
+<p>
+<b>char *<a name="replace_extension">replace_extension</a>(char *dest, char *filename, char *ext, int size);</b><br>
+   Replaces the specified filename+extension with a new extension tail, 
+   generating up to the specified maximum number of characters. Returns a 
+   copy of the dest parameter.
+<p>
+<b>char *<a name="append_filename">append_filename</a>(char *dest, char *path, char *filename, int size);</b><br>
+   Concatenates the specified filename onto the end of the specified path, 
+   generating up to the specified maximum number of characters. Returns a 
+   copy of the dest parameter.
+<p>
+<b>char *<a name="get_filename">get_filename</a>(char *path);</b><br>
+   When passed a completely specified file path, this returns a pointer to 
+   the filename portion. Both '\' and '/' are recognized as directory 
+   separators.
+<p>
+<b>char *<a name="get_extension">get_extension</a>(char *filename);</b><br>
+   When passed a complete filename (with or without path information) this 
+   returns a pointer to the file extension.
+<p>
+<b>void <a name="put_backslash">put_backslash</a>(char *filename);</b><br>
+   If the last character of the filename is not a '\', '/', or '#', this 
+   routine will concatenate a '\' on to it.
+<p>
+<b>int <a name="file_exists">file_exists</a>(char *filename, int attrib, int *aret);</b><br>
+   Checks whether a file matching the given name and attributes exists, 
+   returning non-zero if it does. The file attribute may contain any of the 
+   FA_* constants from dir.h. If aret is not NULL, it will be set to the 
+   attributes of the matching file. If an error occurs the system error code 
+   will be stored in errno.
+<p>
+<b>int <a name="exists">exists</a>(char *filename);</b><br>
+   Shortcut version of file_exists(), which checks for normal files, which 
+   may have the archive or read-only bits set, but are not hidden, 
+   directories, system files, etc.
+<p>
+<b>long <a name="file_size">file_size</a>(char *filename);</b><br>
+   Returns the size of a file, in bytes. If the file does not exist or an 
+   error occurs, it will return zero and store the system error code in 
+   errno.
+<p>
+<b>long <a name="file_time">file_time</a>(char *filename);</b><br>
+   Returns the modification time of a file.
+<p>
+<b>int <a name="delete_file">delete_file</a>(char *filename);</b><br>
+   Removes a file from the disk.
+<p>
+<b>int <a name="for_each_file">for_each_file</a>(char *name, int attrib, void (*callback)(), int param);</b><br>
+   Finds all the files on the disk which match the given wildcard 
+   specification and file attributes, and executes callback() once for each. 
+   callback() will be passed three arguments, the first a string which 
+   contains the completed filename, the second being the attributes of the 
+   file, and the third an int which is simply a copy of param (you can use 
+   this for whatever you like). If an error occurs an error code will be 
+   stored in errno, and callback() can cause for_each_file() to abort by 
+   setting errno itself. Returns the number of successful calls made to 
+   callback(). The file attribute may contain any of the FA_* flags from 
+   dir.h.
+<p>
+<b>void <a name="packfile_password">packfile_password</a>(char *password);</b><br>
+   Sets the encryption password to be used for all future read/writes of 
+   compressed files. Files written with an encryption password cannot be 
+   read unless the same password is selected, so be careful: if you forget 
+   the key, I can't make your data come back again! Pass NULL or an empty 
+   string to return to the normal, non-encrypted mode. If you are using this 
+   function to prevent people getting access to your datafiles, be careful 
+   not to store an obvious copy of the password in your executable: if there 
+   are any strings like "I'm the password for the datafile", it would be 
+   fairly easy to get access to your data :-)
+<p>
+<b>PACKFILE *<a name="pack_fopen">pack_fopen</a>(char *filename, char *mode);</b><br>
+   Opens a file according to mode, which may contain any of the flags:
+<p><ul><li>
+      'r' - open file for reading.
+<p><li>
+      'w' - open file for writing, overwriting any existing data.
+<p><li>
+      'p' - open file in packed mode. Data will be compressed as it is 
+            written to the file, and automatically uncompressed during read 
+            operations. Files created in this mode will produce garbage if 
+            they are read without this flag being set. 
+<p><li>
+      '!' - open file for writing in normal, unpacked mode, but add the 
+            value F_NOPACK_MAGIC to the start of the file, so that it can 
+            later be opened in packed mode and Allegro will automatically 
+            detect that the data does not need to be decompressed.
+<p></ul>
+   Instead of these flags, one of the constants F_READ, F_WRITE, 
+   F_READ_PACKED, F_WRITE_PACKED or F_WRITE_NOPACK may be used as the mode 
+   parameter. On success, pack_fopen() returns a pointer to a file 
+   structure, and on error it returns NULL and stores an error code in 
+   errno. An attempt to read a normal file in packed mode will cause errno 
+   to be set to EDOM.
+<p>
+   The packfile functions also understand several "magic" filenames that are 
+   used for special purposes. These are:
+<p><ul><li>
+      "#" - read data that has been appended to your executable file with 
+      the exedat utility, as if it was a regular independent disk file.
+<p><li>
+      'filename.dat#object_name' - open a specific object from a datafile, 
+      and read from it as if it was a regular file. You can treat nested 
+      datafiles exactly like a normal directory structure, for example 
+      you could open 'filename.dat#graphics/level1/mapdata'.
+<p><li>
+      '#object_name' - combination of the above, reading an object from a 
+      datafile that has been appended onto your executable.
+<p></ul>
+   With these special filenames, the contents of a datafile object or 
+   appended file can be read in an identical way to a normal disk file, so 
+   any of the file access functions in Allegro (eg. load_pcx() and 
+   set_config_file()) can be used to read from them. Note that you can't 
+   write to these special files, though: the fake file is read only. Also, 
+   you must save your datafile uncompressed or with per-object compression 
+   if you are planning on loading individual objects from it (otherwise 
+   there will be an excessive amount of seeking when it is read). Finally, 
+   be aware that the special Allegro object types aren't the same format as 
+   the files you import the data from. When you import data like bitmaps or 
+   samples into the grabber, they are converted into a special 
+   Allegro-specific format, but the '#' marker file syntax reads the objects 
+   as raw binary chunks. This means that if, for example, you want to use 
+   load_pcx to read an image from a datafile, you should import it as a 
+   binary block rather than as a BITMAP object.
+<p>
+<b>int  <a name="pack_fclose">pack_fclose</a>(PACKFILE *f);</b><br>
+<b>int  <a name="pack_fseek">pack_fseek</a>(PACKFILE *f, int offset);</b><br>
+<b>int  <a name="pack_feof">pack_feof</a>(PACKFILE *f);</b><br>
+<b>int  <a name="pack_ferror">pack_ferror</a>(PACKFILE *f);</b><br>
+<b>int  <a name="pack_getc">pack_getc</a>(PACKFILE *f);</b><br>
+<b>int  <a name="pack_putc">pack_putc</a>(int c, PACKFILE *f);</b><br>
+<b>int  <a name="pack_igetw">pack_igetw</a>(PACKFILE *f);</b><br>
+<b>long <a name="pack_igetl">pack_igetl</a>(PACKFILE *f);</b><br>
+<b>int  <a name="pack_iputw">pack_iputw</a>(int w, PACKFILE *f);</b><br>
+<b>long <a name="pack_iputl">pack_iputl</a>(long l, PACKFILE *f);</b><br>
+<b>int  <a name="pack_mgetw">pack_mgetw</a>(PACKFILE *f);</b><br>
+<b>long <a name="pack_mgetl">pack_mgetl</a>(PACKFILE *f);</b><br>
+<b>int  <a name="pack_mputw">pack_mputw</a>(int w, PACKFILE *f);</b><br>
+<b>long <a name="pack_mputl">pack_mputl</a>(long l, PACKFILE *f);</b><br>
+<b>long <a name="pack_fread">pack_fread</a>(void *p, long n, PACKFILE *f);</b><br>
+<b>long <a name="pack_fwrite">pack_fwrite</a>(void *p, long n, PACKFILE *f);</b><br>
+<b>char *<a name="pack_fgets">pack_fgets</a>(char *p, int max, PACKFILE *f);</b><br>
+<b>int  <a name="pack_fputs">pack_fputs</a>(char *p, PACKFILE *f);</b><br>
+<p>
+   These work like the equivalent stdio functions, except that pack_fread() 
+   and pack_fwrite() take a single size parameter instead of that silly size 
+   and num_elements system, seeking only supports forward movement relative 
+   to the current position, and the pack_fgets() function does not include a 
+   trailing carriage return in the returned string. The pack_i* and pack_m* 
+   routines read and write 16 and 32 bit values using the Intel and Motorola 
+   byte ordering systems (endianness) respectively. Note that seeking is 
+   very slow when reading compressed files, and so should be avoided unless 
+   you are sure that the file is not compressed.
+<p>
+<b>PACKFILE *<a name="pack_fopen_chunk">pack_fopen_chunk</a>(PACKFILE *f, int pack);</b><br>
+   Opens a sub-chunk of a file. Chunks are primarily intended for use by the 
+   datafile code, but they may also be useful for your own file routines. A 
+   chunk provides a logical view of part of a file, which can be compressed 
+   as an individual entity and will automatically insert and check length 
+   counts to prevent reading past the end of the chunk. To write a chunk to 
+   the file f, use the code:
+<p><pre>
+      /* assumes f is a PACKFILE * which has been opened in write mode */
+      f = pack_fopen_chunk(f, pack);
+      write some data to f
+      f = pack_fclose_chunk(f);
+<p></pre>
+   The data written to the chunk will be prefixed with two length counts (32 
+   bit, big-endian). For uncompressed chunks these will both be set to the 
+   size of the data in the chunk. For compressed chunks (created by setting 
+   the pack flag), the first length will be the raw size of the chunk, and 
+   the second will be the negative size of the uncompressed data.
+<p>
+   To read the chunk, use the code:
+<p><pre>
+      /* assumes f is a PACKFILE * which has been opened in read mode */
+      f = pack_fopen_chunk(f, FALSE);
+      read data from f
+      f = pack_fclose_chunk(f);
+<p></pre>
+   This sequence will read the length counts created when the chunk was 
+   written, and automatically decompress the contents of the chunk if it 
+   was compressed. The length will also be used to prevent reading past the 
+   end of the chunk (Allegro will return EOF if you attempt this), and to 
+   automatically skip past any unread chunk data when you call 
+   pack_fclose_chunk().
+<p>
+   Chunks can be nested inside each other by making repeated calls to 
+   pack_fopen_chunk(). When writing a file, the compression status is 
+   inherited from the parent file, so you only need to set the pack flag if 
+   the parent is not compressed but you want to pack the chunk data. If the 
+   parent file is already open in packed mode, setting the pack flag will 
+   result in data being compressed twice: once as it is written to the 
+   chunk, and again as the chunk passes it on to the parent file.
+<p>
+<b>PACKFILE *<a name="pack_fclose_chunk">pack_fclose_chunk</a>(PACKFILE *f);</b><br>
+   Closes a sub-chunk of a file, previously obtained by calling 
+   pack_fopen_chunk().
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

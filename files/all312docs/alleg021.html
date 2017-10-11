@@ -1,0 +1,97 @@
+<html><head><title>Sound init routines</title><body>
+<h1><a name="Sound init routines">Sound init routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#detect_digi_driver">detect_digi_driver</a>
+<li><a href="#detect_midi_driver">detect_midi_driver</a>
+<li><a href="#reserve_voices">reserve_voices</a>
+<li><a href="#install_sound">install_sound</a>
+<li><a href="#remove_sound">remove_sound</a>
+<li><a href="#set_volume">set_volume</a>
+</h4></ul>
+<p><br><br>
+<p>
+<b>int <a name="detect_digi_driver">detect_digi_driver</a>(int driver_id);</b><br>
+   Detects whether the specified digital sound device is available, using 
+   the same ID values as install_sound(). Returns the maximum number of 
+   voices that the driver can provide, or zero if the hardware is not 
+   present. This function must be called _before_ install_sound().
+<p>
+<b>int <a name="detect_midi_driver">detect_midi_driver</a>(int driver_id);</b><br>
+   Detects whether the specified MIDI sound device is available, using the 
+   same ID values as install_sound(). Returns the maximum number of voices 
+   that the driver can provide, or zero if the hardware is not present. 
+   There are two special-case return values that you should watch out for: 
+   if this function returns -1 it is a note-stealing driver (eg. DIGMID) 
+   that shares voices with the current digital sound driver, and if it 
+   returns 0xFFFF it is an external device like an MPU-401 where there is no 
+   way to determine how many voices are available. This function must be 
+   called _before_ install_sound(). 
+<p>
+<b>void <a name="reserve_voices">reserve_voices</a>(int digi_voices, int midi_voices);</b><br>
+   Call this function to specify the number of voices that are to be used by 
+   the digital and MIDI sound drivers respectively. This must be done 
+   _before_ calling install_sound(). If you reserve too many voices, 
+   subsequent calls to install_sound() will fail. How many voices are 
+   available depends on the driver, and in some cases you will actually get 
+   more than you reserve (eg. the FM synth drivers will always provide 9 
+   voices on an OPL2 and 18 on an OPL3, and the SB digital driver will round 
+   the number of voices up to the nearest power of two). Pass negative 
+   values to restore the default settings. You should be aware that the 
+   sound quality is usually inversely related to how many voices you use, so 
+   don't reserve any more than you really need.
+<p>
+<b>int <a name="install_sound">install_sound</a>(int digi_card, int midi_card, char *cfg_path); </b><br>
+   Initialises the sound module, returning zero on success. The digi_card 
+   parameter should be one of the values:
+<p><pre>
+      DIGI_AUTODETECT      - let Allegro pick a digital sound driver
+      DIGI_NONE            - no digital sound
+      DIGI_SB              - Sound Blaster (autodetect type)
+      DIGI_SB10            - SB 1.0 (8 bit mono single shot dma)
+      DIGI_SB15            - SB 1.5 (8 bit mono single shot dma)
+      DIGI_SB20            - SB 2.0 (8 bit mono auto-initialised dma)
+      DIGI_SBPRO           - SB Pro (8 bit stereo)
+      DIGI_SB16            - SB16 (16 bit stereo)
+      DIGI_AUDIODRIVE      - ESS AudioDrive
+      DIGI_SOUNDSCAPE      - Ensoniq Soundscape
+<p></pre>
+   The midi_card should be one of the values:
+<p><pre>
+      MIDI_AUTODETECT      - let Allegro pick a MIDI sound driver
+      MIDI_NONE            - no MIDI sound
+      MIDI_ADLIB           - Adlib or SB FM synth (autodetect type)
+      MIDI_OPL2            - OPL2 synth (mono, used in Adlib and SB)
+      MIDI_2XOPL2          - dual OPL2 synths (stereo, used in SB Pro-I)
+      MIDI_OPL3            - OPL3 synth (stereo, SB Pro-II and above)
+      MIDI_SB_OUT          - SB MIDI interface
+      MIDI_MPU             - MPU-401 MIDI interface
+      MIDI_DIGMID          - sample-based software wavetable player
+      MIDI_AWE32           - AWE32 (EMU8000 chip)
+<p></pre>
+   You should normally give the DIGI_AUTODETECT and MIDI_AUTODETECT 
+   parameters to this function, in which case Allegro will read hardware 
+   settings from the current configuration file. This allows the user to 
+   select different values with the setup utility: see the config section 
+   for details.
+<p>
+   The cfg_path parameter is only present for compatibility with previous 
+   versions of Allegro, and has no effect on anything.
+<p>
+   Returns zero if the sound is successfully installed, and -1 on failure. 
+   If it fails it will store a description of the problem in allegro_error.
+<p>
+<b>void <a name="remove_sound">remove_sound</a>();</b><br>
+   Cleans up after you are finished with the sound routines. You don't 
+   normally need to call this, because allegro_exit() will do it for you.
+<p>
+<b>void <a name="set_volume">set_volume</a>(int digi_volume, int midi_volume);</b><br>
+   Alters the global sound output volume. Specify volumes for both digital 
+   samples and MIDI playback, as integers from 0 to 255, or pass a negative 
+   value to leave one of the settings unchanged. If possible this routine 
+   will use a hardware mixer to control the volume, otherwise it will tell 
+   the sample and MIDI players to simulate a mixer in software.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

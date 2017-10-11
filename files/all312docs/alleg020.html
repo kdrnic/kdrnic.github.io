@@ -1,0 +1,125 @@
+<html><head><title>FLIC routines</title><body>
+<h1><a name="FLIC routines">FLIC routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#play_fli">play_fli</a>
+<li><a href="#play_memory_fli">play_memory_fli</a>
+<li><a href="#open_fli">open_fli</a>
+<li><a href="#open_memory_fli">open_memory_fli</a>
+<li><a href="#close_fli">close_fli</a>
+<li><a href="#next_fli_frame">next_fli_frame</a>
+<li><a href="#fli_bitmap">fli_bitmap</a>
+<li><a href="#fli_palette">fli_palette</a>
+<li><a href="#fli_bmp_dirty_from">fli_bmp_dirty_from</a>
+<li><a href="#fli_bmp_dirty_to">fli_bmp_dirty_to</a>
+<li><a href="#fli_pal_dirty_from">fli_pal_dirty_from</a>
+<li><a href="#fli_pal_dirty_to">fli_pal_dirty_to</a>
+<li><a href="#reset_fli_variables">reset_fli_variables</a>
+<li><a href="#fli_frame">fli_frame</a>
+<li><a href="#fli_timer">fli_timer</a>
+</h4></ul>
+<p><br><br>
+<p>
+There are two high level functions for playing FLI/FLC animations: 
+play_fli(), which reads the data directly from disk, and play_memory_fli(), 
+which uses data that has already been loaded into RAM. Apart from the 
+different sources of the data, these two functions behave identically. They 
+draw the animation onto the specified bitmap, which should normally be the 
+screen. Frames will be aligned with the top left corner of the bitmap: if 
+you want to position them somewhere else you will need to create a 
+sub-bitmap for the FLI player to draw onto. If loop is set the player will 
+cycle when it reaches the end of the file, otherwise it will play through 
+the animation once and then return. If the callback function is not NULL it 
+will be called once for each frame, allowing you to perform background tasks 
+of your own. This callback should normally return zero: if it returns 
+non-zero the player will terminate (this is the only way to stop an 
+animation that is playing in looped mode). The FLI player returns FLI_OK if 
+it reached the end of the file, FLI_ERROR if something went wrong, and the 
+value returned by the callback function if that was what stopped it. If you 
+need to distinguish between different return values, your callback should 
+return positive integers, since FLI_OK is zero and FLI_ERROR is negative. 
+Note that the FLI player will only work when the timer module is installed, 
+and that it will alter the palette according to whatever palette data is 
+present in the animation file.
+<p>
+Occasionally you may need more detailed control over how an FLI is played, 
+for example if you want to superimpose a text scroller on top of the 
+animation, or to play it back at a different speed. You could do both of 
+these with the lower level functions described below.
+<p>
+<b>int <a name="play_fli">play_fli</a>(char *filename, BITMAP *bmp, int loop, int (*callback)());</b><br>
+   Plays an Autodesk Animator FLI or FLC animation file, reading the data 
+   from disk as it is required.
+<p>
+<b>int <a name="play_memory_fli">play_memory_fli</a>(void *fli_data, BITMAP *bmp, int loop, int (*callback)());</b><br>
+   Plays an Autodesk Animator FLI or FLC animation, reading the data from a 
+   copy of the file which is held in memory. You can obtain the fli_data 
+   pointer by mallocing a block of memory and reading an FLI file into it, 
+   or by importing an FLI into a grabber datafile. Playing animations from 
+   memory is obviously faster than cueing them directly from disk, and is 
+   particularly useful with short, looped FLI's. Animations can easily get 
+   very large, though, so in most cases you will probably be better just 
+   using play_fli().
+<p>
+<b>int <a name="open_fli">open_fli</a>(char *filename);</b><br>
+<b>int <a name="open_memory_fli">open_memory_fli</a>(void *fli_data);</b><br>
+   Open FLI files ready for playing, reading the data from disk or memory 
+   respectively. Return FLI_OK on success. Information about the current FLI 
+   is held in global variables, so you can only have one animation open at a 
+   time.
+<p>
+<b>void <a name="close_fli">close_fli</a>();</b><br>
+   Closes an FLI file when you have finished reading from it.
+<p>
+<b>int <a name="next_fli_frame">next_fli_frame</a>(int loop);</b><br>
+   Reads the next frame of the current animation file. If loop is set the 
+   player will cycle when it reaches the end of the file, otherwise it will 
+   return FLI_EOF. Returns FLI_OK on success, FLI_ERROR or FLI_NOT_OPEN on 
+   error, and FLI_EOF on reaching the end of the file. The frame is read 
+   into the global variables fli_bitmap and fli_palette.
+<p>
+<b>extern BITMAP *<a name="fli_bitmap">fli_bitmap</a>;</b><br>
+   Contains the current frame of the FLI/FLC animation.
+<p>
+<b>extern PALETTE <a name="fli_palette">fli_palette</a>;</b><br>
+   Contains the current FLI palette.
+<p>
+<b>extern int <a name="fli_bmp_dirty_from">fli_bmp_dirty_from</a>;</b><br>
+<b>extern int <a name="fli_bmp_dirty_to">fli_bmp_dirty_to</a>;</b><br>
+   These variables are set by next_fli_frame() to indicate which part of the 
+   fli_bitmap has changed since the last call to reset_fli_variables(). If 
+   fli_bmp_dirty_from is greater than fli_bmp_dirty_to, the bitmap has not 
+   changed, otherwise lines fli_bmp_dirty_from to fli_bmp_dirty_to 
+   (inclusive) have altered. You can use these when copying the fli_bitmap 
+   onto the screen, to avoid moving data unnecessarily.
+<p>
+<b>extern int <a name="fli_pal_dirty_from">fli_pal_dirty_from</a>;</b><br>
+<b>extern int <a name="fli_pal_dirty_to">fli_pal_dirty_to</a>;</b><br>
+   These variables are set by next_fli_frame() to indicate which part of the 
+   fli_palette has changed since the last call to reset_fli_variables(). If 
+   fli_pal_dirty_from is greater than fli_pal_dirty_to, the palette has not 
+   changed, otherwise colors fli_pal_dirty_from to fli_pal_dirty_to 
+   (inclusive) have altered. You can use these when updating the hardware 
+   palette, to avoid unnecessary calls to set_palette().
+<p>
+<b>void <a name="reset_fli_variables">reset_fli_variables</a>();</b><br>
+   Once you have done whatever you are going to do with the fli_bitmap and 
+   fli_palette, call this function to reset the fli_bmp_dirty_* and 
+   fli_pal_dirty_* variables.
+<p>
+<b>extern int <a name="fli_frame">fli_frame</a>;</b><br>
+   Global variable containing the current frame number in the FLI file. This 
+   is useful for synchronising other events with the animation, for instance 
+   you could check it in a play_fli() callback function and use it to 
+   trigger a sample at a particular point.
+<p>
+<b>extern volatile int <a name="fli_timer">fli_timer</a>;</b><br>
+   Global variable for timing FLI playback. When you open an FLI file, a 
+   timer interrupt is installed which increments this variable every time a 
+   new frame should be displayed. Calling next_fli_frame() decrements it, so 
+   you can test it and know that it is time to display a new frame if it is 
+   greater than zero.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

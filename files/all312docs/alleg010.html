@@ -1,0 +1,138 @@
+<html><head><title>Truecolor pixel formats</title><body>
+<h1><a name="Truecolor pixel formats">Truecolor pixel formats</a></h1>
+<p>
+<ul><h4>
+<li><a href="#makecol8">makecol8</a>
+<li><a href="#makecol15">makecol15</a>
+<li><a href="#makecol16">makecol16</a>
+<li><a href="#makecol24">makecol24</a>
+<li><a href="#makecol32">makecol32</a>
+<li><a href="#makecol">makecol</a>
+<li><a href="#makecol_depth">makecol_depth</a>
+<li><a href="#makecol15_dither">makecol15_dither</a>
+<li><a href="#makecol16_dither">makecol16_dither</a>
+<li><a href="#getr8">getr8</a>
+<li><a href="#getg8">getg8</a>
+<li><a href="#getb8">getb8</a>
+<li><a href="#getr15">getr15</a>
+<li><a href="#getg15">getg15</a>
+<li><a href="#getb15">getb15</a>
+<li><a href="#getr16">getr16</a>
+<li><a href="#getg16">getg16</a>
+<li><a href="#getb16">getb16</a>
+<li><a href="#getr24">getr24</a>
+<li><a href="#getg24">getg24</a>
+<li><a href="#getb24">getb24</a>
+<li><a href="#getr32">getr32</a>
+<li><a href="#getg32">getg32</a>
+<li><a href="#getb32">getb32</a>
+<li><a href="#getr">getr</a>
+<li><a href="#getg">getg</a>
+<li><a href="#getb">getb</a>
+<li><a href="#getr_depth">getr_depth</a>
+<li><a href="#getg_depth">getg_depth</a>
+<li><a href="#getb_depth">getb_depth</a>
+<li><a href="#palette_color">palette_color</a>
+<li><a href="#MASK_COLOR_8">MASK_COLOR_8</a>
+<li><a href="#MASK_COLOR_15">MASK_COLOR_15</a>
+<li><a href="#MASK_COLOR_16">MASK_COLOR_16</a>
+<li><a href="#MASK_COLOR_24">MASK_COLOR_24</a>
+<li><a href="#MASK_COLOR_32">MASK_COLOR_32</a>
+</h4></ul>
+<p><br><br>
+<p>
+In a truecolor video mode the red, green, and blue components for each pixel 
+are packed directly into the color value, rather than using a palette lookup 
+table. In a 15 bit mode there are 5 bits for each color, in 16 bit modes 
+there are 5 bits each of red and blue and six bits of green, and both 24 and 
+32 bit modes use 8 bits for each color (the 32 bit pixels simply have an 
+extra padding byte to align the data nicely). The layout of these components 
+can vary depending on your hardware, but will generally either be RGB or 
+BGR. Since the layout is not known until you select the video mode you will 
+be using, you must call set_gfx_mode() before using any of the following 
+routines!
+<p>
+<b>int <a name="makecol8">makecol8</a>(int r, int g, int b);</b><br>
+<b>int <a name="makecol15">makecol15</a>(int r, int g, int b);</b><br>
+<b>int <a name="makecol16">makecol16</a>(int r, int g, int b);</b><br>
+<b>int <a name="makecol24">makecol24</a>(int r, int g, int b);</b><br>
+<b>int <a name="makecol32">makecol32</a>(int r, int g, int b);</b><br>
+   These functions convert colors from a hardware independent form (red, 
+   green, and blue values ranging 0-255) into various display dependent 
+   pixel formats. Converting to 15, 16, 24, or 32 bit formats only takes a 
+   few shifts, so it is fairly efficient. Converting to an 8 bit color 
+   involves searching the palette to find the closest match, which is quite 
+   slow unless you have set up an RGB mapping table (see below).
+<p>
+<b>int <a name="makecol">makecol</a>(int r, int g, int b);</b><br>
+   Converts colors from a hardware independent format (red, green, and blue 
+   values ranging 0-255) to the pixel format required by the current video 
+   mode, calling the preceding 8, 15, 16, 24, or 32 bit makecol functions as 
+   appropriate.
+<p>
+<b>int <a name="makecol_depth">makecol_depth</a>(int color_depth, int r, int g, int b);</b><br>
+   Converts colors from a hardware independent format (red, green, and blue 
+   values ranging 0-255) to the pixel format required by the specified color 
+   depth.
+<p>
+<b>int <a name="makecol15_dither">makecol15_dither</a>(int r, int g, int b, int x, int y);</b><br>
+<b>int <a name="makecol16_dither">makecol16_dither</a>(int r, int g, int b, int x, int y);</b><br>
+   Given both a color value and a pixel coordinate, calculate a dithered 15 
+   or 16 bit RGB value. This can produce better results when reducing images 
+   from truecolor to hicolor. In addition to calling these functions 
+   directly, hicolor dithering can be automatically enabled when loading 
+   graphics by calling the set_color_conversion() function, for example 
+   set_color_conversion(COLORCONV_REDUCE_TRUE_TO_HI | COLORCONV_DITHER).
+<p>
+<b>int <a name="getr8">getr8</a>(int c);</b><br>
+<b>int <a name="getg8">getg8</a>(int c);</b><br>
+<b>int <a name="getb8">getb8</a>(int c);</b><br>
+<b>int <a name="getr15">getr15</a>(int c);</b><br>
+<b>int <a name="getg15">getg15</a>(int c);</b><br>
+<b>int <a name="getb15">getb15</a>(int c);</b><br>
+<b>int <a name="getr16">getr16</a>(int c);</b><br>
+<b>int <a name="getg16">getg16</a>(int c);</b><br>
+<b>int <a name="getb16">getb16</a>(int c);</b><br>
+<b>int <a name="getr24">getr24</a>(int c);</b><br>
+<b>int <a name="getg24">getg24</a>(int c);</b><br>
+<b>int <a name="getb24">getb24</a>(int c);</b><br>
+<b>int <a name="getr32">getr32</a>(int c);</b><br>
+<b>int <a name="getg32">getg32</a>(int c);</b><br>
+<b>int <a name="getb32">getb32</a>(int c);</b><br>
+   Given a color in a display dependent format, these functions extract one 
+   of the red, green, or blue components (ranging 0-255).
+<p>
+<b>int <a name="getr">getr</a>(int c);</b><br>
+<b>int <a name="getg">getg</a>(int c);</b><br>
+<b>int <a name="getb">getb</a>(int c);</b><br>
+   Given a color in the format being used by the current video mode, these 
+   functions extract one of the red, green, or blue components (ranging 
+   0-255), calling the preceding 8, 15, 16, 24, or 32 bit get functions as 
+   appropriate.
+<p>
+<b>int <a name="getr_depth">getr_depth</a>(int color_depth, int c);</b><br>
+<b>int <a name="getg_depth">getg_depth</a>(int color_depth, int c);</b><br>
+<b>int <a name="getb_depth">getb_depth</a>(int color_depth, int c);</b><br>
+   Given a color in the format being used by the specified color depth, 
+   these functions extract one of the red, green, or blue components 
+   (ranging 0-255).
+<p>
+<b>extern int <a name="palette_color">palette_color</a>[256];</b><br>
+   Table mapping palette index colors (0-255) into whatever pixel format is 
+   being used by the current display mode. In a 256 color mode this just 
+   maps onto the array index. In truecolor modes it looks up the specified 
+   entry in the current palette, and converts that RGB value into the 
+   appropriate packed pixel format.
+<p>
+<b>#define <a name="MASK_COLOR_8">MASK_COLOR_8</a> 0</b><br>
+<b>#define <a name="MASK_COLOR_15">MASK_COLOR_15</a> (5.5.5 pink)</b><br>
+<b>#define <a name="MASK_COLOR_16">MASK_COLOR_16</a> (5.6.5 pink)</b><br>
+<b>#define <a name="MASK_COLOR_24">MASK_COLOR_24</a> (8.8.8 pink)</b><br>
+<b>#define <a name="MASK_COLOR_32">MASK_COLOR_32</a> (8.8.8 pink)</b><br>
+   Constants representing the colors used to mask transparent sprite pixels 
+   for each color depth. In 256 color resolutions this is zero, and in 
+   truecolor modes it is bright pink (maximum red and blue, zero green).
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

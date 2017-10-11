@@ -1,0 +1,154 @@
+<html><head><title>Reducing your executable size</title><body>
+<h1><a name="Reducing your executable size">Reducing your executable size</a></h1>
+<p>
+Some people complain that Allegro produces very large executables. This is 
+certainly true: a simple "hello world" program will be about 200k. But don't 
+worry, it is a relatively fixed overhead and won't increase as your program 
+gets larger. As George Foot so succinctly put it, anyone who is concerned 
+about the ratio between library and program code should just get to work and 
+write more program code to catch up :-)
+<p>
+Having said that, there are several things you can do to make your programs 
+smaller:
+<p><ul><li>
+For starters, read the djgpp FAQ section 8.15, and take note of the -s 
+switch and DJP executable compressor. And don't forget to compile your 
+program with optimisation enabled!
+<p><li>
+If your program is only going to run in a limited number of graphics modes, 
+you can specify which graphics drivers you would like to include with the 
+code:
+<p><pre>
+   BEGIN_GFX_DRIVER_LIST
+      driver1
+      driver2
+      etc...
+   END_GFX_DRIVER_LIST
+<p></pre>
+where the driver names are any of the defines:
+<p><pre>
+   GFX_DRIVER_VBEAF
+   GFX_DRIVER_VGA
+   GFX_DRIVER_MODEX
+   GFX_DRIVER_VESA3
+   GFX_DRIVER_VESA2L
+   GFX_DRIVER_VESA2B
+   GFX_DRIVER_XTENDED
+   GFX_DRIVER_VESA1
+<p></pre>
+This construct must be included in only one of your C source files (_not_ a 
+header file!). The ordering of the names is important, because the 
+autodetection routine works down from the top of the list until it finds the 
+first driver that is able to support the requested mode. I suggest you stick 
+to the default ordering given above, and simply delete whatever entries you 
+aren't going to use.
+<p>
+As a rule, removing the MODEX and XTENDED drivers will save a fair amount of 
+space, as will removing the VESA and VBE/AF drivers if you are only going to 
+use standard VGA modes.
+<p><li>
+If your program doesn't need to use all the possible color depths, you can 
+specify which pixel formats you want to support with the code:
+<p><pre>
+   BEGIN_COLOR_DEPTH_LIST
+      depth1
+      depth2
+      etc...
+   END_COLOR_DEPTH_LIST
+<p></pre>
+where the color depth names are any of the defines:
+<p><pre>
+   COLOR_DEPTH_8
+   COLOR_DEPTH_15
+   COLOR_DEPTH_16
+   COLOR_DEPTH_24
+   COLOR_DEPTH_32
+<p></pre>
+Removing any of the color depths will save quite a bit of space, with the 
+exception of the 15 and 16 bit modes: these share a great deal of code, so 
+if you are including one of them, there is no reason not to use both. Be 
+warned that if you try to use a color depth which isn't in this list, your 
+program will crash horribly!
+<p><li>
+In the same way as the above, you can specify which sound drivers you want 
+to support with the code:
+<p><pre>
+   BEGIN_DIGI_DRIVER_LIST
+      driver1
+      driver2
+      etc...
+   END_DIGI_DRIVER_LIST
+<p></pre>
+using the digital sound driver defines:
+<p><pre>
+   DIGI_DRIVER_SOUNDSCAPE
+   DIGI_DRIVER_AUDIODRIVE
+   DIGI_DRIVER_SB
+<p></pre>
+and for the MIDI music:
+<p><pre>
+   BEGIN_MIDI_DRIVER_LIST
+      driver1
+      driver2
+      etc...
+   END_MIDI_DRIVER_LIST
+<p></pre>
+using the MIDI driver defines:
+<p><pre>
+   MIDI_DRIVER_AWE32
+   MIDI_DRIVER_DIGMID
+   MIDI_DRIVER_ADLIB
+   MIDI_DRIVER_MPU
+   MIDI_DRIVER_SB_OUT
+<p></pre>
+If you are going to use either of these constructs, you must use both. If 
+you only want to include digital sound drivers, simply write 
+DECLARE_MIDI_DRIVER_LIST() to prevent the inclusion of any music drivers at 
+all.
+<p><li>
+Likewise for the joystick drivers, you can declare an inclusion list:
+<p><pre>
+   BEGIN_JOYSTICK_DRIVER_LIST
+      driver1
+      driver2
+      etc...
+   END_JOYSTICK_DRIVER_LIST
+<p></pre>
+using the joystick driver defines:
+<p><pre>
+   JOYSTICK_DRIVER_STANDARD
+   JOYSTICK_DRIVER_SIDEWINDER
+   JOYSTICK_DRIVER_GAMEPAD_PRO
+   JOYSTICK_DRIVER_SNESPAD
+   JOYSTICK_DRIVER_WINGWARRIOR
+<p></pre>
+The standard driver includes support for the dual joysticks, increased 
+numbers of buttons, Flightstick Pro, and Wingman Extreme, because these are 
+all quite minor variations on the basic code.
+<p><li>
+If you are _really_ serious about this size, thing, have a look at the top 
+of allegro.h and you will see the lines:
+<p><pre>
+   #define ALLEGRO_COLOR16
+   #define ALLEGRO_COLOR24
+   #define ALLEGRO_COLOR32
+<p></pre>
+If you comment out any of these definitions and then rebuild the library, 
+you will get a version without any support for the absent color depths, 
+which will be even smaller than using the DECLARE_COLOR_DEPTH_LIST() macro. 
+Removing the ALLEGRO_COLOR16 define will get rid of the support for both 15 
+and 16 bit hicolor modes, since these share a lot of the same code.
+<p></ul>
+If you are distributing a copy of the setup program along with your game, 
+you may be able to get a dramatic size reduction by merging the setup code 
+into your main program, so that only one copy of the Allegro routines will 
+need to be linked. To do this, rename the main() function from setup.c to 
+something like setup_main(), link setup.c and setupdat.s into your program, 
+and add a switch (eg. -setup command line option) that will call 
+setup_main() instead of your main program code. After compressing the 
+executable, this will probably save you about 200k compared to having two 
+separate programs for the setup and the game itself.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

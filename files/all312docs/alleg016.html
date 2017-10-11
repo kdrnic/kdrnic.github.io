@@ -1,0 +1,172 @@
+<html><head><title>Polygon rendering</title><body>
+<h1><a name="Polygon rendering">Polygon rendering</a></h1>
+<p>
+<ul><h4>
+<li><a href="#polygon3d">polygon3d</a>
+<li><a href="#polygon3d_f">polygon3d_f</a>
+<li><a href="#triangle3d">triangle3d</a>
+<li><a href="#triangle3d_f">triangle3d_f</a>
+<li><a href="#quad3d">quad3d</a>
+<li><a href="#quad3d_f">quad3d_f</a>
+<li><a href="#clip3d_f">clip3d_f</a>
+</h4></ul>
+<p><br><br>
+<p>
+<b>void <a name="polygon3d">polygon3d</a>(BITMAP *bmp, int type, BITMAP *texture, int vc, V3D *vtx[]);</b><br>
+<b>void <a name="polygon3d_f">polygon3d_f</a>(BITMAP *bmp, int type, BITMAP *texture, int vc, V3D_f *vtx[]);</b><br>
+   Draw 3d polygons onto the specified bitmap, using the specified rendering 
+   mode. Unlike the regular polygon() function, these routines don't support 
+   concave or self-intersecting shapes, and they can't draw onto mode-X 
+   screen bitmaps (if you want to write 3d code in mode-X, draw onto a 
+   memory bitmap and then blit to the screen). The width and height of the 
+   texture bitmap must be powers of two, but can be different, eg. a 64x16 
+   texture is fine, but a 17x3 one is not. The vertex count parameter (vc) 
+   should be followed by an array containing the appropriate number of 
+   pointers to vertex structures: polygon3d() uses the fixed point V3D 
+   structure, while polygon3d_f() uses the floating point V3D_f structure. 
+   These are defined as:
+<p><pre>
+   typedef struct V3D
+   {
+      fixed x, y, z;       - position
+      fixed u, v;          - texture map coordinates
+      int c;               - color
+   } V3D;
+<p>
+   typedef struct V3D_f
+   {
+      float x, y, z;       - position
+      float u, v;          - texture map coordinates
+      int c;               - color
+   } V3D_f;
+<p></pre>
+   How the vertex data is used depends on the rendering mode:
+<p>
+   The x and y values specify the position of the vertex in 2d screen 
+   coordinates.
+<p>
+   The z value is only required when doing perspective correct texture 
+   mapping, and specifies the depth of the point in 3d world coordinates.
+<p>
+   The u and v coordinates are only required when doing texture mapping, and 
+   specify the position of the point in the texture bitmap, for example 0, 0 
+   maps the vertex onto the top left corner of the texture, and if the 
+   texture is sized 32x32, setting u=32 and v=16 maps the vertex to the 
+   point half way down the right edge of the texture. The u/v coordinates 
+   wrap at the edge of the texture, so with a 32x32 texture, u=v=32 is the 
+   same as u=v=0. This can be used to tile textures several times across a 
+   polygon.
+<p>
+   The c value specifies the vertex color, and is interpreted differently by 
+   various rendering modes.
+<p>
+   The type parameter specifies the polygon rendering mode, and can be any 
+   of the values:
+<p>
+   <b>POLYTYPE_FLAT:</b><br>
+      A simple flat shaded polygon, taking the color from the c value of the 
+      first vertex. This polygon type is affected by the drawing_mode() 
+      function, so it can be used to render XOR or translucent polygons.
+<p>
+   <b>POLYTYPE_GCOL:</b><br>
+      A single-color gouraud shaded polygon. The colors for each vertex are 
+      taken from the c value, and interpolated across the polygon. This is 
+      very fast, but will only work in 256 color modes if your palette 
+      contains a smooth gradient between the colors. In truecolor modes it 
+      interprets the color as a packed, display-format value as produced by 
+      the makecol() function.
+<p>
+   <b>POLYTYPE_GRGB:</b><br>
+      A gouraud shaded polygon which interpolates RGB triplets rather than a 
+      single color. In 256 color modes this uses the global rgb_map table to 
+      convert the result to an 8 bit paletted color, so it must only be used 
+      after you have set up the RGB mapping table! The colors for each 
+      vertex are taken from the c value, which is interpreted as a 24 bit 
+      RGB triplet (0xFF0000 is red, 0x00FF00 is green, and 0x0000FF is 
+      blue).
+<p>
+   <b>POLYTYPE_ATEX:</b><br>
+      An affine texture mapped polygon. This stretches the texture across 
+      the polygon with a simple 2d linear interpolation, which is fast but 
+      not mathematically correct. It can look ok if the polygon is fairly 
+      small or flat-on to the camera, but because it doesn't deal with 
+      perspective foreshortening, it can produce strange warping artifacts. 
+      To see what I mean, run test.exe and see what happens to the 
+      polygon3d() test when you zoom in very close to the cube.
+<p>
+   <b>POLYTYPE_PTEX:</b><br>
+      A perspective-correct texture mapped polygon. This uses the z value 
+      from the vertex structure as well as the u/v coordinates, so textures 
+      are displayed correctly regardless of the angle they are viewed from. 
+      Because it involves division calculations in the inner texture mapping 
+      loop, this mode is a lot slower than POLYTYPE_ATEX, and it uses 
+      floating point so it will be very slow on anything less than a Pentium 
+      (even with an FPU, a 486 can't overlap floating point division with 
+      other integer operations like the Pentium can).
+<p>
+   <b>POLYTYPE_ATEX_MASK:</b><br>
+   <b>POLYTYPE_PTEX_MASK:</b><br>
+      Like POLYTYPE_ATEX and POLYTYPE_PTEX, but zero texture map pixels are 
+      skipped, allowing parts of the texture map to be transparent.
+<p>
+   <b>POLYTYPE_ATEX_LIT:</b><br>
+   <b>POLYTYPE_PTEX_LIT:</b><br>
+      Like POLYTYPE_ATEX and POLYTYPE_PTEX, but the global color_map table 
+      (for 256 color modes) or blender function (for non-MMX truecolor 
+      modes) is used to blend the texture with a light level taken from the 
+      c value in the vertex structure. This must only be used after you have 
+      set up the color mapping table or blender functions!
+<p>
+   <b>POLYTYPE_ATEX_MASK_LIT:</b><br>
+   <b>POLYTYPE_PTEX_MASK_LIT:</b><br>
+      Like POLYTYPE_ATEX_LIT and POLYTYPE_PTEX_LIT, but zero texture map 
+      pixels are skipped, allowing parts of the texture map to be 
+      transparent.
+<p>
+   If the cpu_mmx global variable is set, the GRGB and truecolor *LIT 
+   routines will be optimised using MMX instructions. If the cpu_3dnow 
+   global variable is set, the truecolor PTEX*LIT routines will take 
+   advantage of the 3DNow! CPU extensions. For this reason, it is a good 
+   idea to call check_cpu() before using the polygon functions.
+<p>
+   Using MMX for *LIT routines has a side effect: normally (without MMX), 
+   these routines use the blender functions used also for other lighting 
+   functions, set with set_trans_blender() or set_blender_mode(). The MMX 
+   versions only use the RGB value passed to set_trans_blender() and do the 
+   linear interpolation themselves. Therefore a new set of blender functions 
+   passed to set_blender_mode() is ignored.
+<p>
+<b>void <a name="triangle3d">triangle3d</a>(BITMAP *bmp, int type, BITMAP *tex, V3D *v1, *v2, *v3);</b><br>
+<b>void <a name="triangle3d_f">triangle3d_f</a>(BITMAP *bmp, int type, BITMAP *tex, V3D_f *v1, *v2, *v3);</b><br>
+   Draw 3d triangles, using either fixed or floating point vertex 
+   structures. These are equivalent to calling
+      polygon3d(bmp, type, tex, 3, v1, v2, v3);
+   or
+      polygon3d_f(bmp, type, tex, 3, v1, v2, v3);
+<p>
+<b>void <a name="quad3d">quad3d</a>(BITMAP *bmp, int type, BITMAP *tex, V3D *v1, *v2, *v3, *v4);</b><br>
+<b>void <a name="quad3d_f">quad3d_f</a>(BITMAP *bmp, int type, BITMAP *tex, V3D_f *v1, *v2, *v3, *v4);</b><br>
+   Draw 3d quads, using either fixed or floating point vertex structures. 
+   These are equivalent to calling
+      polygon3d(bmp, type, tex, 4, v1, v2, v3, v4);
+   or
+      polygon3d_f(bmp, type, tex, 4, v1, v2, v3, v4);
+<p>
+<b>int <a name="clip3d_f">clip3d_f</a>(int type, float min_z, float max_z, int vc,</b><br>
+<b>             V3D_f *vtx[], V3D_f *vout[], V3D_f *vtmp[], int out[]);</b><br>
+   Clips the polygon given in vtx. The number of vertices is vc, the result 
+   goes in vout, and vtmp and out are needed for internal purposes. The 
+   pointers in vtx, vout and vtmp must point to valid V3D_f structures. The 
+   size of vout, vtmp and out should be at least vc*2 (additional vertices 
+   may appear in the process of clipping). The frustum (viewing volume) is 
+   defined by -z&lt;x&lt;z, -z&lt;y&lt;z, 0&lt;min_z&lt;z&lt;max_z. If 
+   max_z&lt;=min_z, the z&lt;max_z clipping is not done. As you can see, 
+   clipping is done in the camera space, with perspective in mind, so this 
+   routine should be called after you apply the camera matrix, but before 
+   the perspective projection. The routine will correctly interpolate u, v, 
+   and c in the vertex structure. However, no provision is made for 
+   high/truecolor GCOL.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

@@ -1,0 +1,152 @@
+<html><head><title>Drawing primitives</title><body>
+<h1><a name="Drawing primitives">Drawing primitives</a></h1>
+<p>
+<ul><h4>
+<li><a href="#putpixel">putpixel</a>
+<li><a href="#_putpixel">_putpixel</a>
+<li><a href="#getpixel">getpixel</a>
+<li><a href="#_getpixel">_getpixel</a>
+<li><a href="#vline">vline</a>
+<li><a href="#hline">hline</a>
+<li><a href="#do_line">do_line</a>
+<li><a href="#line">line</a>
+<li><a href="#triangle">triangle</a>
+<li><a href="#polygon">polygon</a>
+<li><a href="#rect">rect</a>
+<li><a href="#rectfill">rectfill</a>
+<li><a href="#do_circle">do_circle</a>
+<li><a href="#circle">circle</a>
+<li><a href="#circlefill">circlefill</a>
+<li><a href="#do_ellipse">do_ellipse</a>
+<li><a href="#ellipse">ellipse</a>
+<li><a href="#ellipsefill">ellipsefill</a>
+<li><a href="#do_arc">do_arc</a>
+<li><a href="#arc">arc</a>
+<li><a href="#calc_spline">calc_spline</a>
+<li><a href="#spline">spline</a>
+<li><a href="#floodfill">floodfill</a>
+</h4></ul>
+<p><br><br>
+<p>
+Except for _putpixel(), all these routines are affected by the current 
+drawing mode and the clipping rectangle of the destination bitmap.
+<p>
+<b>void <a name="putpixel">putpixel</a>(BITMAP *bmp, int x, int y, int color);</b><br>
+   Writes a pixel to the specified position in the bitmap, using the current 
+   drawing mode and the bitmap's clipping rectangle.
+<p>
+<b>void <a name="_putpixel">_putpixel</a>(BITMAP *bmp, int x, int y, unsigned char color);</b><br>
+   Like the regular putpixel(), but much faster because it is implemented as 
+   an inline assembler function. This won't work in mode-X or truecolor 
+   video modes, doesn't perform any clipping (it will crash if you try to 
+   draw outside the bitmap!), and ignores the drawing mode. It clobbers the 
+   %fs register, so you shouldn't mix it with code that uses the 
+   _farsetsel() and _farns*() functions.
+<p>
+<b>int <a name="getpixel">getpixel</a>(BITMAP *bmp, int x, int y);</b><br>
+   Reads a pixel from point x, y in the bitmap. Returns -1 if the point lies 
+   outside the bitmap.
+<p>
+<b>unsigned char <a name="_getpixel">_getpixel</a>(BITMAP *bmp, int x, int y);</b><br>
+   Faster inline version of getpixel(). This won't work in mode-X or 
+   truecolor video modes, and it doesn't do any clipping, so you must make 
+   sure the point lies inside the bitmap.
+<p>
+<b>void <a name="vline">vline</a>(BITMAP *bmp, int x, int y1, int y2, int color);</b><br>
+   Draws a vertical line onto the bitmap, from point (x, y1) to (x, y2).
+<p>
+<b>void <a name="hline">hline</a>(BITMAP *bmp, int x1, int y, int x2, int color);</b><br>
+   Draws a horizontal line onto the bitmap, from point (x1, y) to (x2, y).
+<p>
+<b>void <a name="do_line">do_line</a>(BITMAP *bmp, int x1, y1, x2, y2, int d, void (*proc)());</b><br>
+   Calculates all the points along a line from point (x1, y1) to (x2, y2), 
+   calling the supplied function for each one. This will be passed a copy of 
+   the bmp parameter, the x and y position, and a copy of the d parameter, 
+   so it is suitable for use with putpixel().
+<p>
+<b>void <a name="line">line</a>(BITMAP *bmp, int x1, int y1, int x2, int y2, int color);</b><br>
+   Draws a line onto the bitmap, from point (x1, y1) to (x2, y2).
+<p>
+<b>void <a name="triangle">triangle</a>(BITMAP *bmp, int x1, y1, x2, y2, x3, y3, int color);</b><br>
+   Draws a filled triangle between the three points.
+<p>
+<b>void <a name="polygon">polygon</a>(BITMAP *bmp, int vertices, int *points, int color);</b><br>
+   Draws a filled polygon with an arbitrary number of corners. Pass the 
+   number of vertices and an array containing a series of x, y points (a 
+   total of vertices*2 values).
+<p>
+<b>void <a name="rect">rect</a>(BITMAP *bmp, int x1, int y1, int x2, int y2, int color);</b><br>
+   Draws an outline rectangle with the two points as its opposite corners.
+<p>
+<b>void <a name="rectfill">rectfill</a>(BITMAP *bmp, int x1, int y1, int x2, int y2, int color);</b><br>
+   Draws a solid, filled rectangle with the two points as its opposite 
+   corners.
+<p>
+<b>void <a name="do_circle">do_circle</a>(BITMAP *bmp, int x, int y, int radius, int d, void (*proc)());</b><br>
+   Calculates all the points in a circle around point (x, y) with radius r, 
+   calling the supplied function for each one. This will be passed a copy of 
+   the bmp parameter, the x and y position, and a copy of the d parameter, 
+   so it is suitable for use with putpixel().
+<p>
+<b>void <a name="circle">circle</a>(BITMAP *bmp, int x, int y, int radius, int color);</b><br>
+   Draws a circle with the specified centre and radius.
+<p>
+<b>void <a name="circlefill">circlefill</a>(BITMAP *bmp, int x, int y, int radius, int color);</b><br>
+   Draws a filled circle with the specified centre and radius.
+<p>
+<b>void <a name="do_ellipse">do_ellipse</a>(BITMAP *bmp, int x, y, int rx, ry, int d, void (*proc)());</b><br>
+   Calculates all the points in an ellipse around point (x, y) with radius 
+   rx and ry, calling the supplied function for each one. This will be 
+   passed a copy of the bmp parameter, the x and y position, and a copy of 
+   the d parameter, so it is suitable for use with putpixel().
+<p>
+<b>void <a name="ellipse">ellipse</a>(BITMAP *bmp, int x, int y, int rx, int ry, int color);</b><br>
+   Draws an ellipse with the specified centre and radius.
+<p>
+<b>void <a name="ellipsefill">ellipsefill</a>(BITMAP *bmp, int x, int y, int rx, int ry, int color);</b><br>
+   Draws a filled ellipse with the specified centre and radius.
+<p>
+<b>void <a name="do_arc">do_arc</a>(BITMAP *bmp, int x, y, fixed a1, a2, int r, d, void (*proc)());</b><br>
+   Calculates all the points in a circular arc around point (x, y) with 
+   radius r, calling the supplied function for each one. This will be passed 
+   a copy of the bmp parameter, the x and y position, and a copy of the d 
+   parameter, so it is suitable for use with putpixel(). The arc will be 
+   plotted in an anticlockwise direction starting from the angle a1 and 
+   ending when it reaches a2. These values are specified in 16.16 fixed 
+   point format, with 256 equal to a full circle, 64 a right angle, etc. 
+   Zero is to the right of the centre point, and larger values rotate 
+   anticlockwise from there.
+<p>
+<b>void <a name="arc">arc</a>(BITMAP *bmp, int x, y, fixed ang1, ang2, int r, int color);</b><br>
+   Draws a circular arc with centre x, y and radius r, in an anticlockwise 
+   direction starting from the angle a1 and ending when it reaches a2. These 
+   values are specified in 16.16 fixed point format, with 256 equal to a 
+   full circle, 64 a right angle, etc. Zero is to the right of the centre 
+   point, and larger values rotate anticlockwise from there.
+<p>
+<b>void <a name="calc_spline">calc_spline</a>(int points[8], int npts, int *x, int *y);</b><br>
+   Calculates a series of npts values along a bezier spline, storing them in 
+   the output x and y arrays. The bezier curve is specified by the four x/y 
+   control points in the points array: points[0] and points[1] contain the 
+   coordinates of the first control point, points[2] and points[3] are the 
+   second point, etc. Control points 0 and 3 are the ends of the spline, and 
+   points 1 and 2 are guides. The curve probably won't pass through points 1 
+   and 2, but they affect the shape of the curve between points 0 and 3 (the 
+   lines p0-p1 and p2-p3 are tangents to the spline). The easiest way to 
+   think of it is that the curve starts at p0, heading in the direction of 
+   p1, but curves round so that it arrives at p3 from the direction of p2. 
+   In addition to their role as graphics primitives, spline curves can be 
+   useful for constructing smooth paths around a series of control points, 
+   as in ex23.c.
+<p>
+<b>void <a name="spline">spline</a>(BITMAP *bmp, int points[8], int color);</b><br>
+   Draws a bezier spline using the four control points specified in the 
+   points array.
+<p>
+<b>void <a name="floodfill">floodfill</a>(BITMAP *bmp, int x, int y, int color);</b><br>
+   Floodfills an enclosed area, starting at point (x, y), with the specified 
+   color.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

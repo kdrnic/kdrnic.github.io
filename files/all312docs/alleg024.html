@@ -1,0 +1,53 @@
+<html><head><title>Audio stream routines</title><body>
+<h1><a name="Audio stream routines">Audio stream routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#play_audio_stream">play_audio_stream</a>
+<li><a href="#stop_audio_stream">stop_audio_stream</a>
+<li><a href="#get_audio_stream_buffer">get_audio_stream_buffer</a>
+<li><a href="#free_audio_stream_buffer">free_audio_stream_buffer</a>
+</h4></ul>
+<p><br><br>
+<p>
+The audio stream functions are for playing digital sounds that are too big 
+to fit in a regular SAMPLE structure, either because they are huge files 
+that you want to load in pieces as the data is required, or because you are 
+doing something clever like generating the waveform on the fly.
+<p>
+<b>AUDIOSTREAM *<a name="play_audio_stream">play_audio_stream</a>(int len, bits, stereo, freq, vol, pan);</b><br>
+   This function creates a new audio stream and starts it playing. The 
+   length is the size of each transfer buffer (in samples), which should be 
+   at least 2K: larger buffers are more efficient and require fewer updates, 
+   but result in more latency between you providing the data and it actually 
+   being played. The bits parameter must be 8 or 16, freq is the sample rate 
+   of the data, and the vol and pan values use the same 0-255 ranges as the 
+   regular sample playing functions. If you want to adjust the pitch, 
+   volume, or panning of a stream once it is playing, you can use the 
+   regular voice_*() functions with stream->voice as a parameter. The sample 
+   data is always in unsigned format, with stereo waveforms consisting of 
+   alternate left/right samples.
+<p>
+<b>void <a name="stop_audio_stream">stop_audio_stream</a>(AUDIOSTREAM *stream);</b><br>
+   Destroys an audio stream when it is no longer required.
+<p>
+<b>void *<a name="get_audio_stream_buffer">get_audio_stream_buffer</a>(AUDIOSTREAM *stream);</b><br>
+   You must call this function at regular intervals while an audio stream is 
+   playing, to provide the next buffer of sample data (the smaller the 
+   stream buffer size, the more often it must be called). If it returns 
+   NULL, the stream is still playing the previous lot of data, so you don't 
+   need to do anything. If it returns a value, that is the location of the 
+   next buffer to be played, and you should load the appropriate number of 
+   samples (however many you specified when creating the stream) to that 
+   address, for example using an fread() from a disk file. After filling the 
+   buffer with data, call free_audio_stream_buffer() to indicate that the 
+   new data is now valid. Note that this function should not be called from 
+   a timer handler...
+<p>
+<b>void <a name="free_audio_stream_buffer">free_audio_stream_buffer</a>(AUDIOSTREAM *stream);</b><br>
+   Call this function after get_audio_stream_buffer() returns a non-NULL 
+   address, to indicate that you have loaded a new block of samples to that 
+   location and the data is now ready to be played.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

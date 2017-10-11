@@ -1,0 +1,120 @@
+<html><head><title>MIDI music routines</title><body>
+<h1><a name="MIDI music routines">MIDI music routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#load_midi">load_midi</a>
+<li><a href="#destroy_midi">destroy_midi</a>
+<li><a href="#play_midi">play_midi</a>
+<li><a href="#play_looped_midi">play_looped_midi</a>
+<li><a href="#stop_midi">stop_midi</a>
+<li><a href="#midi_pause">midi_pause</a>
+<li><a href="#midi_resume">midi_resume</a>
+<li><a href="#midi_seek">midi_seek</a>
+<li><a href="#midi_out">midi_out</a>
+<li><a href="#load_midi_patches">load_midi_patches</a>
+<li><a href="#midi_pos">midi_pos</a>
+<li><a href="#midi_loop_start">midi_loop_start</a>
+<li><a href="#midi_loop_end">midi_loop_end</a>
+<li><a href="#midi_msg_callback">midi_msg_callback</a>
+<li><a href="#midi_meta_callback">midi_meta_callback</a>
+<li><a href="#midi_sysex_callback">midi_sysex_callback</a>
+<li><a href="#load_ibk">load_ibk</a>
+</h4></ul>
+<p><br><br>
+<p>
+<b>MIDI *<a name="load_midi">load_midi</a>(char *filename);</b><br>
+   Loads a MIDI file (handles both format 0 and format 1), returning a 
+   pointer to a MIDI structure, or NULL on error.
+<p>
+<b>void <a name="destroy_midi">destroy_midi</a>(MIDI *midi);</b><br>
+   Destroys a MIDI structure when you are done with it. It is safe to call 
+   this even when the MIDI file might be playing, because it checks and will 
+   kill it off if it is active.
+<p>
+<b>int <a name="play_midi">play_midi</a>(MIDI *midi, int loop);</b><br>
+   Starts playing the specified MIDI file, first stopping whatever music was 
+   previously playing. If the loop flag is set, the data will be repeated 
+   until replaced with something else, otherwise it will stop at the end of 
+   the file. Passing a NULL pointer will stop whatever music is currently 
+   playing. Returns non-zero if an error occurs (this may happen if a 
+   patch-caching wavetable driver is unable to load the required samples, or 
+   at least it might in the future when somebody writes some patch-caching 
+   wavetable drivers :-)
+<p>
+<b>int <a name="play_looped_midi">play_looped_midi</a>(MIDI *midi, int loop_start, int loop_end);</b><br>
+   Starts playing a MIDI file with a user-defined loop position. When the 
+   player reaches the loop end position or the end of the file (loop_end may 
+   be -1 to only loop at EOF), it will wind back to the loop start point. 
+   Both positions are specified in the same beat number format as the 
+   midi_pos variable.
+<p>
+<b>void <a name="stop_midi">stop_midi</a>();</b><br>
+   Stops whatever music is currently playing. This is the same thing as 
+   calling play_midi(NULL, FALSE).
+<p>
+<b>void <a name="midi_pause">midi_pause</a>();</b><br>
+   Pauses the MIDI player.
+<p>
+<b>void <a name="midi_resume">midi_resume</a>();</b><br>
+   Resumes playback of a paused MIDI file.
+<p>
+<b>int <a name="midi_seek">midi_seek</a>(int target);</b><br>
+   Seeks to the given midi_pos in the current MIDI file. If the target is 
+   earlier in the file than the current midi_pos it seeks from the 
+   beginning; otherwise it seeks from the current position. Returns zero if 
+   successful, non-zero if it hit the end of the file (1 means it stopped 
+   playing, 2 means it looped back to the start). If this function stops 
+   because it reached EOF, midi_pos will be set to the negative length of 
+   the MIDI file.
+<p>
+<b>void <a name="midi_out">midi_out</a>(unsigned char *data, int length);</b><br>
+   Streams a block of MIDI commands into the player in realtime, allowing 
+   you to trigger notes, jingles, etc, over the top of whatever MIDI file is 
+   currently playing.
+<p>
+<b>int <a name="load_midi_patches">load_midi_patches</a>();</b><br>
+   Forces the MIDI driver to load the entire set of patches ready for use. 
+   You will not normally need to call this, because Allegro automatically 
+   loads whatever data is required for the current MIDI file, but you must 
+   call it before sending any program change messages via the midi_out() 
+   command. Returns non-zero if an error occurred.
+<p>
+<b>extern volatile long <a name="midi_pos">midi_pos</a>;</b><br>
+   Stores the current position (beat number) in the MIDI file, or contains 
+   a negative number if no music is currently playing. Useful for 
+   synchronising animations with the music, and for checking whether a MIDI 
+   file has finished playing.
+<p>
+<b>extern long <a name="midi_loop_start">midi_loop_start</a>;</b><br>
+<b>extern long <a name="midi_loop_end">midi_loop_end</a>;</b><br>
+   The loop start and end points, set by the play_looped_midi() function. 
+   These may safely be altered while the music is playing, but you should be 
+   sure they are always set to sensible values (start &lt; end). If you are 
+   changing them both at the same time, make sure to alter them in the right 
+   order in case a MIDI interrupt happens to occur in between your two 
+   writes! Setting these values to -1 represents the start and end of the 
+   file respectively.
+<p>
+<b>extern void (*<a name="midi_msg_callback">midi_msg_callback</a>)(int msg, int byte1, int byte2);</b><br>
+<b>extern void (*<a name="midi_meta_callback">midi_meta_callback</a>)(int type, unsigned char *data, int length);</b><br>
+<b>extern void (*<a name="midi_sysex_callback">midi_sysex_callback</a>)(unsigned char *data, int length);</b><br>
+   Hook functions allowing you to intercept MIDI player events. If set to 
+   anything other than NULL, these routines will be called for each MIDI 
+   message, meta-event, and system exclusive data block respectively. They 
+   will execute in an interrupt handler context, so all the code and data 
+   they use should be locked, and they must not call any operating system 
+   functions. In general you just use these routines to set some flags and 
+   respond to them later in your mainline code.
+<p>
+<b>int <a name="load_ibk">load_ibk</a>(char *filename, int drums);</b><br>
+   Reads in a .IBK patch definition file for use by the Adlib driver. If 
+   drums is set, it will load it as a percussion patch set, otherwise it 
+   will use it as a replacement set of General MIDI instruments. You may 
+   call this before or after initialising the sound code, or can simply set 
+   the ibk_file and ibk_drum_file variables in the configuration file to 
+   have the data loaded automatically. Note that this function has no effect 
+   on any drivers other than the Adlib one!
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

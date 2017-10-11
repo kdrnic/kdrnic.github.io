@@ -1,0 +1,246 @@
+<html><head><title>Joystick routines</title><body>
+<h1><a name="Joystick routines">Joystick routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#install_joystick">install_joystick</a>
+<li><a href="#remove_joystick">remove_joystick</a>
+<li><a href="#poll_joystick">poll_joystick</a>
+<li><a href="#num_joysticks">num_joysticks</a>
+<li><a href="#joy">joy</a>
+<li><a href="#calibrate_joystick_name">calibrate_joystick_name</a>
+<li><a href="#calibrate_joystick">calibrate_joystick</a>
+<li><a href="#save_joystick_data">save_joystick_data</a>
+<li><a href="#load_joystick_data">load_joystick_data</a>
+</h4></ul>
+<p><br><br>
+<p>
+<b>int <a name="install_joystick">install_joystick</a>(int type);</b><br>
+   Initialises the joystick, and calibrates the centre position value. You 
+   must call this before using any other joystick functions, and you should 
+   make sure that the joystick is in the middle position at the time. 
+   Returns zero on success. The type parameter should be one of the values:
+<p>
+   <b>JOY_TYPE_AUTODETECT</b><br>
+      Attempts to autodetect your joystick hardware. It isn't possible to 
+      reliably distinguish between all the possible input setups, so this 
+      routine can only ever choose the standard joystick, Sidewider, or 
+      GamePad Pro drivers, but it will use information from the 
+      configuration file if one is available (this can be created using the 
+      setup utility or by calling the save_joystick_data() function), so you 
+      can always use JOY_TYPE_AUTODETECT in your code and then select the 
+      exact hardware type from the setup program.
+<p>
+   <b>JOY_TYPE_NONE</b><br>
+      Dummy driver for machines without any joystick.
+<p>
+   <b>JOY_TYPE_STANDARD</b><br>
+      A normal two button stick.
+<p>
+   <b>JOY_TYPE_2PADS</b><br>
+      Dual joystick mode (two sticks, each with two buttons).
+<p>
+   <b>JOY_TYPE_4BUTTON</b><br>
+      Enable the extra buttons on a 4-button joystick.
+<p>
+   <b>JOY_TYPE_6BUTTON</b><br>
+      Enable the extra buttons on a 6-button joystick.
+<p>
+   <b>JOY_TYPE_8BUTTON</b><br>
+      Enable the extra buttons on an 8-button joystick.
+<p>
+   <b>JOY_TYPE_FSPRO</b><br>
+      CH Flightstick Pro or compatible stick, which provides four buttons, 
+      an analogue throttle control, and a 4-direction coolie hat.
+<p>
+   <b>JOY_TYPE_WINGEX</b><br>
+      A Logitech Wingman Extreme, which should also work with any 
+      Thrustmaster Mk.I compatible joystick. It provides support for four 
+      buttons and a coolie hat. This also works with the Wingman Warrior, if 
+      you plug in the 15 pin plug (remember to unplug the 9-pin plug!) and 
+      set the tiny switch in front to the "H" position (you will not be able 
+      to use the throttle or the spinner though).
+<p>
+   <b>JOY_TYPE_SIDEWINDER</b><br>
+      The Microsoft Sidewinder digital pad (supports up to four 
+      controllers, each with ten buttons and a digital direction control).
+<p>
+   <b>JOY_TYPE_GAMEPAD_PRO</b><br>
+      The Gravis GamePad Pro (supports up to two controllers, each with ten 
+      buttons and a digital direction control).
+<p>
+   <b>JOY_TYPE_SNESPAD_LPT1</b><br>
+   <b>JOY_TYPE_SNESPAD_LPT2</b><br>
+   <b>JOY_TYPE_SNESPAD_LPT3</b><br>
+      SNES joypads connected to LPT1, LPT2, and LPT3 respectively.
+<p>
+   <b>JOY_TYPE_WINGWARRIOR</b><br>
+      A Wingman Warrior joystick.
+<p>
+   As soon as you have installed the joystick module, you will be able to 
+   read the button state and digital (on/off toggle) direction information, 
+   which may be enough for some games. If you want to get full analogue 
+   input, though, you need to use the calibrate_joystick() functions to 
+   measure the exact range of the inputs: see below.
+<p>
+<b>void <a name="remove_joystick">remove_joystick</a>();</b><br>
+   Removes the joystick handler. You don't normally need to bother calling 
+   this, because allegro_exit() will do it for you.
+<p>
+<b>int <a name="poll_joystick">poll_joystick</a>();</b><br>
+   Unlike the mouse and keyboard, the joystick is not interrupt driven, so 
+   you need to call this function every now and again to update the global 
+   position values.
+<p>
+<b>extern int <a name="num_joysticks">num_joysticks</a>;</b><br>
+   Global variable containing the number of active joystick devices. The 
+   current drivers support a maximum of four controllers.
+<p>
+<b>extern JOYSTICK_INFO <a name="joy">joy</a>[n];</b><br>
+   Global array of joystick state information, which is updated by the 
+   poll_joystick() function. Only the first num_joysticks elements will 
+   contain meaningful information. The JOYSTICK_INFO structure is defined as:
+<p><pre>
+   typedef struct JOYSTICK_INFO
+   {
+      int flags;                       - status flags for this joystick
+      int num_sticks;                  - how many stick inputs?
+      int num_buttons;                 - how many buttons?
+      JOYSTICK_STICK_INFO stick[n];    - stick state information
+      JOYSTICK_BUTTON_INFO button[n];  - button state information
+   } JOYSTICK_INFO;
+<p></pre>
+   The button status is stored in the structure:
+<p><pre>
+   typedef struct JOYSTICK_BUTTON_INFO
+   {
+      int b;                           - boolean on/off flag
+      char *name;                      - description of this button
+   } JOYSTICK_BUTTON_INFO;
+<p></pre>
+   You may wish to display the button names as part of an input 
+   configuration screen to let the user choose what game function will be 
+   performed by each button, but in simpler situations you can safely assume 
+   that the first two elements in the button array will always be the main 
+   trigger controls.
+<p>
+   Each joystick will provide one or more stick inputs, of varying types. 
+   These can be digital controls which snap to specific positions (eg. a 
+   gamepad controller, the coolie hat on a Flightstick Pro or Wingman 
+   Extreme, or a normal joystick which hasn't yet been calibrated), or they 
+   can be full analogue inputs with a smooth range of motion. Sticks may 
+   also have different numbers of axis, for example a normal directional 
+   control has two, but the Flightstick Pro throttle is only a single axis, 
+   and it is possible that the system could be extended in the future to 
+   support full 3d controllers. A stick input is described by the structure:
+<p><pre>
+   typedef struct JOYSTICK_STICK_INFO
+   {
+      int flags;                       - status flags for this input
+      int num_axis;                    - how many axis do we have?
+      JOYSTICK_AXIS_INFO axis[n];      - axis state information
+      char *name;                      - description of this input
+   } JOYSTICK_STICK_INFO;
+<p></pre>
+   A single joystick may provide several different stick inputs, but you can 
+   safely assume that the first element in the stick array will always be 
+   the main directional controller.
+<p>
+   Information about each of the stick axis is stored in the substructure:
+<p><pre>
+   typedef struct JOYSTICK_AXIS_INFO
+   {
+      int pos;                         - analogue axis position
+      int d1, d2;                      - digital axis position
+      char *name;                      - description of this axis
+   } JOYSTICK_AXIS_INFO;
+<p></pre>
+   This provides both analogue input in the pos field (ranging from -128 to 
+   128 or from 0 to 255, depending on the type of the control), and digital 
+   values in the d1 and d2 fields. For example, when describing the X-axis 
+   position, the pos field will hold the horizontal position of the 
+   joystick, d1 will be set if it is moved left, and d2 will be set if it is 
+   moved right. Allegro will fill in all these values regardless of whether 
+   it is using a digital or analogue joystick, emulating the pos field for 
+   digital inputs by snapping it to the min, middle, and maximum positions, 
+   and emulating the d1 and d2 values for an analogue stick by comparing the 
+   current position with the centre point.
+<p>
+   The joystick flags field may contain any combination of the bit flags:
+<p>
+   <b>JOYFLAG_DIGITAL</b><br>
+      This control is currently providing digital input.
+<p>
+   <b>JOYFLAG_ANALOGUE</b><br>
+      This control is currently providing analogue input.
+<p>
+   <b>JOYFLAG_CALIB_DIGITAL</b><br>
+      This control will be capable of providing digital input once it has 
+      been calibrated, but is not doing this at the moment.
+<p>
+   <b>JOYFLAG_CALIB_ANALOGUE</b><br>
+      This control will be capable of providing analogue input once it has 
+      been calibrated, but is not doing this at the moment.
+<p>
+   <b>JOYFLAG_CALIBRATE</b><br>
+      Indicates that this control needs to be calibrated. Many devices 
+      require multiple calibration steps, so you should call the 
+      calibrate_joystick() function from a loop until this flag is cleared.
+<p>
+   <b>JOYFLAG_SIGNED</b><br>
+      Indicates that the analogue axis position is in signed format, ranging 
+      from -128 to 128. This is the case for all 2d directional controls.
+<p>
+   <b>JOYFLAG_UNSIGNED</b><br>
+      Indicates that the analogue axis position is in unsigned format, 
+      ranging from 0 to 255. This is the case for all 1d throttle controls.
+<p>
+   Note for people who spell funny: in case you don't like having to type 
+   "analogue", there are some #define aliases in allegro.h that will allow 
+   to to write "analog" instead.
+<p>
+<b>char *<a name="calibrate_joystick_name">calibrate_joystick_name</a>(int n);</b><br>
+   Returns a text description for the next type of calibration that will be 
+   done on the specified joystick, or NULL if no more calibration is 
+   required.
+<p>
+<b>int <a name="calibrate_joystick">calibrate_joystick</a>(int n);</b><br>
+   Most joysticks need to be calibrated before they can provide full 
+   analogue input. This function performs the next operation in the 
+   calibration series for the specified stick, assuming that the joystick 
+   has been positioned in the manner described by a previous call to 
+   calibrate_joystick_name(), returning zero on success. For example, a 
+   simple routine to fully calibrate all the joysticks might look like:
+<p><pre>
+      int i;
+<p>
+      for (i=0; i&lt;;num_joysticks; i++) {
+         while (joy[i].flags & JOYFLAG_CALIBRATE) {
+            char *msg = calibrate_joystick_name(i);
+            printf("%s, and press a key\n", msg);
+            readkey();
+            if (calibrate_joystick(i) != 0) {
+               printf("oops!\n");
+               exit(1);
+            }
+         }
+      }
+<p></pre>
+<b>int <a name="save_joystick_data">save_joystick_data</a>(char *filename);</b><br>
+   After all the headache of calibrating the joystick, you may not want to 
+   make your poor users repeat the process every time they run your program. 
+   Call this function to save the joystick calibration data into the 
+   specified configuration file, from which it can later be read by 
+   load_joystick_data(). Pass a NULL filename to write the data to the 
+   currently selected configuration file. Returns zero on success.
+<p>
+<b>int <a name="load_joystick_data">load_joystick_data</a>(char *filename);</b><br>
+   Restores calibration data previously stored by save_joystick_data() or 
+   the setup utility. This sets up all aspects of the joystick code: you 
+   don't even need to call install_joystick() if you are using this 
+   function. Pass a NULL filename to read the data from the currently 
+   selected configuration file. Returns zero on success: if it fails the 
+   joystick state is undefined and you must reinitialise it from scratch.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

@@ -1,0 +1,186 @@
+<html><head><title>Keyboard routines</title><body>
+<h1><a name="Keyboard routines">Keyboard routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#install_keyboard">install_keyboard</a>
+<li><a href="#remove_keyboard">remove_keyboard</a>
+<li><a href="#install_keyboard_hooks">install_keyboard_hooks</a>
+<li><a href="#key">key</a>
+<li><a href="#key_shifts">key_shifts</a>
+<li><a href="#keypressed">keypressed</a>
+<li><a href="#readkey">readkey</a>
+<li><a href="#simulate_keypress">simulate_keypress</a>
+<li><a href="#keyboard_callback">keyboard_callback</a>
+<li><a href="#keyboard_lowlevel_callback">keyboard_lowlevel_callback</a>
+<li><a href="#set_leds">set_leds</a>
+<li><a href="#clear_keybuf">clear_keybuf</a>
+<li><a href="#three_finger_flag">three_finger_flag</a>
+<li><a href="#key_led_flag">key_led_flag</a>
+<li><a href="#switch_standard_kb_key">switch_standard_kb_key</a>
+<li><a href="#switch_standard_kb_flags">switch_standard_kb_flags</a>
+<li><a href="#switch_custom_kb_key">switch_custom_kb_key</a>
+<li><a href="#switch_custom_kb_flags">switch_custom_kb_flags</a>
+<li><a href="#set_standard_keyboard">set_standard_keyboard</a>
+<li><a href="#set_custom_keyboard">set_custom_keyboard</a>
+</h4></ul>
+<p><br><br>
+<p>
+If you want to detect multiple keypresses at the same time, the BIOS 
+keyboard routines are useless. Allegro can install a replacement keyboard 
+handler, which provides both buffered input and a set of flags storing the 
+state of each key. Note that it is not possible to correctly detect every 
+combination of keys, due to the design of the PC keyboard. Up to two or 
+three keys at a time will work fine, but if you press more than that the 
+extras are likely to be ignored (exactly which combinations are possible 
+seems to vary from one keyboard to another).
+<p>
+<b>int <a name="install_keyboard">install_keyboard</a>();</b><br>
+   Installs the Allegro keyboard interrupt handler. You must call this 
+   before using any of the keyboard input routines. Once you have set up the 
+   Allegro handler, you can no longer use DOS/BIOS calls or C library 
+   functions to access the keyboard.
+<p>
+<b>void <a name="remove_keyboard">remove_keyboard</a>();</b><br>
+   Removes the keyboard handler, returning control to the BIOS. You don't 
+   normally need to bother calling this, because allegro_exit() will do it 
+   for you.
+<p>
+<b>void <a name="install_keyboard_hooks">install_keyboard_hooks</a>(int (*keypressed)(), int (*readkey)());</b><br>
+   You should only use this function if you *aren't* using the rest of the 
+   keyboard handler. It should be called in the place of install_keyboard(), 
+   and lets you provide callback routines to detect and read keypresses, 
+   which will be used by the main keypressed() and readkey() functions. This 
+   can be useful if you want to use Allegro's GUI code with a custom 
+   keyboard handler, as it provides a way for the GUI to access keyboard 
+   input from your own code. If you want to use the BIOS keyboard routines, 
+   the libc function _bios_keybrd(_KEYBRD_READ) returns keypresses in the 
+   correct format.
+<p>
+<b>extern volatile char <a name="key">key</a>[128];</b><br>
+   Array of flags indicating the state of each key, ordered by scancode. The 
+   scancodes are defined in allegro.h as a series of KEY_* constants. For 
+   example, you could write:
+<p><pre>
+      if (key[KEY_SPACE])
+         printf("Space is pressed\n");
+<p></pre>
+   Each of these values is actually a bitfield containing either or both of 
+   the flags KB_NORMAL and KB_EXTENDED, allowing you to determine which key 
+   is pressed even when there are two with the same scancode. For example, 
+   you could write:
+<p><pre>
+      if (key[KEY_ENTER] & KB_NORMAL)
+         printf("Enter (next to the right shift key) is pressed\n");
+<p>
+      if (key[KEY_ENTER] & KB_EXTENDED)
+         printf("Enter (on the numeric keypad) is pressed\n");
+<p></pre>
+<b>extern volatile int <a name="key_shifts">key_shifts</a>;</b><br>
+   Bitmask containing the current state of shift/ctrl/alt, the special 
+   Windows keys, and the accent escape characters. This can contain any of 
+   the flags:
+<p>
+      KB_SHIFT_FLAG<br>
+      KB_CTRL_FLAG<br>
+      KB_ALT_FLAG<br>
+      KB_LWIN_FLAG<br>
+      KB_RWIN_FLAG<br>
+      KB_MENU_FLAG<br>
+      KB_SCROLOCK_FLAG<br>
+      KB_NUMLOCK_FLAG<br>
+      KB_CAPSLOCK_FLAG<br>
+      KB_INALTSEQ_FLAG<br>
+      KB_ACCENT1_FLAG<br>
+      KB_ACCENT1_S_FLAG<br>
+      KB_ACCENT2_FLAG<br>
+      KB_ACCENT2_S_FLAG
+<p>
+<b>int <a name="keypressed">keypressed</a>();</b><br>
+   Returns TRUE if there are keypresses waiting in the input buffer. This is 
+   equivalent to the libc kbhit() function.
+<p>
+<b>int <a name="readkey">readkey</a>();</b><br>
+   Returns the next character from the keyboard buffer. If the buffer is 
+   empty, it waits until a key is pressed. The low byte of the return value 
+   contains the ASCII code of the key, and the high byte the scancode. The 
+   scancode remains the same whatever the state of the shift, ctrl and alt 
+   keys. The ASCII code is affected by shift and ctrl in the normal way 
+   (shift changes case, ctrl+letter gives the position of that letter in the 
+   alphabet, eg. ctrl+A = 1, ctrl+B = 2, etc). Pressing alt+key returns only 
+   the scancode, with a zero ASCII code in the low byte. For example:
+<p><pre>
+      if ((readkey() & 0xff) == 'd')         // by ASCII code
+         printf("You pressed 'd'\n");
+<p>
+      if ((readkey() &gt;&gt; 8) == KEY_SPACE)     // by scancode
+         printf("You pressed Space\n");
+<p>
+      if ((readkey() & 0xff) == 3)           // ctrl+letter
+         printf("You pressed Control+C\n");
+<p>
+      if (readkey() == (KEY_X &lt;&lt; 8))         // alt+letter
+         printf("You pressed Alt+X\n");
+<p></pre>
+<b>void <a name="simulate_keypress">simulate_keypress</a>(int key);</b><br>
+   Stuffs a key into the keyboard buffer, just as if the user had pressed 
+   it. The parameter is in the same format returned by readkey().
+<p>
+<b>extern int (*<a name="keyboard_callback">keyboard_callback</a>)(int key);</b><br>
+   If set, this function is called by the keyboard handler in response to 
+   every keypress. It is passed a copy of the value that is about to be 
+   added into the input buffer, and can either return this value unchanged, 
+   return zero to cause the key to be ignored, or return a modified value to 
+   change what readkey() will later return. This routine executes in an 
+   interrupt context, so it must be in locked memory.
+<p>
+<b>extern void (*<a name="keyboard_lowlevel_callback">keyboard_lowlevel_callback</a>)(int key);</b><br>
+   If set, this function is called by the keyboard handler in response to 
+   every keyboard event, both presses and releases. It will be passed a raw 
+   keyboard scancode byte, with the top bit clear if the key has been 
+   pressed or set if it was released. This routine executes in an interrupt 
+   context, so it must be in locked memory.
+<p>
+<b>void <a name="set_leds">set_leds</a>(int leds);</b><br>
+   Overrides the state of the keyboard LED indicators. The parameter is a 
+   bitmask containing any of the values KB_SCROLOCK_FLAG, KB_NUMLOCK_FLAG, 
+   and KB_CAPSLOCK_FLAG, or -1 to restore the default behavior.
+<p>
+<b>void <a name="clear_keybuf">clear_keybuf</a>();</b><br>
+   Empties the keyboard buffer.
+<p>
+<b>extern int <a name="three_finger_flag">three_finger_flag</a>;</b><br>
+   The Allegro keyboard handler provides an 'emergency exit' sequence which 
+   you can use to kill off your program. If you are running under DOS this 
+   is the three finger salute, ctrl+alt+del. Most multitasking OS's will 
+   trap this combination before it reaches the Allegro handler, in which 
+   case you can use the alternative ctrl+alt+end. If you want to disable 
+   this behaviour in release versions of your program, set this flag to 
+   FALSE.
+<p>
+<b>extern int <a name="key_led_flag">key_led_flag</a>;</b><br>
+   By default, the capslock, numlock, and scroll-lock keys toggle the 
+   keyboard LED indicators when they are pressed. If you are using these 
+   keys for input in your game (eg. capslock to fire) this may not be 
+   desirable, so you can clear this flag to prevent the LED's being updated.
+<p>
+<b>extern int <a name="switch_standard_kb_key">switch_standard_kb_key</a>;</b><br>
+<b>extern int <a name="switch_standard_kb_flags">switch_standard_kb_flags</a>;</b><br>
+<b>extern int <a name="switch_custom_kb_key">switch_custom_kb_key</a>;</b><br>
+<b>extern int <a name="switch_custom_kb_flags">switch_custom_kb_flags</a>;</b><br>
+   Scancode and shift flag combinations used for the custom to standard 
+   keyboard mapping switch. By default, pressing ctrl+alt+F1 will select the 
+   standard US layout, while ctrl+alt+F2 selects the custom mapping. 
+   These values allow you to alter the hotswap keys, or you can set them to 
+   zero to disable the swapping.
+<p>
+<b>void <a name="set_standard_keyboard">set_standard_keyboard</a>();</b><br>
+   Forces Allegro to use the standard US keyboard mapping, regardless of 
+   what custom keyboard layout is currently loaded.
+<p>
+<b>void <a name="set_custom_keyboard">set_custom_keyboard</a>();</b><br>
+   Forces a switch to the current custom keyboard layout, reversing the 
+   effect of any previous calls to set_standard_keyboard().
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

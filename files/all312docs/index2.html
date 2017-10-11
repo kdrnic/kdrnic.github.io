@@ -1,0 +1,688 @@
+# 1 "index.html"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "index.html"
+<html>
+ <head>
+  <script src="jquery.min.js"></script>
+  <script src="jquery-ui.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="jquery-ui.min.css">
+  <style type="text/css">
+
+ height: 100%;
+ width: 100%;
+ border: none;
+}
+
+ padding-left: 50px;
+ border-left: 1px
+}
+
+ height: 100%;
+ overflow-y: scroll;
+ overflow-x: wrap;
+}
+table{
+ border-spacing: 5px;
+}
+td{
+ border-top: 1px solid rgb(105,105,105);
+ border-left: 1px solid rgb(105,105,105);
+ border-bottom: 2px solid rgb(160,160,160);
+ border-right: 2px solid rgb(160,160,160);
+ margin: 2px;
+ background-color: rgb(255,255,255);
+ vertical-align: top;
+}
+body{
+ background-color: rgb(240,240,240);
+}
+
+ width: 900px;
+ height: 1px;
+}
+ul{
+ list-style-type: none;
+}
+  </style>
+  <script>
+$(function(){
+ $("#index").children("li:has(ul)").prepend("<a class='expander' href='#'><img src='minus.png'></a>");
+ $("#index").children("li").children("a").not(".expander").click(function(a){
+  $('#content').attr('src', this.href);
+  return false;
+ });
+ $("#index").children("li").children("ul").find("li").children("a").click(function(a){
+  var newHref = $(this).parent().parent().parent().parent().children("a").not(".expander").first().attr("href") + $(this).attr("href");
+  console.log(newHref);
+  $('#content').attr('src', newHref);
+  return false;
+ });
+ $(".expander").click(function(e){
+  var a = $(this);
+  var sublist = a.parent().children("ul").first();
+  sublist.toggle();
+  a.children("img").first().attr("src", sublist.is(":visible") ? "minus.png" : "plus.png");
+ });
+ $(".expander").trigger("click");
+
+ $("#indextd").resizable({
+  handles: "e, w"
+ });
+});
+  </script>
+ </head>
+ <body>
+  <table width="100%" height="100%">
+   <tr>
+    <td id="indextd">
+     <div id="tdwrap">
+      <ul id="index">
+<li><a href="alleg000.html">Using Allegro</a>
+<ul><h4>
+<li><a href="#allegro_init">allegro_init</a>
+<li><a href="#allegro_exit">allegro_exit</a>
+<li><a href="#allegro_id">allegro_id</a>
+<li><a href="#allegro_error">allegro_error</a>
+<li><a href="#os_type">os_type</a>
+<li><a href="#windows_version">windows_version</a>
+<li><a href="#windows_sub_version">windows_sub_version</a>
+<li><a href="#check_cpu">check_cpu</a>
+<li><a href="#cpu_vendor">cpu_vendor</a>
+<li><a href="#cpu_family">cpu_family</a>
+<li><a href="#cpu_model">cpu_model</a>
+<li><a href="#cpu_fpu">cpu_fpu</a>
+<li><a href="#cpu_mmx">cpu_mmx</a>
+<li><a href="#cpu_3dnow">cpu_3dnow</a>
+<li><a href="#cpu_cpuid">cpu_cpuid</a>
+</h4></ul>
+<li><a href="alleg001.html">Configuration routines</a>
+<ul><h4>
+<li><a href="#set_config_file">set_config_file</a>
+<li><a href="#set_config_data">set_config_data</a>
+<li><a href="#override_config_file">override_config_file</a>
+<li><a href="#override_config_data">override_config_data</a>
+<li><a href="#push_config_state">push_config_state</a>
+<li><a href="#pop_config_state">pop_config_state</a>
+<li><a href="#hook_config_section">hook_config_section</a>
+<li><a href="#config_is_hooked">config_is_hooked</a>
+<li><a href="#get_config_string">get_config_string</a>
+<li><a href="#get_config_int">get_config_int</a>
+<li><a href="#get_config_hex">get_config_hex</a>
+<li><a href="#get_config_float">get_config_float</a>
+<li><a href="#get_config_id">get_config_id</a>
+<li><a href="#get_config_argv">get_config_argv</a>
+<li><a href="#get_config_text">get_config_text</a>
+<li><a href="#set_config_string">set_config_string</a>
+<li><a href="#set_config_int">set_config_int</a>
+<li><a href="#set_config_hex">set_config_hex</a>
+<li><a href="#set_config_float">set_config_float</a>
+<li><a href="#set_config_id">set_config_id</a>
+</h4></ul>
+<li><a href="alleg002.html">Mouse routines</a>
+<ul><h4>
+<li><a href="#install_mouse">install_mouse</a>
+<li><a href="#remove_mouse">remove_mouse</a>
+<li><a href="#mouse_x">mouse_x</a>
+<li><a href="#mouse_y">mouse_y</a>
+<li><a href="#mouse_b">mouse_b</a>
+<li><a href="#mouse_pos">mouse_pos</a>
+<li><a href="#show_mouse">show_mouse</a>
+<li><a href="#scare_mouse">scare_mouse</a>
+<li><a href="#unscare_mouse">unscare_mouse</a>
+<li><a href="#freeze_mouse_flag">freeze_mouse_flag</a>
+<li><a href="#position_mouse">position_mouse</a>
+<li><a href="#set_mouse_range">set_mouse_range</a>
+<li><a href="#set_mouse_speed">set_mouse_speed</a>
+<li><a href="#set_mouse_sprite">set_mouse_sprite</a>
+<li><a href="#set_mouse_sprite_focus">set_mouse_sprite_focus</a>
+<li><a href="#get_mouse_mickeys">get_mouse_mickeys</a>
+<li><a href="#mouse_callback">mouse_callback</a>
+</h4></ul>
+<li><a href="alleg003.html">Timer routines</a>
+<ul><h4>
+<li><a href="#install_timer">install_timer</a>
+<li><a href="#remove_timer">remove_timer</a>
+<li><a href="#install_int">install_int</a>
+<li><a href="#install_int_ex">install_int_ex</a>
+<li><a href="#remove_int">remove_int</a>
+<li><a href="#i_love_bill">i_love_bill</a>
+<li><a href="#timer_simulate_retrace">timer_simulate_retrace</a>
+<li><a href="#retrace_count">retrace_count</a>
+<li><a href="#retrace_proc">retrace_proc</a>
+<li><a href="#rest">rest</a>
+<li><a href="#rest_callback">rest_callback</a>
+</h4></ul>
+<li><a href="alleg004.html">Keyboard routines</a>
+<ul><h4>
+<li><a href="#install_keyboard">install_keyboard</a>
+<li><a href="#remove_keyboard">remove_keyboard</a>
+<li><a href="#install_keyboard_hooks">install_keyboard_hooks</a>
+<li><a href="#key">key</a>
+<li><a href="#key_shifts">key_shifts</a>
+<li><a href="#keypressed">keypressed</a>
+<li><a href="#readkey">readkey</a>
+<li><a href="#simulate_keypress">simulate_keypress</a>
+<li><a href="#keyboard_callback">keyboard_callback</a>
+<li><a href="#keyboard_lowlevel_callback">keyboard_lowlevel_callback</a>
+<li><a href="#set_leds">set_leds</a>
+<li><a href="#clear_keybuf">clear_keybuf</a>
+<li><a href="#three_finger_flag">three_finger_flag</a>
+<li><a href="#key_led_flag">key_led_flag</a>
+<li><a href="#switch_standard_kb_key">switch_standard_kb_key</a>
+<li><a href="#switch_standard_kb_flags">switch_standard_kb_flags</a>
+<li><a href="#switch_custom_kb_key">switch_custom_kb_key</a>
+<li><a href="#switch_custom_kb_flags">switch_custom_kb_flags</a>
+<li><a href="#set_standard_keyboard">set_standard_keyboard</a>
+<li><a href="#set_custom_keyboard">set_custom_keyboard</a>
+</h4></ul>
+<li><a href="alleg005.html">Joystick routines</a>
+<ul><h4>
+<li><a href="#install_joystick">install_joystick</a>
+<li><a href="#remove_joystick">remove_joystick</a>
+<li><a href="#poll_joystick">poll_joystick</a>
+<li><a href="#num_joysticks">num_joysticks</a>
+<li><a href="#joy">joy</a>
+<li><a href="#calibrate_joystick_name">calibrate_joystick_name</a>
+<li><a href="#calibrate_joystick">calibrate_joystick</a>
+<li><a href="#save_joystick_data">save_joystick_data</a>
+<li><a href="#load_joystick_data">load_joystick_data</a>
+</h4></ul>
+<li><a href="alleg006.html">Graphics modes</a>
+<ul><h4>
+<li><a href="#set_color_depth">set_color_depth</a>
+<li><a href="#set_gfx_mode">set_gfx_mode</a>
+<li><a href="#gfx_capabilities">gfx_capabilities</a>
+<li><a href="#scroll_screen">scroll_screen</a>
+<li><a href="#request_scroll">request_scroll</a>
+<li><a href="#poll_scroll">poll_scroll</a>
+<li><a href="#show_video_bitmap">show_video_bitmap</a>
+<li><a href="#request_video_bitmap">request_video_bitmap</a>
+<li><a href="#request_modex_scroll">request_modex_scroll</a>
+<li><a href="#poll_modex_scroll">poll_modex_scroll</a>
+<li><a href="#split_modex_screen">split_modex_screen</a>
+</h4></ul>
+<li><a href="alleg007.html">Bitmap objects</a>
+<ul><h4>
+<li><a href="#screen">screen</a>
+<li><a href="#create_bitmap">create_bitmap</a>
+<li><a href="#create_bitmap_ex">create_bitmap_ex</a>
+<li><a href="#create_sub_bitmap">create_sub_bitmap</a>
+<li><a href="#create_video_bitmap">create_video_bitmap</a>
+<li><a href="#destroy_bitmap">destroy_bitmap</a>
+<li><a href="#bitmap_color_depth">bitmap_color_depth</a>
+<li><a href="#bitmap_mask_color">bitmap_mask_color</a>
+<li><a href="#is_same_bitmap">is_same_bitmap</a>
+<li><a href="#is_linear_bitmap">is_linear_bitmap</a>
+<li><a href="#is_planar_bitmap">is_planar_bitmap</a>
+<li><a href="#is_memory_bitmap">is_memory_bitmap</a>
+<li><a href="#is_screen_bitmap">is_screen_bitmap</a>
+<li><a href="#is_sub_bitmap">is_sub_bitmap</a>
+<li><a href="#set_clip">set_clip</a>
+</h4></ul>
+<li><a href="alleg008.html">Loading image files</a>
+<ul><h4>
+<li><a href="#load_bitmap">load_bitmap</a>
+<li><a href="#load_bmp">load_bmp</a>
+<li><a href="#load_lbm">load_lbm</a>
+<li><a href="#load_pcx">load_pcx</a>
+<li><a href="#load_tga">load_tga</a>
+<li><a href="#save_bitmap">save_bitmap</a>
+<li><a href="#save_bmp">save_bmp</a>
+<li><a href="#save_pcx">save_pcx</a>
+<li><a href="#save_tga">save_tga</a>
+<li><a href="#register_bitmap_file_type">register_bitmap_file_type</a>
+<li><a href="#set_color_conversion">set_color_conversion</a>
+</h4></ul>
+<li><a href="alleg009.html">Palette routines</a>
+<ul><h4>
+<li><a href="#vsync">vsync</a>
+<li><a href="#set_color">set_color</a>
+<li><a href="#_set_color">_set_color</a>
+<li><a href="#set_palette">set_palette</a>
+<li><a href="#set_palette_range">set_palette_range</a>
+<li><a href="#get_color">get_color</a>
+<li><a href="#get_palette">get_palette</a>
+<li><a href="#get_palette_range">get_palette_range</a>
+<li><a href="#fade_interpolate">fade_interpolate</a>
+<li><a href="#fade_from_range">fade_from_range</a>
+<li><a href="#fade_in_range">fade_in_range</a>
+<li><a href="#fade_out_range">fade_out_range</a>
+<li><a href="#fade_from">fade_from</a>
+<li><a href="#fade_in">fade_in</a>
+<li><a href="#fade_out">fade_out</a>
+<li><a href="#select_palette">select_palette</a>
+<li><a href="#unselect_palette">unselect_palette</a>
+<li><a href="#generate_332_palette">generate_332_palette</a>
+<li><a href="#generate_optimized_palette">generate_optimized_palette</a>
+<li><a href="#black_palette">black_palette</a>
+<li><a href="#desktop_palette">desktop_palette</a>
+</h4></ul>
+<li><a href="alleg010.html">Truecolor pixel formats</a>
+<ul><h4>
+<li><a href="#makecol8">makecol8</a>
+<li><a href="#makecol15">makecol15</a>
+<li><a href="#makecol16">makecol16</a>
+<li><a href="#makecol24">makecol24</a>
+<li><a href="#makecol32">makecol32</a>
+<li><a href="#makecol">makecol</a>
+<li><a href="#makecol_depth">makecol_depth</a>
+<li><a href="#makecol15_dither">makecol15_dither</a>
+<li><a href="#makecol16_dither">makecol16_dither</a>
+<li><a href="#getr8">getr8</a>
+<li><a href="#getg8">getg8</a>
+<li><a href="#getb8">getb8</a>
+<li><a href="#getr15">getr15</a>
+<li><a href="#getg15">getg15</a>
+<li><a href="#getb15">getb15</a>
+<li><a href="#getr16">getr16</a>
+<li><a href="#getg16">getg16</a>
+<li><a href="#getb16">getb16</a>
+<li><a href="#getr24">getr24</a>
+<li><a href="#getg24">getg24</a>
+<li><a href="#getb24">getb24</a>
+<li><a href="#getr32">getr32</a>
+<li><a href="#getg32">getg32</a>
+<li><a href="#getb32">getb32</a>
+<li><a href="#getr">getr</a>
+<li><a href="#getg">getg</a>
+<li><a href="#getb">getb</a>
+<li><a href="#getr_depth">getr_depth</a>
+<li><a href="#getg_depth">getg_depth</a>
+<li><a href="#getb_depth">getb_depth</a>
+<li><a href="#palette_color">palette_color</a>
+<li><a href="#MASK_COLOR_8">MASK_COLOR_8</a>
+<li><a href="#MASK_COLOR_15">MASK_COLOR_15</a>
+<li><a href="#MASK_COLOR_16">MASK_COLOR_16</a>
+<li><a href="#MASK_COLOR_24">MASK_COLOR_24</a>
+<li><a href="#MASK_COLOR_32">MASK_COLOR_32</a>
+</h4></ul>
+<li><a href="alleg011.html">Drawing primitives</a>
+<ul><h4>
+<li><a href="#putpixel">putpixel</a>
+<li><a href="#_putpixel">_putpixel</a>
+<li><a href="#getpixel">getpixel</a>
+<li><a href="#_getpixel">_getpixel</a>
+<li><a href="#vline">vline</a>
+<li><a href="#hline">hline</a>
+<li><a href="#do_line">do_line</a>
+<li><a href="#line">line</a>
+<li><a href="#triangle">triangle</a>
+<li><a href="#polygon">polygon</a>
+<li><a href="#rect">rect</a>
+<li><a href="#rectfill">rectfill</a>
+<li><a href="#do_circle">do_circle</a>
+<li><a href="#circle">circle</a>
+<li><a href="#circlefill">circlefill</a>
+<li><a href="#do_ellipse">do_ellipse</a>
+<li><a href="#ellipse">ellipse</a>
+<li><a href="#ellipsefill">ellipsefill</a>
+<li><a href="#do_arc">do_arc</a>
+<li><a href="#arc">arc</a>
+<li><a href="#calc_spline">calc_spline</a>
+<li><a href="#spline">spline</a>
+<li><a href="#floodfill">floodfill</a>
+</h4></ul>
+<li><a href="alleg012.html">Blitting and sprites</a>
+<ul><h4>
+<li><a href="#clear">clear</a>
+<li><a href="#clear_to_color">clear_to_color</a>
+<li><a href="#blit">blit</a>
+<li><a href="#masked_blit">masked_blit</a>
+<li><a href="#stretch_blit">stretch_blit</a>
+<li><a href="#draw_sprite">draw_sprite</a>
+<li><a href="#draw_sprite_v_flip">draw_sprite_v_flip</a>
+<li><a href="#draw_sprite_h_flip">draw_sprite_h_flip</a>
+<li><a href="#draw_sprite_vh_flip">draw_sprite_vh_flip</a>
+<li><a href="#draw_trans_sprite">draw_trans_sprite</a>
+<li><a href="#draw_lit_sprite">draw_lit_sprite</a>
+<li><a href="#draw_gouraud_sprite">draw_gouraud_sprite</a>
+<li><a href="#draw_character">draw_character</a>
+<li><a href="#rotate_sprite">rotate_sprite</a>
+<li><a href="#rotate_scaled_sprite">rotate_scaled_sprite</a>
+<li><a href="#stretch_sprite">stretch_sprite</a>
+</h4></ul>
+<li><a href="alleg013.html">RLE sprites</a>
+<ul><h4>
+<li><a href="#get_rle_sprite">get_rle_sprite</a>
+<li><a href="#destroy_rle_sprite">destroy_rle_sprite</a>
+<li><a href="#draw_rle_sprite">draw_rle_sprite</a>
+<li><a href="#draw_trans_rle_sprite">draw_trans_rle_sprite</a>
+<li><a href="#draw_lit_rle_sprite">draw_lit_rle_sprite</a>
+</h4></ul>
+<li><a href="alleg014.html">Compiled sprites</a>
+<ul><h4>
+<li><a href="#get_compiled_sprite">get_compiled_sprite</a>
+<li><a href="#destroy_compiled_sprite">destroy_compiled_sprite</a>
+<li><a href="#draw_compiled_sprite">draw_compiled_sprite</a>
+</h4></ul>
+<li><a href="alleg015.html">Text output</a>
+<ul><h4>
+<li><a href="#font">font</a>
+<li><a href="#text_mode">text_mode</a>
+<li><a href="#textout">textout</a>
+<li><a href="#textout_centre">textout_centre</a>
+<li><a href="#textout_justify">textout_justify</a>
+<li><a href="#textprintf">textprintf</a>
+<li><a href="#textprintf_centre">textprintf_centre</a>
+<li><a href="#text_length">text_length</a>
+<li><a href="#text_height">text_height</a>
+<li><a href="#destroy_font">destroy_font</a>
+</h4></ul>
+<li><a href="alleg016.html">Polygon rendering</a>
+<ul><h4>
+<li><a href="#polygon3d">polygon3d</a>
+<li><a href="#polygon3d_f">polygon3d_f</a>
+<li><a href="#triangle3d">triangle3d</a>
+<li><a href="#triangle3d_f">triangle3d_f</a>
+<li><a href="#quad3d">quad3d</a>
+<li><a href="#quad3d_f">quad3d_f</a>
+<li><a href="#clip3d_f">clip3d_f</a>
+</h4></ul>
+<li><a href="alleg017.html">Transparency and patterned drawing</a>
+<ul><h4>
+<li><a href="#drawing_mode">drawing_mode</a>
+<li><a href="#xor_mode">xor_mode</a>
+<li><a href="#solid_mode">solid_mode</a>
+<li><a href="#color_map">color_map</a>
+<li><a href="#create_light_table">create_light_table</a>
+<li><a href="#create_trans_table">create_trans_table</a>
+<li><a href="#create_color_table">create_color_table</a>
+<li><a href="#set_trans_blender">set_trans_blender</a>
+<li><a href="#set_blender_mode">set_blender_mode</a>
+</h4></ul>
+<li><a href="alleg018.html">Converting between color formats</a>
+<ul><h4>
+<li><a href="#bestfit_color">bestfit_color</a>
+<li><a href="#rgb_map">rgb_map</a>
+<li><a href="#create_rgb_table">create_rgb_table</a>
+<li><a href="#hsv_to_rgb">hsv_to_rgb</a>
+<li><a href="#rgb_to_hsv">rgb_to_hsv</a>
+</h4></ul>
+<li><a href="alleg019.html">Direct access to video memory</a>
+<li><a href="alleg020.html">FLIC routines</a>
+<ul><h4>
+<li><a href="#play_fli">play_fli</a>
+<li><a href="#play_memory_fli">play_memory_fli</a>
+<li><a href="#open_fli">open_fli</a>
+<li><a href="#open_memory_fli">open_memory_fli</a>
+<li><a href="#close_fli">close_fli</a>
+<li><a href="#next_fli_frame">next_fli_frame</a>
+<li><a href="#fli_bitmap">fli_bitmap</a>
+<li><a href="#fli_palette">fli_palette</a>
+<li><a href="#fli_bmp_dirty_from">fli_bmp_dirty_from</a>
+<li><a href="#fli_bmp_dirty_to">fli_bmp_dirty_to</a>
+<li><a href="#fli_pal_dirty_from">fli_pal_dirty_from</a>
+<li><a href="#fli_pal_dirty_to">fli_pal_dirty_to</a>
+<li><a href="#reset_fli_variables">reset_fli_variables</a>
+<li><a href="#fli_frame">fli_frame</a>
+<li><a href="#fli_timer">fli_timer</a>
+</h4></ul>
+<li><a href="alleg021.html">Sound init routines</a>
+<ul><h4>
+<li><a href="#detect_digi_driver">detect_digi_driver</a>
+<li><a href="#detect_midi_driver">detect_midi_driver</a>
+<li><a href="#reserve_voices">reserve_voices</a>
+<li><a href="#install_sound">install_sound</a>
+<li><a href="#remove_sound">remove_sound</a>
+<li><a href="#set_volume">set_volume</a>
+</h4></ul>
+<li><a href="alleg022.html">Digital sample routines</a>
+<ul><h4>
+<li><a href="#load_sample">load_sample</a>
+<li><a href="#load_wav">load_wav</a>
+<li><a href="#load_voc">load_voc</a>
+<li><a href="#create_sample">create_sample</a>
+<li><a href="#destroy_sample">destroy_sample</a>
+<li><a href="#play_sample">play_sample</a>
+<li><a href="#adjust_sample">adjust_sample</a>
+<li><a href="#stop_sample">stop_sample</a>
+<li><a href="#allocate_voice">allocate_voice</a>
+<li><a href="#deallocate_voice">deallocate_voice</a>
+<li><a href="#reallocate_voice">reallocate_voice</a>
+<li><a href="#release_voice">release_voice</a>
+<li><a href="#voice_start">voice_start</a>
+<li><a href="#voice_stop">voice_stop</a>
+<li><a href="#voice_set_priority">voice_set_priority</a>
+<li><a href="#voice_check">voice_check</a>
+<li><a href="#voice_get_position">voice_get_position</a>
+<li><a href="#voice_set_position">voice_set_position</a>
+<li><a href="#voice_set_playmode">voice_set_playmode</a>
+<li><a href="#voice_get_volume">voice_get_volume</a>
+<li><a href="#voice_set_volume">voice_set_volume</a>
+<li><a href="#voice_ramp_volume">voice_ramp_volume</a>
+<li><a href="#voice_stop_volumeramp">voice_stop_volumeramp</a>
+<li><a href="#voice_get_frequency">voice_get_frequency</a>
+<li><a href="#voice_set_frequency">voice_set_frequency</a>
+<li><a href="#voice_sweep_frequency">voice_sweep_frequency</a>
+<li><a href="#voice_stop_frequency_sweep">voice_stop_frequency_sweep</a>
+<li><a href="#voice_get_pan">voice_get_pan</a>
+<li><a href="#voice_set_pan">voice_set_pan</a>
+<li><a href="#voice_sweep_pan">voice_sweep_pan</a>
+<li><a href="#voice_stop_pan_sweep">voice_stop_pan_sweep</a>
+<li><a href="#voice_set_echo">voice_set_echo</a>
+<li><a href="#voice_set_tremolo">voice_set_tremolo</a>
+<li><a href="#voice_set_vibrato">voice_set_vibrato</a>
+</h4></ul>
+<li><a href="alleg023.html">MIDI music routines</a>
+<ul><h4>
+<li><a href="#load_midi">load_midi</a>
+<li><a href="#destroy_midi">destroy_midi</a>
+<li><a href="#play_midi">play_midi</a>
+<li><a href="#play_looped_midi">play_looped_midi</a>
+<li><a href="#stop_midi">stop_midi</a>
+<li><a href="#midi_pause">midi_pause</a>
+<li><a href="#midi_resume">midi_resume</a>
+<li><a href="#midi_seek">midi_seek</a>
+<li><a href="#midi_out">midi_out</a>
+<li><a href="#load_midi_patches">load_midi_patches</a>
+<li><a href="#midi_pos">midi_pos</a>
+<li><a href="#midi_loop_start">midi_loop_start</a>
+<li><a href="#midi_loop_end">midi_loop_end</a>
+<li><a href="#midi_msg_callback">midi_msg_callback</a>
+<li><a href="#midi_meta_callback">midi_meta_callback</a>
+<li><a href="#midi_sysex_callback">midi_sysex_callback</a>
+<li><a href="#load_ibk">load_ibk</a>
+</h4></ul>
+<li><a href="alleg024.html">Audio stream routines</a>
+<ul><h4>
+<li><a href="#play_audio_stream">play_audio_stream</a>
+<li><a href="#stop_audio_stream">stop_audio_stream</a>
+<li><a href="#get_audio_stream_buffer">get_audio_stream_buffer</a>
+<li><a href="#free_audio_stream_buffer">free_audio_stream_buffer</a>
+</h4></ul>
+<li><a href="alleg025.html">Recording routines</a>
+<ul><h4>
+<li><a href="#install_sound_input">install_sound_input</a>
+<li><a href="#remove_sound_input">remove_sound_input</a>
+<li><a href="#get_sound_input_cap_bits">get_sound_input_cap_bits</a>
+<li><a href="#get_sound_input_cap_stereo">get_sound_input_cap_stereo</a>
+<li><a href="#get_sound_input_cap_rate">get_sound_input_cap_rate</a>
+<li><a href="#get_sound_input_cap_parm">get_sound_input_cap_parm</a>
+<li><a href="#set_sound_input_source">set_sound_input_source</a>
+<li><a href="#start_sound_input">start_sound_input</a>
+<li><a href="#stop_sound_input">stop_sound_input</a>
+<li><a href="#read_sound_input">read_sound_input</a>
+<li><a href="#digi_recorder">digi_recorder</a>
+<li><a href="#midi_recorder">midi_recorder</a>
+</h4></ul>
+<li><a href="alleg026.html">File and compression routines</a>
+<ul><h4>
+<li><a href="#fix_filename_case">fix_filename_case</a>
+<li><a href="#fix_filename_slashes">fix_filename_slashes</a>
+<li><a href="#fix_filename_path">fix_filename_path</a>
+<li><a href="#replace_filename">replace_filename</a>
+<li><a href="#replace_extension">replace_extension</a>
+<li><a href="#append_filename">append_filename</a>
+<li><a href="#get_filename">get_filename</a>
+<li><a href="#get_extension">get_extension</a>
+<li><a href="#put_backslash">put_backslash</a>
+<li><a href="#file_exists">file_exists</a>
+<li><a href="#exists">exists</a>
+<li><a href="#file_size">file_size</a>
+<li><a href="#file_time">file_time</a>
+<li><a href="#delete_file">delete_file</a>
+<li><a href="#for_each_file">for_each_file</a>
+<li><a href="#packfile_password">packfile_password</a>
+<li><a href="#pack_fopen">pack_fopen</a>
+<li><a href="#pack_fclose">pack_fclose</a>
+<li><a href="#pack_fseek">pack_fseek</a>
+<li><a href="#pack_feof">pack_feof</a>
+<li><a href="#pack_ferror">pack_ferror</a>
+<li><a href="#pack_getc">pack_getc</a>
+<li><a href="#pack_putc">pack_putc</a>
+<li><a href="#pack_igetw">pack_igetw</a>
+<li><a href="#pack_igetl">pack_igetl</a>
+<li><a href="#pack_iputw">pack_iputw</a>
+<li><a href="#pack_iputl">pack_iputl</a>
+<li><a href="#pack_mgetw">pack_mgetw</a>
+<li><a href="#pack_mgetl">pack_mgetl</a>
+<li><a href="#pack_mputw">pack_mputw</a>
+<li><a href="#pack_mputl">pack_mputl</a>
+<li><a href="#pack_fread">pack_fread</a>
+<li><a href="#pack_fwrite">pack_fwrite</a>
+<li><a href="#pack_fgets">pack_fgets</a>
+<li><a href="#pack_fputs">pack_fputs</a>
+<li><a href="#pack_fopen_chunk">pack_fopen_chunk</a>
+<li><a href="#pack_fclose_chunk">pack_fclose_chunk</a>
+</h4></ul>
+<li><a href="alleg027.html">Datafile routines</a>
+<ul><h4>
+<li><a href="#load_datafile">load_datafile</a>
+<li><a href="#unload_datafile">unload_datafile</a>
+<li><a href="#load_datafile_object">load_datafile_object</a>
+<li><a href="#unload_datafile_object">unload_datafile_object</a>
+<li><a href="#get_datafile_property">get_datafile_property</a>
+<li><a href="#register_datafile_object">register_datafile_object</a>
+<li><a href="#fixup_datafile">fixup_datafile</a>
+</h4></ul>
+<li><a href="alleg028.html">Fixed point math routines</a>
+<ul><h4>
+<li><a href="#itofix">itofix</a>
+<li><a href="#fixtoi">fixtoi</a>
+<li><a href="#ftofix">ftofix</a>
+<li><a href="#fixtof">fixtof</a>
+<li><a href="#fmul">fmul</a>
+<li><a href="#fdiv">fdiv</a>
+<li><a href="#fadd">fadd</a>
+<li><a href="#fsub">fsub</a>
+<li><a href="#fsin">fsin</a>
+<li><a href="#fcos">fcos</a>
+<li><a href="#ftan">ftan</a>
+<li><a href="#fasin">fasin</a>
+<li><a href="#facos">facos</a>
+<li><a href="#fatan">fatan</a>
+<li><a href="#fatan2">fatan2</a>
+<li><a href="#fsqrt">fsqrt</a>
+</h4></ul>
+<li><a href="alleg029.html">3D math routines</a>
+<ul><h4>
+<li><a href="#identity_matrix">identity_matrix</a>
+<li><a href="#identity_matrix_f">identity_matrix_f</a>
+<li><a href="#get_translation_matrix">get_translation_matrix</a>
+<li><a href="#get_translation_matrix_f">get_translation_matrix_f</a>
+<li><a href="#get_scaling_matrix">get_scaling_matrix</a>
+<li><a href="#get_scaling_matrix_f">get_scaling_matrix_f</a>
+<li><a href="#get_x_rotate_matrix">get_x_rotate_matrix</a>
+<li><a href="#get_x_rotate_matrix_f">get_x_rotate_matrix_f</a>
+<li><a href="#get_y_rotate_matrix">get_y_rotate_matrix</a>
+<li><a href="#get_y_rotate_matrix_f">get_y_rotate_matrix_f</a>
+<li><a href="#get_z_rotate_matrix">get_z_rotate_matrix</a>
+<li><a href="#get_z_rotate_matrix_f">get_z_rotate_matrix_f</a>
+<li><a href="#get_rotation_matrix">get_rotation_matrix</a>
+<li><a href="#get_rotation_matrix_f">get_rotation_matrix_f</a>
+<li><a href="#get_align_matrix">get_align_matrix</a>
+<li><a href="#get_align_matrix_f">get_align_matrix_f</a>
+<li><a href="#get_vector_rotation_matrix">get_vector_rotation_matrix</a>
+<li><a href="#get_vector_rotation_matrix_f">get_vector_rotation_matrix_f</a>
+<li><a href="#get_transformation_matrix">get_transformation_matrix</a>
+<li><a href="#get_transformation_matrix_f">get_transformation_matrix_f</a>
+<li><a href="#get_camera_matrix">get_camera_matrix</a>
+<li><a href="#get_camera_matrix_f">get_camera_matrix_f</a>
+<li><a href="#qtranslate_matrix">qtranslate_matrix</a>
+<li><a href="#qtranslate_matrix_f">qtranslate_matrix_f</a>
+<li><a href="#qscale_matrix">qscale_matrix</a>
+<li><a href="#qscale_matrix_f">qscale_matrix_f</a>
+<li><a href="#matrix_mul">matrix_mul</a>
+<li><a href="#matrix_mul_f">matrix_mul_f</a>
+<li><a href="#vector_length">vector_length</a>
+<li><a href="#vector_length_f">vector_length_f</a>
+<li><a href="#normalize_vector">normalize_vector</a>
+<li><a href="#normalize_vector_f">normalize_vector_f</a>
+<li><a href="#dot_product">dot_product</a>
+<li><a href="#dot_product_f">dot_product_f</a>
+<li><a href="#cross_product">cross_product</a>
+<li><a href="#cross_product_f">cross_product_f</a>
+<li><a href="#polygon_z_normal">polygon_z_normal</a>
+<li><a href="#polygon_z_normal_f">polygon_z_normal_f</a>
+<li><a href="#apply_matrix">apply_matrix</a>
+<li><a href="#apply_matrix_f">apply_matrix_f</a>
+<li><a href="#set_projection_viewport">set_projection_viewport</a>
+<li><a href="#persp_project">persp_project</a>
+<li><a href="#persp_project_f">persp_project_f</a>
+</h4></ul>
+<li><a href="alleg030.html">GUI routines</a>
+<ul><h4>
+<li><a href="#d_clear_proc">d_clear_proc</a>
+<li><a href="#d_box_proc">d_box_proc</a>
+<li><a href="#d_shadow_box_proc">d_shadow_box_proc</a>
+<li><a href="#d_bitmap_proc">d_bitmap_proc</a>
+<li><a href="#d_text_proc">d_text_proc</a>
+<li><a href="#d_ctext_proc">d_ctext_proc</a>
+<li><a href="#d_button_proc">d_button_proc</a>
+<li><a href="#d_check_proc">d_check_proc</a>
+<li><a href="#d_radio_proc">d_radio_proc</a>
+<li><a href="#d_icon_proc">d_icon_proc</a>
+<li><a href="#d_keyboard_proc">d_keyboard_proc</a>
+<li><a href="#d_edit_proc">d_edit_proc</a>
+<li><a href="#d_list_proc">d_list_proc</a>
+<li><a href="#d_textbox_proc">d_textbox_proc</a>
+<li><a href="#d_slider_proc">d_slider_proc</a>
+<li><a href="#d_menu_proc">d_menu_proc</a>
+<li><a href="#gui_mouse_focus">gui_mouse_focus</a>
+<li><a href="#gui_fg_color">gui_fg_color</a>
+<li><a href="#gui_bg_color">gui_bg_color</a>
+<li><a href="#gui_mg_color">gui_mg_color</a>
+<li><a href="#gui_font_baseline">gui_font_baseline</a>
+<li><a href="#gui_mouse_x">gui_mouse_x</a>
+<li><a href="#gui_mouse_y">gui_mouse_y</a>
+<li><a href="#gui_mouse_b">gui_mouse_b</a>
+<li><a href="#gui_textout">gui_textout</a>
+<li><a href="#gui_strlen">gui_strlen</a>
+<li><a href="#centre_dialog">centre_dialog</a>
+<li><a href="#set_dialog_color">set_dialog_color</a>
+<li><a href="#find_dialog_focus">find_dialog_focus</a>
+<li><a href="#dialog_message">dialog_message</a>
+<li><a href="#broadcast_dialog_message">broadcast_dialog_message</a>
+<li><a href="#do_dialog">do_dialog</a>
+<li><a href="#popup_dialog">popup_dialog</a>
+<li><a href="#init_dialog">init_dialog</a>
+<li><a href="#update_dialog">update_dialog</a>
+<li><a href="#shutdown_dialog">shutdown_dialog</a>
+<li><a href="#active_dialog">active_dialog</a>
+<li><a href="#do_menu">do_menu</a>
+<li><a href="#active_menu">active_menu</a>
+<li><a href="#alert">alert</a>
+<li><a href="#alert3">alert3</a>
+<li><a href="#file_select">file_select</a>
+<li><a href="#gfx_mode_select">gfx_mode_select</a>
+<li><a href="#gfx_mode_select_ex">gfx_mode_select_ex</a>
+</h4></ul>
+<li><a href="alleg031.html">Reducing your executable size</a>
+<li><a href="alleg032.html">Debugging</a>
+<li><a href="alleg033.html">Conclusion</a>
+       <li><a href="changes.html">Change list</a>
+       <li><a href="faq.html">Frequently Asked Questions</a>
+       <li><a href="help.html">What to do when your program doesn't work</a>
+       <li><a href="thanks.html">Special thanks - The Hall of Fame</a>
+      </ul>
+     </div>
+    </td>
+    <td id="contenttd">
+     <div id="spacerthing"></div>
+     <iframe id="content" src="allegro.html"></iframe>
+    </td>
+   </tr>
+  </table>
+ </body>
+</html>

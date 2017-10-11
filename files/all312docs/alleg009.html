@@ -1,0 +1,177 @@
+<html><head><title>Palette routines</title><body>
+<h1><a name="Palette routines">Palette routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#vsync">vsync</a>
+<li><a href="#set_color">set_color</a>
+<li><a href="#_set_color">_set_color</a>
+<li><a href="#set_palette">set_palette</a>
+<li><a href="#set_palette_range">set_palette_range</a>
+<li><a href="#get_color">get_color</a>
+<li><a href="#get_palette">get_palette</a>
+<li><a href="#get_palette_range">get_palette_range</a>
+<li><a href="#fade_interpolate">fade_interpolate</a>
+<li><a href="#fade_from_range">fade_from_range</a>
+<li><a href="#fade_in_range">fade_in_range</a>
+<li><a href="#fade_out_range">fade_out_range</a>
+<li><a href="#fade_from">fade_from</a>
+<li><a href="#fade_in">fade_in</a>
+<li><a href="#fade_out">fade_out</a>
+<li><a href="#select_palette">select_palette</a>
+<li><a href="#unselect_palette">unselect_palette</a>
+<li><a href="#generate_332_palette">generate_332_palette</a>
+<li><a href="#generate_optimized_palette">generate_optimized_palette</a>
+<li><a href="#black_palette">black_palette</a>
+<li><a href="#desktop_palette">desktop_palette</a>
+</h4></ul>
+<p><br><br>
+<p>
+All the Allegro drawing functions use integer parameters to represent 
+colors. In truecolor resolutions these numbers encode the color directly as 
+a collection of red, green, and blue bits, but in a regular 256 color mode 
+the values are treated as indexes into the current palette, which is a table 
+listing the red, green and blue intensities for each of the 256 possible 
+colors.
+<p>
+Palette entries are stored in an RGB structure, which contains red, green 
+and blue intensities in the VGA hardware format, ranging from 0-63, and is 
+defined as:
+<p><pre>
+typedef struct RGB
+{
+   unsigned char r, g, b;
+} RGB;
+<p></pre>
+For example:
+<p><pre>
+   RGB black = { 0,  0,  0  };
+   RGB white = { 63, 63, 63 };
+   RGB green = { 0,  63, 0  };
+   RGB grey  = { 32, 32, 32 };
+<p></pre>
+The type PALETTE is defined to be an array of 256 RGB structures.
+<p>
+You may notice that a lot of the code in Allegro spells 'palette' as 
+'pallete'. This is because the headers from my old Mark Williams compiler on 
+the Atari spelt it with two l's, so that is what I'm used to. Allegro will 
+happily accept either spelling, due to some #defines in allegro.h.
+<p>
+<b>void <a name="vsync">vsync</a>();</b><br>
+   Waits for a vertical retrace to begin. The retrace happens when the 
+   electron beam in your monitor has reached the bottom of the screen and is 
+   moving back to the top ready for another scan. During this short period 
+   the graphics card isn't sending any data to the monitor, so you can do 
+   things to it that aren't possible at other times, such as altering the 
+   palette without causing flickering (snow). Allegro will automatically 
+   wait for a retrace before altering the palette or doing any hardware 
+   scrolling, though, so you don't normally need to bother with this 
+   function.
+<p>
+<b>void <a name="set_color">set_color</a>(int index, RGB *p);</b><br>
+   Sets the specified palette entry to the specified RGB triplet. Unlike the 
+   other palette functions this doesn't do any retrace synchronisation, so 
+   you should call vsync() before it to prevent snow problems.
+<p>
+<b>void <a name="_set_color">_set_color</a>(int index, RGB *p);</b><br>
+   This is an inline version of set_color(), intended for use in the 
+   vertical retrace simulator callback function. It should only be used in 
+   VGA mode 13h and mode-X, because some of the more recent SVGA chipsets 
+   aren't VGA compatible (set_color() and set_palette() will use VESA calls 
+   on these cards, but _set_color() doesn't know about that).
+<p>
+<b>void <a name="set_palette">set_palette</a>(PALETTE p);</b><br>
+   Sets the entire palette of 256 colors. You should provide an array of 256 
+   RGB structures. Unlike set_color(), there is no need to call vsync() 
+   before this function.
+<p>
+<b>void <a name="set_palette_range">set_palette_range</a>(PALETTE p, int from, int to, int vsync);</b><br>
+   Sets the palette entries between from and to (inclusive: pass 0 and 255 
+   to set the entire palette). If vsync is set it waits for the vertical 
+   retrace, otherwise it sets the colors immediately.
+<p>
+<b>void <a name="get_color">get_color</a>(int index, RGB *p);</b><br>
+   Retrieves the specified palette entry.
+<p>
+<b>void <a name="get_palette">get_palette</a>(PALETTE p);</b><br>
+   Retrieves the entire palette of 256 colors. You should provide an array 
+   of 256 RGB structures to store it in.
+<p>
+<b>void <a name="get_palette_range">get_palette_range</a>(PALETTE p, int from, int to);</b><br>
+   Retrieves the palette entries between from and to (inclusive: pass 0 and 
+   255 to get the entire palette).
+<p>
+<b>void <a name="fade_interpolate">fade_interpolate</a>(PALETTE source, dest, output, int pos, int from, to);</b><br>
+   Calculates a temporary palette part way between source and dest, 
+   returning it in the output parameter. The position between the two 
+   extremes is specified by the pos value: 0 returns an exact copy of 
+   source, 64 returns dest, 32 returns a palette half way between the two, 
+   etc. This routine only affects colors between from and to (inclusive: 
+   pass 0 and 255 to interpolate the entire palette).
+<p>
+<b>void <a name="fade_from_range">fade_from_range</a>(PALETTE source, dest, int speed, int from, to);</b><br>
+   Gradually fades a part of the palette from the source palette to the dest 
+   palette. The speed is from 1 (the slowest) up to 64 (instantaneous). This 
+   routine only affects colors between from and to (inclusive: pass 0 and 
+   255 to fade the entire palette).
+<p>
+<b>void <a name="fade_in_range">fade_in_range</a>(PALETTE p, int speed, int from, to);</b><br>
+   Gradually fades a part of the palette from a black screen to the 
+   specified palette. The speed is from 1 (the slowest) up to 64 
+   (instantaneous). This routine only affects colors between from and to 
+   (inclusive: pass 0 and 255 to fade the entire palette).
+<p>
+<b>void <a name="fade_out_range">fade_out_range</a>(int speed, int from, to);</b><br>
+   Gradually fades a part of the palette from the current palette to a black 
+   screen. The speed is from 1 (the slowest) up to 64 (instantaneous). This 
+   routine only affects colors between from and to (inclusive: pass 0 and 
+   255 to fade the entire palette).
+<p>
+<b>void <a name="fade_from">fade_from</a>(PALETTE source, PALETTE dest, int speed);</b><br>
+   Fades gradually from the source palette to the dest palette. The speed is 
+   from 1 (the slowest) up to 64 (instantaneous).
+<p>
+<b>void <a name="fade_in">fade_in</a>(PALETTE p, int speed);</b><br>
+   Fades gradually from a black screen to the specified palette. The speed 
+   is from 1 (the slowest) up to 64 (instantaneous).
+<p>
+<b>void <a name="fade_out">fade_out</a>(int speed);</b><br>
+   Fades gradually from the current palette to a black screen. The speed is 
+   from 1 (the slowest) up to 64 (instantaneous).
+<p>
+<b>void <a name="select_palette">select_palette</a>(PALLETE p);</b><br>
+   Ugly hack for use in various dodgy situations where you need to convert 
+   between paletted and truecolor image formats. Sets the internal palette 
+   table in the same way as the set_palette() function, so the conversion 
+   will use the specified palette, but without affecting the display 
+   hardware in any way. The previous palette settings are stored in an 
+   internal buffer, and can be restored by calling unselect_palette().
+<p>
+<b>void <a name="unselect_palette">unselect_palette</a>();</b><br>
+   Restores the palette tables that were in use before the last call to 
+   select_palette().
+<p>
+<b>void <a name="generate_332_palette">generate_332_palette</a>(PALETTE pal);</b><br>
+   Constructs a fake truecolor palette, using three bits for red and green 
+   and two for the blue. The load_bitmap() function returns this if the file 
+   does not contain a palette itself (ie. you are reading a truecolor 
+   bitmap).
+<p>
+<b>int <a name="generate_optimized_palette">generate_optimized_palette</a>(BITMAP *bmp, PALETTE pal, char rsvd[256]);</b><br>
+   Generates a 256 color palette suitable for making a reduced color version 
+   of the specified truecolor image. The rsvd parameter points to a table 
+   indicating which colors it is allowed to modify: zero for free colors, 
+   non-zero for ones which are already set to fixed values and may not be 
+   changed. If rsvd is NULL, the remapping will use the entire palette.
+<p>
+<b>extern PALETTE <a name="black_palette">black_palette</a>;</b><br>
+   A palette containing solid black colors, used by the fade routines.
+<p>
+<b>extern PALETTE <a name="desktop_palette">desktop_palette</a>;</b><br>
+   The palette used by the Atari ST low resolution desktop. I'm not quite 
+   sure why this is still here, except that the grabber and test programs 
+   use it. It is probably the only Atari legacy code left in Allegro, and it 
+   would be a shame to remove it :-)
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>
