@@ -1,0 +1,141 @@
+﻿<html>
+<head>
+<title>#ludumdare city</title>
+<style>
+@media all and (max-height: 447px) {
+	#bg {
+		background-image: url(bg.png);
+		height: 224px;
+		width: 6144px;
+	}
+	@keyframes bganim {
+		from {
+			transform: translateX(-2048px);
+		}
+		to {
+			transform: translateX(-4096px);
+		}
+	}
+}
+@media all and (min-height: 448px) {
+	#bg {
+		background-image: url(bg2x.png);
+		height: 448px;
+		width: 12288px;
+	}
+	@keyframes bganim {
+		from {
+			transform: translateX(-4096px);
+		}
+		to {
+			transform: translateX(-8192px);
+		}
+	}
+}
+@media all and (min-height: 672px) {
+	#bg {
+		background-image: url(bg3x.png);
+		height: 672px;
+		width: 18432px;
+	}
+	@keyframes bganim {
+		from {
+			transform: translateX(-6144px);
+		}
+		to {
+			transform: translateX(-12288px);
+		}
+	}
+}
+@media all and (min-height: 896px) {
+	#bg {
+		background-image: url(bg4x.png);
+		height: 896px;
+		width: 24576px;
+	}
+	@keyframes bganim {
+		from {
+			transform: translateX(-8192px);
+		}
+		to {
+			transform: translateX(-16384px);
+		}
+	}
+}
+#bg {
+	background-repeat: repeat-x;
+	animation-iteration-count:infinite;
+	animation-name: bganim;
+	animation-duration: 25s;
+	animation-timing-function: linear;
+}
+#container {
+	top: 0px;
+	left: 0px;
+	position: fixed;
+	overflow: hidden;
+}
+body {
+	background-color: black;
+}
+a {
+	color: hotpink;
+	font-family: sans-serif;
+	font-style: oblique;
+	font-size: 18px;
+	text-shadow: 1px 1px blue, 2px 2px blue;
+	text-decoration: none;
+}
+a:hover{
+	color: aquamarine;
+}
+#by {
+	position: fixed;
+	bottom: 18px;
+	text-align: center;
+	width: 100%;
+}
+.songcontrols{
+	display: none;
+}
+#speaker{
+	font-size: 90vmin;
+	position: absolute;
+	line-height: 1em;
+	color: hotpink;
+	text-shadow: 0.01em 0.01em blue, 0.01em 0.01em blue;
+	display: none;
+}
+</style>
+<script>
+function PausePlay()
+{
+	var a = document.getElementById("songaudio");
+	a[a.paused?"play":"pause"]();
+	var d = document.getElementById("speaker");
+	d.innerHTML = a.paused ? "&#128263;" : "&#128266";
+	d.style.display = "block";
+	setTimeout(function(){d.style.display="none"}, 1000);
+}
+</script>
+<noscript>
+<style>
+.songcontrols{
+	display: block;
+}
+</style>
+</noscript>
+</head>
+<body>
+	<div id="container" title="Song is Kavinsky's NIGHTCALL.MID on AdLib" onclick="PausePlay();">
+	<div id="bg"></div>
+	</div>
+	<div id="by">
+	<a href="http://kdrnic.github.io">by KDRNIC</a>
+	</div>
+	<audio autoplay="true" loop="true" controls="controls" id="songaudio" class="songcontrols">
+		<source src="nightcall_5q_mono.ogg" type="application/ogg">
+	</audio>
+	<div id="speaker"></div>
+</body>
+</html>
