@@ -1,0 +1,19 @@
+<html>
+<title>Home of TAPEGRO, the Js game framework of the future</title>
+<body bgcolor="black" text="green">
+<bgsound src="ALLEGRO.MID" loop="infinite">
+<h1>Tutorial</h1>
+<h3>How Tapegro works</h3>
+When TAPEGRO.EXE starts, it looks for two files in the current directory: <b>config.cfg</b> and <b>main.js</b>.<br>
+The former will contain a number of settings, which include how many frames per second will the game run at, graphics mode, controls, and whether to enable the developer console, plus any Allegro-specific settings.<br>
+The latter will be executed as soon as Allegro is initialised, and must include at least one global "Update" function which will be called every frame. Both drawing and logic is done on this function.<br>
+The default files included together with Tapegro will be fine for starting your first game.<br>
+<br><br><br>Now, some Tapegro-specific features will be discussed.
+<h3>Handling input</h3>
+There are 4 "virtual" gamepad states. Each includes directional controls and 12 buttons, much alike the SNES controller. The directional input, however, may be either analog (mouse or analog sticks) or digital (D-pads or keyboard).<br>
+There are two arrays, <b>dpad</b> and <b>button</b>. Each element of this array is one controller.<br>
+<b>dpad</b> elements have <b>x</b> and <b>y</b> floating point properties, while <b>button</b> is an integer bitfield.
+<h3>The developer console</h3>
+You can type anything there and it will be executed just as if it was in main.js.
+</body>
+</html>

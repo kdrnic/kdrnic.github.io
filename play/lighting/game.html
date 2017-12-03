@@ -1,0 +1,273 @@
+<html>
+	<head>
+	<script>
+function DrawLight(x, y, radius, intensity)
+{
+	radius *= 2;
+	lighting.context.globalAlpha = intensity ? intensity : 1;
+	lighting.context.globalCompositeOperation = "source-over";
+	lighting.context.drawImage(light, 0, 0, light.width, light.height, x - radius * 0.5, y - radius * 0.5, radius, radius);
+}
+
+function Start()
+{
+	screen = {};
+	screen.canvas = document.getElementById("canvas");
+	screen.context = screen.canvas.getContext("2d");
+	
+	lighting = {};
+	lighting.canvas = document.createElement("canvas");
+	lighting.canvas.width = screen.canvas.width;
+	lighting.canvas.height = screen.canvas.height;
+	lighting.context = lighting.canvas.getContext("2d");
+	
+	flies = [];
+	for(var i = 0; i < 10; i++)
+	{
+		flies[i] = {x: Math.random() * 640, y: Math.random() * 480, t: Math.random() * 600, angle: Math.random() * Math.PI * 2};
+	}
+	
+	physicsT = 0;
+	
+	chord = [];
+	var chordSegs = 5;
+	for(var i = 0; i < chordSegs; i++)
+	{
+		var c =
+		{
+			x: 320,
+			y: i * (240 / chordSegs),
+			oldX: 320,
+			oldY: i * (240 / chordSegs)
+		};
+		
+		if(i == chordSegs - 1)
+		{
+			c.lamp = true;
+			c.sphere = 
+			{
+				radius: 37.5,
+				offsetX: 0,
+				offsetY: 25
+			};
+		}
+		
+		c.gravity = 100;
+		if(i > 0)
+		{
+			c.constraint =
+			{
+				length: 240 / chordSegs,
+				other: chord[i - 1]
+			};
+		}
+		else c.fixed = true;
+		
+		chord[i] = c;
+	}
+	
+	ambient = 0.25;
+	
+	var img1 = new Image();
+	img1.onload = function()
+	{
+		light = this;
+	}
+	img1.src = "light2.png";
+	var img2 = new Image();
+	img2.onload = function()
+	{
+		bg = this;
+	}
+	img2.src = "bg.jpg";
+	var img3 = new Image();
+	img3.onload = function()
+	{
+		bulb = this;
+	}
+	img3.src = "bulb.png";
+	
+	time = performance.now();
+	lastTime = performance.now();
+	window.requestAnimationFrame(Render);
+}
+
+function DrawBg()
+{
+	screen.context.globalCompositeOperation = "source-over";
+	screen.context.drawImage(bg, 0, 0);
+}
+
+function UpdateChord(dt)
+{
+	var timeStep = dt;
+	physicsT += dt;
+	while(physicsT > timeStep)
+	{
+		physicsT -= timeStep;
+		for(var i = 0; i < chord.length; i++)
+		{
+			var c = chord[i];
+			var tempX = c.x;
+			var tempY = c.y;
+			c.x += (c.x - c.oldX);
+			c.y += (c.y - c.oldY);
+			if(!c.fixed)
+			{
+				c.oldX = tempX;
+				c.oldY = tempY;
+			}
+			c.y += c.gravity * timeStep;
+		}
+		for(var j = 0; j < 10; j++)
+		{
+		for(var i = 0; i < chord.length; i++)
+		{
+			var c = chord[i];
+			if(c.constraint)
+			{
+				var o = c.constraint.other;
+				var dx = (c.x - o.x);
+				var dy = (c.y - o.y);
+				var l = Math.sqrt(dx * dx + dy * dy);
+				c.x -= (dx / l) * ((l - c.constraint.length) * 0.5);
+				c.y -= (dy / l) * ((l - c.constraint.length) * 0.5);
+				o.x += (dx / l) * ((l - c.constraint.length) * 0.5);
+				o.y += (dy / l) * ((l - c.constraint.length) * 0.5);
+			}
+			if(c.sphere)
+			{
+				var sx = c.x;
+				var sy = c.y;
+				var o = chord[i - 1];
+				var dx = (c.x - o.x);
+				var dy = (c.y - o.y);
+				var l = Math.sqrt(dx * dx + dy * dy);
+				sx += c.sphere.offsetX * (dx / l);
+				sy += c.sphere.offsetY * (dy / l);
+				var mx = 0;
+				var my = 0;
+				for(var k = 0; k < flies.length; k++)
+				{
+					var f = flies[k];
+					var fdx = sx - f.x;
+					var fdy = sy - f.y;
+					var fl = Math.sqrt(fdx * fdx + fdy * fdy);
+					if(fl < c.sphere.radius)
+					{
+						mx += (fdx / l) * (c.sphere.radius - fl);
+						my += (fdy / l) * (c.sphere.radius - fl);
+					}
+				}
+				c.x += mx;
+				c.y += my;
+			}
+		}
+		}
+		for(var i = 0; i < chord.length; i++)
+		{
+			var c = chord[i];
+			if(c.fixed)
+			{
+				c.x = c.oldX;
+				c.y = c.oldY;
+			}
+		}
+	}
+}
+
+function DrawChord()
+{
+	screen.context.globalCompositeOperation = "source-over";
+	screen.context.lineWidth = 2;
+	for(var i = 1; i < chord.length; i++)
+	{
+		screen.context.strokeStyle = "#000000";
+		screen.context.beginPath();
+		screen.context.moveTo(chord[i - 1].x, chord[i - 1].y);
+		screen.context.lineTo(chord[i].x, chord[i].y);
+		screen.context.stroke();
+		screen.context.closePath();
+		
+		if(chord[i].lamp)
+		{
+			screen.context.save();
+			lighting.context.save();
+			screen.context.translate(chord[i].x, chord[i].y);
+			lighting.context.translate(chord[i].x, chord[i].y);
+			screen.context.rotate(Math.atan2(chord[i].y - chord[i - 1].y, chord[i].x - chord[i - 1].x) + Math.PI * 0.5);
+			lighting.context.rotate(Math.atan2(chord[i].y - chord[i - 1].y, chord[i].x - chord[i - 1].x) + Math.PI * 0.5);
+			screen.context.drawImage(bulb, 0 - bulb.width * 0.5, -bulb.height);
+			DrawLight(0, -bulb.height * 0.5, 150, 1);
+			screen.context.restore();
+			lighting.context.restore();
+			
+		}
+	}
+}
+
+function UpdateFlies(dt)
+{
+	for(var i = 0; i < flies.length; i++)
+	{
+		flies[i].x += Math.cos(flies[i].angle) * (dt + Math.random() * 0.25) * 20;
+		flies[i].y += Math.sin(flies[i].angle) * (dt + Math.random() * 0.25) * 20;
+		flies[i].angle += (Math.random() - 0.5) * 2 * Math.PI * 0.25 * (0.5 + Math.sin(flies[i].t / 10));
+		flies[i].t += dt;
+		if(flies[i].x < 0) flies[i].x = 640;
+		if(flies[i].y < 0) flies[i].y = 480;
+		if(flies[i].x > 640) flies[i].x = 0;
+		if(flies[i].y > 640) flies[i].y = 0;
+	}
+}
+
+function DrawFlies()
+{
+	for(var i = 0; i < flies.length; i++)
+	{
+		DrawLight(flies[i].x, flies[i].y, 50, 0.25 + (0.5 + Math.sin(flies[i].t) * 0.5) * 0.75);
+	}
+}
+
+function UpdateAll(dt)
+{
+	UpdateFlies(dt);
+	UpdateChord(dt)
+}
+
+function DrawAll()
+{
+	lighting.context.clearRect(0, 0, lighting.canvas.width, lighting.canvas.height);
+	var ll = "" + Math.floor(ambient * 255);
+	lighting.context.globalAlpha = (1 - ambient);
+	lighting.context.globalCompositeOperation = "source-over";
+	lighting.context.fillStyle = "#000000";
+	lighting.context.fillRect(0, 0, lighting.canvas.width, lighting.canvas.height);
+	
+	DrawBg();
+	DrawChord();
+	DrawFlies();
+	
+	screen.context.globalCompositeOperation = "multiply";
+	screen.context.drawImage(lighting.canvas, 0, 0);
+}
+
+function Render()
+{
+	if((typeof light == "undefined") || (typeof bg == "undefined") || (typeof bulb == "undefined"))
+	{
+		window.requestAnimationFrame(Render);
+		return;
+	}
+	DrawAll();
+	UpdateAll((time - lastTime) / 1000);
+	lastTime = time;
+	time = performance.now();
+	window.requestAnimationFrame(Render);
+}
+	</script>
+	</head>
+	<body onload="Start();">
+		<canvas width="640" height="480" id="canvas" class="gameCanvas"></canvas>
+	</body>
+</html>
