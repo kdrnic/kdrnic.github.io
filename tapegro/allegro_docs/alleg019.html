@@ -1,0 +1,161 @@
+<html><head><title>Direct access to video memory</title><body>
+<h1><a name="Direct access to video memory">Direct access to video memory</a></h1>
+<p>
+The bitmap structure looks like:
+<p><pre>
+typedef struct BITMAP
+{
+   int w, h;               - size of the bitmap in pixels
+   int clip;               - non-zero if clipping is turned on
+   int cl, cr, ct, cb;     - clip rectangle left, right, top, and bottom
+   int seg;                - segment for use with the line pointers
+   unsigned char *line[];  - pointers to the start of each line
+} BITMAP;
+<p></pre>
+There is some other stuff in the structure as well, but it is liable to 
+change and you shouldn't use anything except the above. The clipping 
+rectangle is inclusive on the left and top (0 allows drawing to position 0) 
+but exclusive on the right and bottom (10 allows drawing to position 9, but 
+not to 10). Note this is not the same format as you pass to set_clip(), 
+which takes inclusive coordinates for all four corners.
+<p>
+There are several ways to get direct access to the image memory of a bitmap, 
+varying in complexity depending on what sort of bitmap you are using.
+<p><p><hr><p>
+The simplest approach will only work with memory bitmaps (obtained from 
+create_bitmap(), grabber datafiles, and image files) and sub-bitmaps of 
+memory bitmaps. This uses a table of char pointers, called 'line', which is 
+a part of the bitmap structure and contains pointers to the start of each 
+line of the image. For example, a simple memory bitmap putpixel function is:
+<p><pre>
+   void memory_putpixel(BITMAP *bmp, int x, int y, int color)
+   {
+      bmp-&gt;line[y][x] = color;
+   }
+<p></pre><p><hr><p>
+For truecolor modes you need to cast the line pointer to the appropriate 
+type, for example:
+<p><pre>
+   void memory_putpixel_15_or_16_bpp(BITMAP *bmp, int x, int y, int color)
+   {
+      ((short *)bmp-&gt;line[y])[x] = color;
+   }
+<p>
+   void memory_putpixel_32(BITMAP *bmp, int x, int y, int color)
+   {
+      ((long *)bmp-&gt;line[y])[x] = color;
+   }
+<p></pre><p><hr><p>
+If you want to write to the screen as well as to memory bitmaps, you need to 
+use far pointers. Rewriting the above function to use the routines in 
+sys/farptr.h will allow it to be used with screen bitmaps, as long as they 
+do not require bank switching (this means mode 13h screens and linear 
+framebuffer SVGA screens). Using far pointers, the putpixel is:
+<p><pre>
+   #include &lt;sys/farptr.h&gt;
+<p>
+   void farptr_putpixel(BITMAP *bmp, int x, int y, int color)
+   {
+      _farpokeb(bmp-&gt;seg, (unsigned long)bmp-&gt;line[y]+x, color);
+   }
+<p></pre>
+Obviously for truecolor modes you should replace the _farpokeb() with 
+_farpokew() or _farpokel(), and multiply the x offset by the number of bytes 
+per pixel.
+<p><p><hr><p>
+This still won't work in banked SVGA modes, however. For more 
+flexible access to bitmap memory, you need to call the bank switching 
+functions:
+<p>
+<b>unsigned long <a name="bmp_write_line">bmp_write_line</a>(BITMAP *bmp, int line);</b><br>
+   Selects the line of a bitmap that you are going to draw onto.
+<p>
+<b>unsigned long <a name="bmp_read_line">bmp_read_line</a>(BITMAP *bmp, int line);</b><br>
+   Selects the line of a bitmap that you are going to read from.
+<p>
+These are implemented as inline assembler routines, so they are not as 
+inefficient as they might seem. If the bitmap doesn't require bank switching 
+(ie. it is a memory bitmap, mode 13h screen, etc), these functions just 
+return bmp-&gt;line[line].
+<p>
+Although SVGA bitmaps are banked, Allegro provides linear access to the 
+memory within each scanline, so you only need to pass a y coordinate to 
+these functions. Various x positions can be obtained by simply adding the x 
+coordinate to the returned address. The return value is an unsigned long 
+rather than a char pointer because the bitmap memory may not be in your data 
+segment, and you need to access it with far pointers. For example, a 
+putpixel using the bank switching functions is:
+<p><pre>
+   #include &lt;sys/farptr.h&gt;
+<p>
+   void banked_putpixel(BITMAP *b, int x, int y, int color)
+   {
+      unsigned long address = bmp_write_line(bmp, y);
+      _farpokeb(bmp-&gt;seg, address+x, color);
+   }
+<p></pre>
+You will notice that Allegro provides separate functions for setting the 
+read and write banks. It is important that you distinguish between these, 
+because on some graphics cards the banks can be set individually, and on 
+others the video memory is read and written at different addresses. Life is 
+never quite as simple as we might wish it to be, though (this is true even 
+when we _aren't_ talking about graphics coding :-) and so of course some 
+cards only provide a single bank. On these the read and write bank functions 
+will behave identically, so you shouldn't assume that you can read from one 
+part of video memory and write to another at the same time. You can call 
+bmp_read_line(), and read whatever you like from that line, and then call 
+bmp_write_line() with the same or a different line number, and write 
+whatever you like to this second line, but you mustn't call bmp_read_line() 
+and bmp_write_line() together and expect to be able to read one line and 
+write the other simultaneously. It would be nice if this was possible, but 
+if you do it, your code won't work on single banked SVGA cards.
+<p><p><hr><p>
+And then there's mode-X. If you've never done any mode-X graphics coding, 
+you probably won't understand this, but for those of you who want to know 
+how Allegro sets up the mode-X screen bitmaps, here goes...
+<p>
+The line pointers are still present, and they contain planar addresses, ie. 
+the actual location at which you access the first pixel in the line. These 
+addresses are guaranteed to be quad aligned, so you can just set the write 
+plane, divide your x coordinate by four, and add it to the line pointer. For 
+example, a mode-X putpixel is:
+<p><pre>
+   #include &lt;pc.h&gt;
+   #include &lt;sys/farptr.h&gt;
+<p>
+   void modex_putpixel(BITMAP *b, int x, int y, int color)
+   {
+      outportw(0x3C4, (0x100&lt;&lt;(x&3))|2);
+      _farpokeb(bmp-&gt;seg, (unsigned long)bmp-&gt;line[y]+(x&gt;&gt;2), color);
+   }
+<p></pre><p><hr><p>
+Oh yeah: the nearptr hack. Personally I don't like this very much, but a lot 
+of people swear by it because it can give you direct access to the screen 
+memory via a normal C pointer. Warning: this method will only work in VGA 
+mode 13h and linear framebuffer modes!
+<p>
+In your setup code:
+<p><pre>
+   #include &lt;sys/nearptr.h&gt;
+<p>
+   unsigned char *screenmemory;
+   unsigned long screen_base_addr;
+<p>
+   __djgpp_nearptr_enable();
+<p>
+   __dpmi_get_segment_base_address(screen->seg, &screen_base_addr);
+<p>
+   screenmemory = (unsigned char *)(screen_base_addr + 
+                                    screen->line[0] - 
+                                    __djgpp_base_address);
+<p></pre>
+Then:
+<p><pre>
+   void nearptr_putpixel(int x, int y, int color)
+   {
+      screenmemory[x + y*SCREEN_W] = color;
+   }
+<p></pre>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

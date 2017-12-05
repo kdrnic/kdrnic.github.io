@@ -1,0 +1,118 @@
+<html><head><title>Fixed point math routines</title><body>
+<h1><a name="Fixed point math routines">Fixed point math routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#itofix">itofix</a>
+<li><a href="#fixtoi">fixtoi</a>
+<li><a href="#ftofix">ftofix</a>
+<li><a href="#fixtof">fixtof</a>
+<li><a href="#fmul">fmul</a>
+<li><a href="#fdiv">fdiv</a>
+<li><a href="#fadd">fadd</a>
+<li><a href="#fsub">fsub</a>
+<li><a href="#fsin">fsin</a>
+<li><a href="#fcos">fcos</a>
+<li><a href="#ftan">ftan</a>
+<li><a href="#fasin">fasin</a>
+<li><a href="#facos">facos</a>
+<li><a href="#fatan">fatan</a>
+<li><a href="#fatan2">fatan2</a>
+<li><a href="#fsqrt">fsqrt</a>
+</h4></ul>
+<p><br><br>
+<p>
+Allegro provides some routines for working with fixed point numbers, and 
+defines the type 'fixed' to be a signed 32 bit integer. The high word is 
+used for the integer part and the low word for the fraction, giving a range 
+of -32768 to 32767 and an accuracy of about four or five decimal places. 
+Fixed point numbers can be assigned, compared, added, subtracted, negated 
+and shifted (for multiplying or dividing by powers of two) using the normal 
+integer operators, but you should take care to use the appropriate 
+conversion routines when mixing fixed point with integer or floating point 
+values. Writing 'fixed_point_1 + fixed_point_2' is ok, but 'fixed_point + 
+integer' is not.
+<p>
+<b>fixed <a name="itofix">itofix</a>(int x);</b><br>
+   Converts an integer to fixed point. This is the same thing as x&lt;&lt;16.
+<p>
+<b>int <a name="fixtoi">fixtoi</a>(fixed x);</b><br>
+   Converts fixed point to integer, rounding as required. If you want to 
+   avoid the rounding, use x&gt;&gt;16 instead.
+<p>
+<b>fixed <a name="ftofix">ftofix</a>(float x);</b><br>
+   Converts a floating point value to fixed point.
+<p>
+<b>float <a name="fixtof">fixtof</a>(fixed x);</b><br>
+   Converts fixed point to floating point.
+<p>
+<b>fixed <a name="fmul">fmul</a>(fixed x, fixed y);</b><br>
+   A fixed point value can be multiplied or divided by an integer with the 
+   normal '*' and '/' operators. To multiply two fixed point values, though, 
+   you must use this function.
+<p>
+   If an overflow or division by zero occurs, errno will be set and the 
+   maximum possible value will be returned, but errno is not cleared if the 
+   operation is successful. This means that if you are going to test for 
+   overflow you should set errno=0 before calling fmul().
+<p>
+<b>fixed <a name="fdiv">fdiv</a>(fixed x, fixed y);</b><br>
+   Fixed point division: see comments about fmul().
+<p>
+<b>fixed <a name="fadd">fadd</a>(fixed x, fixed y);</b><br>
+   Although fixed point numbers can be added with the normal '+' integer 
+   operator, that doesn't provide any protection against overflow. If 
+   overflow is a problem, you should use this function instead. It is slower 
+   than using integer operators, but if an overflow occurs it will clamp the 
+   result, rather than just letting it wrap, and set errno.
+<p>
+<b>fixed <a name="fsub">fsub</a>(fixed x, fixed y);</b><br>
+   Fixed point subtraction: see comments about fadd().
+<p>
+The fixed point square root, sin, cos, tan, inverse sin, and inverse cos 
+functions are implemented using lookup tables, which are very fast but not 
+particularly accurate. At the moment the inverse tan uses an iterative 
+search on the tan table, so it is a lot slower than the others.
+<p>
+Angles are represented in a binary format with 256 equal to a full circle, 
+64 being a right angle and so on. This has the advantage that a simple 
+bitwise 'and' can be used to keep the angle within the range zero to a full 
+circle, eliminating all those tiresome 'if (angle &gt;= 360)' checks.
+<p>
+<b>fixed <a name="fsin">fsin</a>(fixed x);</b><br>
+   Lookup table sine.
+<p>
+<b>fixed <a name="fcos">fcos</a>(fixed x);</b><br>
+   Lookup table cosine.
+<p>
+<b>fixed <a name="ftan">ftan</a>(fixed x);</b><br>
+   Lookup table tangent.
+<p>
+<b>fixed <a name="fasin">fasin</a>(fixed x);</b><br>
+   Lookup table inverse sine.
+<p>
+<b>fixed <a name="facos">facos</a>(fixed x);</b><br>
+   Lookup table inverse cosine.
+<p>
+<b>fixed <a name="fatan">fatan</a>(fixed x);</b><br>
+   Fixed point inverse tangent.
+<p>
+<b>fixed <a name="fatan2">fatan2</a>(fixed y, fixed x);</b><br>
+   Fixed point version of the libc atan2() routine.
+<p>
+<b>fixed <a name="fsqrt">fsqrt</a>(fixed x);</b><br>
+   Fixed point square root.
+<p>
+<br>
+<p><hr><p>
+If you are programming in C++ you can ignore all the above and use the fix 
+class instead, which overloads a lot of operators to provide automatic 
+conversion to and from integer and floating point values, and calls the 
+above routines as they are required. You should not mix the fix class with 
+the fixed typedef though, because the compiler will mistake the fixed values 
+for regular integers and insert unnecessary conversions. For example, if x 
+is an object of class fix, calling fsqrt(x) will return the wrong result. 
+You should use the overloaded sqrt(x) or x.sqrt() instead.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

@@ -6,7 +6,7 @@
 <h3>How Tapegro works</h3>
 When TAPEGRO.EXE starts, it looks for two files in the current directory: <b>config.cfg</b> and <b>main.js</b>.<br>
 The former will contain a number of settings, which include how many frames per second will the game run at, graphics mode, controls, and whether to enable the developer console, plus any Allegro-specific settings.<br>
-The latter will be executed as soon as Allegro is initialised, and must include at least one global "Update" function which will be called every frame. Both drawing and logic is done on this function.<br>
+The latter will be executed as soon as Allegro is initialised, and must include at least one global "Loop" function which will be called every frame. Both drawing and logic is done on this function.<br>
 The default files included together with Tapegro will be fine for starting your first game.<br>
 <br><br><br>Now, some Tapegro-specific features will be discussed.
 <h3>Handling input</h3>

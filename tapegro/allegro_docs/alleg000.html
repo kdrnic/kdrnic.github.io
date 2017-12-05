@@ -1,0 +1,147 @@
+<html><head><title>Using Allegro</title><body>
+<h1><a name="Using Allegro">Using Allegro</a></h1>
+<p>
+<ul><h4>
+<li><a href="#allegro_init">allegro_init</a>
+<li><a href="#allegro_exit">allegro_exit</a>
+<li><a href="#allegro_id">allegro_id</a>
+<li><a href="#allegro_error">allegro_error</a>
+<li><a href="#os_type">os_type</a>
+<li><a href="#windows_version">windows_version</a>
+<li><a href="#windows_sub_version">windows_sub_version</a>
+<li><a href="#check_cpu">check_cpu</a>
+<li><a href="#cpu_vendor">cpu_vendor</a>
+<li><a href="#cpu_family">cpu_family</a>
+<li><a href="#cpu_model">cpu_model</a>
+<li><a href="#cpu_fpu">cpu_fpu</a>
+<li><a href="#cpu_mmx">cpu_mmx</a>
+<li><a href="#cpu_3dnow">cpu_3dnow</a>
+<li><a href="#cpu_cpuid">cpu_cpuid</a>
+</h4></ul>
+<p><br><br>
+<p>
+See readme.txt for a general introduction, copyright details, and 
+information about how to compile Allegro.
+<p>
+All the Allegro functions, variables, and data structures are defined in 
+allegro.h. You should include this in your programs, and link with 
+liballeg.a. To do this you should:
+<p>
+   - Put the following line at the beginning of all C or C++ files that use 
+     Allegro:
+<p>
+         #include &lt;allegro.h&gt;
+<p>
+   - If you compile from the command line or with a makefile, add '-lalleg' 
+     to the end of the gcc command, eg:
+<p>
+         gcc foo.c -o foo.exe -lalleg
+<p>
+   - If you are using Rhide, go to the Options/Libraries menu, type 'alleg' 
+     into the first empty space, and make sure the box next to it is checked.
+<p>
+   - If you aren't using some parts of Allegro's functionality, you can 
+     slightly reduce your compilation times by defining any of the following 
+     preprocessor symbols before including allegro.h:
+<p>
+         alleg_mouse_unused<br>
+         alleg_timer_unused<br>
+         alleg_keyboard_unused<br>
+         alleg_joystick_unused<br>
+         alleg_gfx_driver_unused<br>
+         alleg_palette_unused<br>
+         alleg_graphics_unused<br>
+         alleg_vidmem_unused<br>
+         alleg_flic_unused<br>
+         alleg_sound_unused<br>
+         alleg_file_unused<br>
+         alleg_datafile_unused<br>
+         alleg_math_unused<br>
+         alleg_gui_unused
+<p>
+     Please note that these defines will not affect your executable size, 
+     though! See towards the end of this file for information about how to 
+     remove unused code at the linking stage.
+<p>
+<b>int <a name="allegro_init">allegro_init</a>();</b><br>
+   Initialises the Allegro library. It doesn't actually do very much except 
+   setting up some global variables, locking some memory, and installing 
+   allegro_exit() as an atexit() routine, but you must call it before doing 
+   anything else. Returns zero for success (at the moment it can't fail, so 
+   there is not much point checking the return value).
+<p>
+<b>void <a name="allegro_exit">allegro_exit</a>();</b><br>
+   Closes down the Allegro system. This includes returning the system to 
+   text mode and removing whatever mouse, keyboard, and timer routines have 
+   been installed. You don't normally need to bother making an explicit call 
+   to this function, because allegro_init() installs it as an atexit() 
+   routine so it will be called automatically when your program exits.
+<p>
+<b>extern char <a name="allegro_id">allegro_id</a>[];</b><br>
+   Text string containing a date and version number for the library, in case 
+   you want to display these somewhere.
+<p>
+<b>extern char <a name="allegro_error">allegro_error</a>[];</b><br>
+   Text string used by set_gfx_mode() and install_sound() to report error 
+   messages. If they fail and you want to tell the user why, this is the 
+   place to look for a description of the problem.
+<p>
+<b>extern int <a name="os_type">os_type</a>;</b><br>
+   Set by allegro_init() to one of the values:
+<p><pre>
+      OSTYPE_UNKNOWN    - unknown, or regular MSDOS
+      OSTYPE_WIN3       - Windows 3.1 or earlier
+      OSTYPE_WIN95      - Windows 95
+      OSTYPE_WIN98      - Windows 98
+      OSTYPE_WINNT      - Windows NT
+      OSTYPE_OS2        - OS/2
+      OSTYPE_WARP       - OS/2 Warp 3
+      OSTYPE_DOSEMU     - Linux DOSEMU
+      OSTYPE_OPENDOS    - Caldera OpenDOS
+<p></pre>
+<b>extern int <a name="windows_version">windows_version</a>, <a name="windows_sub_version">windows_sub_version</a>;</b><br>
+   These are set by allegro_init(), using int 0x2F, ax=0x1600 to detect the 
+   presence of Microsoft Windows. Under windows 3.1, windows_version will be 
+   set to 3, under win95 it will be 4, under NT it will be 0x100, and if 
+   windows isn't present it will be zero. Under Linux DOSEMU, they will both 
+   be set to -1.
+<p>
+<b>void <a name="check_cpu">check_cpu</a>();</b><br>
+   Detects the CPU type, setting the following global variables:
+<p>
+<b>extern char <a name="cpu_vendor">cpu_vendor</a>[];</b><br>
+   Set by check_cpu() to the CPU vendor name, if known.
+<p>
+<b>extern int <a name="cpu_family">cpu_family</a>;</b><br>
+   Set by check_cpu() to the CPU type: 3=386, 4=486, 5=Pentium, 6=PPro, etc.
+<p>
+<b>extern int <a name="cpu_model">cpu_model</a>;</b><br>
+   Set by check_cpu() to the CPU submodel. On a 386 (cpu_family=3), zero 
+   indicates a DX chip, 2 an SX, 4 an SL, and 15 is unknown. On a 486 
+   (cpu_family=4), zero or one indicates a DX chip, 2 an SX, 3 a 487 (SX) or 
+   486 DX, 4 an SL, 5 an SX2, 7 a DX2 write-back enhanced, 8 a DX4 or DX4 
+   overdrive, 14 a Cyrix, and 15 is unknown. On a Pentium chip 
+   (cpu_family=5), 1 indicates a Pentium (510\66, 567\66), 2 is a Pentium 
+   P54C, 3 is a Pentium overdrive processor, 5 is a Pentium overdrive for 
+   IntelDX4, 14 is a Cyrix, and 15 is unknown.
+<p>
+<b>extern int <a name="cpu_fpu">cpu_fpu</a>;</b><br>
+   Set by check_cpu() to TRUE or FALSE, depending on whether a floating 
+   point processor is available.
+<p>
+<b>extern int <a name="cpu_mmx">cpu_mmx</a>;</b><br>
+   Set by check_cpu() to TRUE or FALSE, depending on whether the MMX 
+   instruction set is available.
+<p>
+<b>extern int <a name="cpu_3dnow">cpu_3dnow</a>;</b><br>
+   Set by check_cpu() to TRUE or FALSE, depending on whether the 3DNow! 
+   instruction set is available.
+<p>
+<b>extern int <a name="cpu_cpuid">cpu_cpuid</a>;</b><br>
+   Set by check_cpu() to TRUE or FALSE, depending on whether the "cpuid" 
+   instruction was available (if this is set, the other CPU variables are 
+   100% reliable, otherwise there may be some mistakes).
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

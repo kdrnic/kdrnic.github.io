@@ -1,0 +1,162 @@
+<html><head><title>Bitmap objects</title><body>
+<h1><a name="Bitmap objects">Bitmap objects</a></h1>
+<p>
+<ul><h4>
+<li><a href="#screen">screen</a>
+<li><a href="#create_bitmap">create_bitmap</a>
+<li><a href="#create_bitmap_ex">create_bitmap_ex</a>
+<li><a href="#create_sub_bitmap">create_sub_bitmap</a>
+<li><a href="#create_video_bitmap">create_video_bitmap</a>
+<li><a href="#destroy_bitmap">destroy_bitmap</a>
+<li><a href="#bitmap_color_depth">bitmap_color_depth</a>
+<li><a href="#bitmap_mask_color">bitmap_mask_color</a>
+<li><a href="#is_same_bitmap">is_same_bitmap</a>
+<li><a href="#is_linear_bitmap">is_linear_bitmap</a>
+<li><a href="#is_planar_bitmap">is_planar_bitmap</a>
+<li><a href="#is_memory_bitmap">is_memory_bitmap</a>
+<li><a href="#is_screen_bitmap">is_screen_bitmap</a>
+<li><a href="#is_sub_bitmap">is_sub_bitmap</a>
+<li><a href="#set_clip">set_clip</a>
+</h4></ul>
+<p><br><br>
+<p>
+Once you have selected a graphics mode, you can draw things onto the display 
+via the 'screen' bitmap. All the Allegro graphics routines draw onto BITMAP 
+structures, which are areas of memory containing rectangular images, stored 
+as packed byte arrays (eight bits per pixel). You can create and manipulate 
+bitmaps in system RAM, or you can write to the special 'screen' bitmap which 
+represents the video memory in your graphics card.
+<p>
+For example, to draw a pixel onto the screen you would write:
+<p><pre>
+   putpixel(screen, x, y, color);
+<p></pre>
+Or to implement a double-buffered system:
+<p><pre>
+   BITMAP *bmp = create_bitmap(320, 200);    // make a bitmap in system RAM
+   clear(bmp);                               // zero the memory bitmap
+   putpixel(bmp, x, y, color);               // draw onto the memory bitmap
+   blit(bmp, screen, 0, 0, 0, 0, 320, 200);  // copy it to the screen
+<p></pre>
+See below for information on how to get direct access to the image memory in 
+a bitmap.
+<p>
+Allegro supports several different types of bitmaps:
+<p>
+   - The screen bitmap, which represents the hardware video memory. 
+     Ultimately you have to draw onto this in order for your image to be 
+     visible.
+<p>
+   - Memory bitmaps, which are located in system RAM and can be used to 
+     store graphics or as temporary drawing spaces for double buffered 
+     systems. These can be obtained by calling create_bitmap(), load_pcx(), 
+     or by loading a grabber datafile.
+<p>
+   - Sub-bitmaps. These share image memory with a parent bitmap (which 
+     can be the screen, a memory bitmap, or another sub-bitmap), so drawing 
+     onto them will also change their parent. They can be of any size and 
+     located anywhere within the parent bitmap, and can have their own 
+     clipping rectangles, so they are a useful way of dividing a bitmap into 
+     several smaller units, eg. splitting a large virtual screen into two 
+     sections for page flipping (see examples/ex9.c).
+<p>
+   - Video memory bitmaps. These are created by the create_video_bitmap() 
+     function, and are usually implemented as sub-bitmaps of the screen 
+     object.
+<p>
+<b>extern BITMAP *<a name="screen">screen</a>;</b><br>
+   Global pointer to a bitmap, sized VIRTUAL_W x VIRTUAL_H. This is created 
+   by set_gfx_mode(), and represents the hardware video memory. Only a part 
+   of this bitmap will actually be visible, sized SCREEN_W x SCREEN_H. 
+   Normally this is the top left corner of the larger virtual screen, so you 
+   can ignore the extra invisible virtual size of the bitmap if you aren't 
+   interested in hardware scrolling or page flipping. To move the visible 
+   window to other parts of the screen bitmap, call scroll_screen(). 
+   Initially the clipping rectangle will be limited to the physical screen 
+   size, so if you want to draw onto a larger virtual screen space outside 
+   this rectangle, you will need to adjust the clipping.
+<p>
+<b>BITMAP *<a name="create_bitmap">create_bitmap</a>(int width, int height);</b><br>
+   Creates a memory bitmap sized width by height, and returns a pointer to 
+   it. The bitmap will have clipping turned on, and the clipping rectangle 
+   set to the full size of the bitmap. The image memory will not be cleared, 
+   so it will probably contain garbage: you should clear the bitmap before 
+   using it. This routine always uses the global pixel format, as specified 
+   by calling set_color_depth().
+<p>
+<b>BITMAP *<a name="create_bitmap_ex">create_bitmap_ex</a>(int color_depth, int width, int height);</b><br>
+   Creates a bitmap in a specific color depth (8, 15, 16, 24 or 32 bits per 
+   pixel).
+<p>
+<b>BITMAP *<a name="create_sub_bitmap">create_sub_bitmap</a>(BITMAP *parent, int x, y, width, height);</b><br>
+   Creates a sub-bitmap, ie. a bitmap sharing drawing memory with a 
+   pre-existing bitmap, but possibly with a different size and clipping 
+   settings. When creating a sub-bitmap of the mode-X screen, the x position 
+   must be a multiple of four. The sub-bitmap width and height can extend 
+   beyond the right and bottom edges of the parent (they will be clipped), 
+   but the origin point must lie within the parent region.
+<p>
+<b>BITMAP *<a name="create_video_bitmap">create_video_bitmap</a>(int width, int height);</b><br>
+   Allocates a video memory bitmap of the specified size, returning a 
+   pointer to it on success or NULL on failure (ie. if you have run out of 
+   vram). This can be used to allocate offscreen video memory for storing 
+   source graphics ready for a hardware accelerated blitting operation, or 
+   to create multiple video memory pages which can then be displayed by 
+   calling show_video_bitmap(). Video memory bitmaps are usually allocated 
+   from the same space as the screen bitmap, so they may overlap with it: it 
+   is not therefore a good idea to use the global screen at the same time as 
+   any surfaces returned by this function.
+<p>
+<b>void <a name="destroy_bitmap">destroy_bitmap</a>(BITMAP *bitmap);</b><br>
+   Destroys a memory bitmap, sub-bitmap, or video memory bitmap when you are 
+   finished with it.
+<p>
+<b>int <a name="bitmap_color_depth">bitmap_color_depth</a>(BITMAP *bmp);</b><br>
+   Returns the color depth of the specified bitmap (8, 15, 16, 24, or 32).
+<p>
+<b>int <a name="bitmap_mask_color">bitmap_mask_color</a>(BITMAP *bmp);</b><br>
+   Returns the mask color for the specified bitmap (the value which is 
+   skipped when drawing sprites). For 256 color bitmaps this is zero, and 
+   for truecolor bitmaps it is bright pink (maximum red and blue, zero 
+   green).
+<p>
+<b>int <a name="is_same_bitmap">is_same_bitmap</a>(BITMAP *bmp1, BITMAP *bmp2);</b><br>
+   Returns TRUE if the two bitmaps describe the same drawing surface, ie. 
+   the pointers are equal, one is a sub-bitmap of the other, or they are 
+   both sub-bitmaps of a common parent.
+<p>
+<b>int <a name="is_linear_bitmap">is_linear_bitmap</a>(BITMAP *bmp);</b><br>
+   Returns TRUE if bmp is a linear bitmap, ie. a memory bitmap, mode 13h 
+   screen, or SVGA screen. Linear bitmaps can be used with the _putpixel(), 
+   _getpixel(), bmp_write_line(), and bmp_read_line() functions.
+<p>
+<b>int <a name="is_planar_bitmap">is_planar_bitmap</a>(BITMAP *bmp);</b><br>
+   Returns TRUE if bmp is a planar (mode-X or Xtended mode) screen bitmap.
+<p>
+<b>int <a name="is_memory_bitmap">is_memory_bitmap</a>(BITMAP *bmp);</b><br>
+   Returns TRUE if bmp is a memory bitmap, ie. it was created by calling 
+   create_bitmap() or loaded from a grabber datafile or image file. Memory 
+   bitmaps can be accessed directly via the line pointers in the bitmap 
+   structure, eg. bmp-&gt;line[y][x] = color.
+<p>
+<b>int <a name="is_screen_bitmap">is_screen_bitmap</a>(BITMAP *bmp);</b><br>
+   Returns TRUE if bmp is the screen bitmap, a video memory bitmap, or a 
+   sub-bitmap of either.
+<p>
+<b>int <a name="is_sub_bitmap">is_sub_bitmap</a>(BITMAP *bmp);</b><br>
+   Returns TRUE if bmp is a sub-bitmap.
+<p>
+<b>void <a name="set_clip">set_clip</a>(BITMAP *bitmap, int x1, int y1, int x2, int y2);</b><br>
+   Each bitmap has an associated clipping rectangle, which is the area of 
+   the image that it is ok to draw on. Nothing will be drawn to positions 
+   outside this space. Pass the two opposite corners of the clipping 
+   rectangle: these are inclusive, eg. set_clip(bitmap, 16, 16, 32, 32) will 
+   allow drawing to (16, 16) and (32, 32), but not to (15, 15) and (33, 33). 
+   If x1, y1, x2, and y2 are all zero, clipping will be turned off, which 
+   may slightly speed up some drawing operations (usually a negligible 
+   difference, although every little helps) but will result in your program 
+   dying a horrible death if you try to draw beyond the edges of the bitmap.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

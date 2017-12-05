@@ -1,0 +1,106 @@
+<html><head><title>Recording routines</title><body>
+<h1><a name="Recording routines">Recording routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#install_sound_input">install_sound_input</a>
+<li><a href="#remove_sound_input">remove_sound_input</a>
+<li><a href="#get_sound_input_cap_bits">get_sound_input_cap_bits</a>
+<li><a href="#get_sound_input_cap_stereo">get_sound_input_cap_stereo</a>
+<li><a href="#get_sound_input_cap_rate">get_sound_input_cap_rate</a>
+<li><a href="#get_sound_input_cap_parm">get_sound_input_cap_parm</a>
+<li><a href="#set_sound_input_source">set_sound_input_source</a>
+<li><a href="#start_sound_input">start_sound_input</a>
+<li><a href="#stop_sound_input">stop_sound_input</a>
+<li><a href="#read_sound_input">read_sound_input</a>
+<li><a href="#digi_recorder">digi_recorder</a>
+<li><a href="#midi_recorder">midi_recorder</a>
+</h4></ul>
+<p><br><br>
+<p>
+<b>int <a name="install_sound_input">install_sound_input</a>(int digi_card, int midi_card);</b><br>
+   Initialises the sound recorder module, returning zero on success. You 
+   must install the normal sound playback system before calling this 
+   routine. The two card parameters should use the same constants as 
+   install_sound(), including DIGI_NONE and MIDI_NONE to disable parts of 
+   the module, or DIGI_AUTODETECT and MIDI_AUTODETECT to guess the hardware.
+<p>
+<b>void <a name="remove_sound_input">remove_sound_input</a>();</b><br>
+   Cleans up after you are finished with the sound input routines. You don't 
+   normally need to call this, because remove_sound() and/or allegro_exit() 
+   will do it for you.
+<p>
+<b>int <a name="get_sound_input_cap_bits">get_sound_input_cap_bits</a>();</b><br>
+   Checks which sample formats are supported by the current audio input 
+   driver, returning one of the bitfield values:
+<p>
+      0 = audio input not supported<br>
+      8 = eight bit audio input is supported<br>
+      16 = sixteen bit audio input is supported<br>
+      24 = both eight and sixteen bit audio input are supported
+<p>
+<b>int <a name="get_sound_input_cap_stereo">get_sound_input_cap_stereo</a>();</b><br>
+   Checks whether the current audio input driver is capable of stereo 
+   recording.
+<p>
+<b>int <a name="get_sound_input_cap_rate">get_sound_input_cap_rate</a>(int bits, int stereo);</b><br>
+   Returns the maximum possible sample frequency for recording in the 
+   specified format, or zero if these settings are not supported.
+<p>
+<b>int <a name="get_sound_input_cap_parm">get_sound_input_cap_parm</a>(int rate, int bits, int stereo);</b><br>
+   Checks whether the specified recording frequency, number of bits, and 
+   mono/stereo mode are supported by the current audio driver, returning one 
+   of the values:
+<p>
+      0 = it is impossible to record in this format<br>
+      1 = recording is possible, but audio output will be suspended<br>
+      2 = recording is possible at the same time as playing other sounds<br>
+      -n = sampling rate not supported, but rate 'n' would work instead
+<p>
+<b>int <a name="set_sound_input_source">set_sound_input_source</a>(int source);</b><br>
+   Selects the audio input source, returning zero on success or -1 if the 
+   hardware does not provide an input select register. The parameter should 
+   be one of the values:
+<p>
+      SOUND_INPUT_MIC<br>
+      SOUND_INPUT_LINE<br>
+      SOUND_INPUT_CD
+<p>
+<b>int <a name="start_sound_input">start_sound_input</a>(int rate, int bits, int stereo);</b><br>
+   Starts recording in the specified format, suspending audio playback as 
+   necessary (this will always happen with the current drivers). Returns the 
+   buffer size in bytes if successful, or zero on error.
+<p>
+<b>void <a name="stop_sound_input">stop_sound_input</a>();</b><br>
+   Stops audio recording, switching the card back into the normal playback 
+   mode.
+<p>
+<b>int <a name="read_sound_input">read_sound_input</a>(void *buffer);</b><br>
+   Retrieves the most recently recorded audio buffer into the specified 
+   location, returning non-zero if a buffer has been copied or zero if no 
+   new data is yet available. The buffer size can be obtained by checking 
+   the return value from start_sound_input(). You must be sure to call this 
+   function at regular intervals during the recording (typically around 100 
+   times a second), or some data will be lost. If you are unable to do this 
+   often enough from the mainline code, use the digi_recorder() callback to 
+   store the waveform into a larger buffer of your own. Note: many cards 
+   produce a click or popping sound when switching between record and 
+   playback modes, so it is often a good idea to discard the first buffer 
+   after you start a recording. The waveform is always stored in unsigned 
+   format, with stereo data consisting of alternate left/right samples.
+<p>
+<b>extern void (*<a name="digi_recorder">digi_recorder</a>)();</b><br>
+   If set, this function is called by the input driver whenever a new sample 
+   buffer becomes available, at which point you can use read_sound_input() 
+   to copy the data into a more permenent location. This routine runs in an 
+   interrupt context, so it must execute very quickly, the code and all 
+   memory that it touches must be locked, and you cannot call any operating 
+   system routines or access disk files.
+<p>
+<b>extern void (*<a name="midi_recorder">midi_recorder</a>)(unsigned char data);</b><br>
+   If set, this function is called by the MIDI input driver whenever a new 
+   byte of MIDI data becomes available. It runs in an interrupt context, so 
+   it must execute very quickly and all the code/data must be locked.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

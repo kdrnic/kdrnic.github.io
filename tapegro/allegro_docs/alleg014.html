@@ -1,0 +1,49 @@
+<html><head><title>Compiled sprites</title><body>
+<h1><a name="Compiled sprites">Compiled sprites</a></h1>
+<p>
+<ul><h4>
+<li><a href="#get_compiled_sprite">get_compiled_sprite</a>
+<li><a href="#destroy_compiled_sprite">destroy_compiled_sprite</a>
+<li><a href="#draw_compiled_sprite">draw_compiled_sprite</a>
+</h4></ul>
+<p><br><br>
+<p>
+Compiled sprites are stored as actual machine code instructions that draw a 
+specific image onto a bitmap, using mov instructions with immediate data 
+values. This is the fastest way to draw a masked image: on my machine 
+drawing compiled sprites is about five times as fast as using draw_sprite() 
+with a regular bitmap. Compiled sprites are big, so if memory is tight you 
+should use RLE sprites instead, and what you can do with them is even more 
+restricted than with RLE sprites, because they don't support clipping. If 
+you try to draw one off the edge of a bitmap, you will corrupt memory and 
+probably crash the system. You can convert bitmaps into compiled sprites at 
+runtime, or you can create compiled sprite structures in grabber datafiles 
+by making a bitmap object and checking the 'Linear Compiled' or 'Mode-X 
+Compiled' buttons. 
+<p>
+<b>COMPILED_SPRITE *<a name="get_compiled_sprite">get_compiled_sprite</a>(BITMAP *bitmap, int planar);</b><br>
+   Creates a compiled sprite based on the specified bitmap (which must be a 
+   memory bitmap). Compiled sprites are device-dependent, so you have to 
+   specify whether to compile it into a linear or planar format. Pass FALSE 
+   as the second parameter if you are going to be drawing it onto memory 
+   bitmaps or mode 13h and SVGA screen bitmaps, and pass TRUE if you are 
+   going to draw it onto mode-X or Xtended mode screen bitmaps.
+<p>
+<b>void <a name="destroy_compiled_sprite">destroy_compiled_sprite</a>(COMPILED_SPRITE *sprite);</b><br>
+   Destroys a compiled sprite structure previously returned by 
+   get_compiled_sprite().
+<p>
+<b>void <a name="draw_compiled_sprite">draw_compiled_sprite</a>(BITMAP *bmp, COMPILED_SPRITE *sprite, int x, int y);</b><br>
+   Draws a compiled sprite onto a bitmap at the specified position. The 
+   sprite must have been compiled for the correct type of bitmap (linear or 
+   planar). This function does not support clipping.
+<p>
+   Hint: if not being able to clip compiled sprites is a problem, a neat 
+   trick is to set up a work surface (memory bitmap, mode-X virtual screen, 
+   or whatever) a bit bigger than you really need, and use the middle of it 
+   as your screen. That way you can draw slightly off the edge without any 
+   trouble... 
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

@@ -1,0 +1,54 @@
+<html>
+<title>Home of TAPEGRO, the Js game framework of the future</title>
+<body text="white" background="musicbg.jpg" vlink="pink" link="pink">
+<bgsound src="ALLEGRO.MID" loop="infinite">
+<center><img src="keyboard.gif"></center>
+<marquee><h6>Can you tell what real model is the pretty piece of technology above meant to be? Bonus points if you guess the music played on it correctly - tell kdrnic</h6></marquee>
+<center><h1>The MIDI page</h1></center>
+<h3>Help! I can't get MIDI out on Linux or I am in Windows and the MIDI sucks balls!</h3>
+Don't panic! You may configure, and ship, your game, to use a Allegro's custom synth, which can have that good 90s MIDI quality.
+<h3>How to use Allegro's custom software MIDI synthesizer</h3>
+Basically you follow the steps <a href="http://liballeg.org/digmid.html">on the Allegro page</a>.<br>
+In case you download Richard's patches in the .dat format, you will find that it doesn't work. Why? Because whoever prepared the .dat is a madman, and bzip2ed the file while keeping the extension. Fortunately, you have the great kdrnic to save your day and tell you that.<br>
+Alternatively, you can download the already fixed file directly from here<br>
+<center><a href="files/patches.dat"><img src="download.gif"></a></center>
+Then all you have to do is setup the config file like below<br>
+<pre>
+[sound]
+midi_card = DIGI
+patches = data\patches.dat
+</pre>
+and you are good to go.
+<h3><a id="midiout"></a>How to do custom MIDI output in TAPEGRO</h3>
+Have you got that procedural generation fever?<br>
+Are the <a href="http://www.google.com/search?q=lol+no">MIDI files hard to find</a>?<br>
+Maybe you want to write a sequencer inside Tapegro?<br>
+...or a level with a floor piano?<br>
+Never fear! Tapegro counts with exclusive access to Allegro's midi_out function, meaning you can write MIDI notes directly and easily.<br>
+You may still find the specs a bit thick to read, and even that something that works in Windoze may not work in MS-DOS, producing no sound.<br>
+So here's what I found out: for better compatibility don't assume any default state in the MIDI device. It was necessary to set both volume and program, which were presumably zeroed or invalid. Send the following bytes, for example:<br>
+<table>
+	<tr>
+		<th>Bytes in hex</th>
+		<th>Meaning</th>
+	</tr>
+	<tr>
+		<td>B0 07 FF</td>
+		<td>Set volume controller to max (on channel 0)</td>
+	</tr>
+	<tr>
+		<td>C0 00</td>
+		<td>Change the program to the first one (the grand piano in General MIDI) (also on channel 0)</td>
+	</tr>
+	<tr>
+		<td>90 3C FF</td>
+		<td>Start a note (middle C) with max velocity (still channel 0)</td>
+	</tr>
+	<tr>
+		<td>90 3C 00</td>
+		<td>End the note (middle C) with zero velocity - actually, a note on command with zero velocity is considered a note off (you could ommit the 90) (still channel 0)</td>
+	</tr>
+</table>
+Here are some good online specs for that: <a href="http://computermusicresource.com/MIDI.Commands.html">1</a>  <a href="http://www.gweep.net/~prefect/eng/reference/protocol/midispec.html">2</a><br>
+</body>
+</html>

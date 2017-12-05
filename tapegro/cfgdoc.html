@@ -2,6 +2,149 @@
 <title>Home of TAPEGRO, the Js game framework of the future</title>
 <body bgcolor="black" text="green">
 <bgsound src="ALLEGRO.MID" loop="infinite">
-TODO
+The config.cfg file is divided into several sections, each holds a number of different settings.
+	<table border="1">
+		<tr>
+			<th>gfx</th>
+		</tr>
+		<tr>
+			<td>screen_w, screen_h</td>
+			<td>Integer</td>
+			<td>Width and height of virtual screen area (area of the screen bitmap the game writes on to)</td>
+		</tr>
+		<tr>
+			<td>window_w, window_h</td>
+			<td>Integer</td>
+			<td>Width and height of the actual window, or resolution for fullscreen modes</td>
+		</tr>
+		<tr>
+			<td>fullscreen</td>
+			<td>Integer boolean</td>
+			<td>Whether to use fullscreen graphics</td>
+		</tr>
+		<tr>
+			<td>color_depth</td>
+			<td>Integer</td>
+			<td>Bits per pixel of the virtual screen, may be 8, 16 or 32</td>
+		</tr>
+		<tr>
+			<td>use_vsync</td>
+			<td>Integer boolean</td>
+			<td>Use vsync to wait between frames, may make the game smoother on Windows and Linux</td>
+		</tr>
+		<tr>
+			<th>game</th>
+		</tr>
+		<tr>
+			<td>ticks_per_second</td>
+			<td>Integer</td>
+			<td>How many times your Loop function will be called, per second - FPS the game runs at</td>
+		</tr>
+		<tr>
+			<td>use_tick_timer</td>
+			<td>Integer</td>
+			<td>Attempts to use an internal timer to time frames precisely at the desired rate</td>
+		</tr>
+		<tr>
+			<td>window_title</td>
+			<td>String</td>
+			<td>Title of the window, if not fullscreen, default is "TAPEGRO game"</td>
+		</tr>
+		<tr>
+			<td>log_filename</td>
+			<td>String</td>
+			<td>If set, all errors and other developer console outputs will be written to this file</td>
+		</tr>
+		<tr>
+			<th>controls</th>
+		</tr>
+		<tr>
+			<td>player[player #]_device</td>
+			<td>Integer</td>
+			<td>0 is keyboard, 1 is joystick, 2 is both</td>
+			<td>Player # is 1 to 4</td>
+		</tr>
+		<tr>
+			<td>player[player #]_joystick</td>
+			<td>Integer</td>
+			<td>0 is keyboard, number of the joystick used by this player, if there is only one joystick connected to the computer, it is always 0, and may be higher accordingly</td>
+			<td>Player # is 1 to 4</td>
+		</tr>
+		<tr>
+			<td>player[player #]_keyboard_d[direction]</td>
+			<td>Integer</td>
+			<td>Scancode of key for directional controls</td>
+			<td>Player # is 1 to 4, direction is a single char among u,d,l,r</td>
+		</tr>
+		<tr>
+			<td>player[player #]_keyboard_b[button #]</td>
+			<td>Integer</td>
+			<td>Scancode of key for button controls</td>
+			<td>Player # is 1 to 4, button # is 0 to 11</td>
+		</tr>
+		<tr>
+			<td>player[player #]joystick_d</td>
+			<td>Integer</td>
+			<td>Joystick "stick" for directional controls, usually 0 will always be the DPAD</td>
+			<td>Player # is 1 to 4</td>
+		</tr>
+		<tr>
+			<td>player[player #]joystick_b[button #]</td>
+			<td>Integer</td>
+			<td>Joystick button number</td>
+			<td>Player # is 1 to 4, button # is 0 to 11</td>
+		</tr>
+		<tr>
+			<th>devconsole</th>
+		</tr>
+		<tr>
+			<td>enable</td>
+			<td>Integer boolean</td>
+			<td>Whether to enable the developer console (default is not to)</td>
+		</tr>
+		<tr>
+			<td>bgcolor</td>
+			<td>Integer</td>
+			<td>Color value of the background color for the developer console, default is 0, under 8 bit be careful to pick according to the palette</td>
+		</tr>
+		<tr>
+			<td>fgcolor</td>
+			<td>Integer</td>
+			<td>Color value of the foreground (text) color for the developer console, under 8 bit be careful to pick according to the palette</td>
+		</tr>
+		<tr>
+			<td>min_lines</td>
+			<td>Integer</td>
+			<td>Minimum number of lines the developer console buffer will contain</td>
+		</tr>
+		<tr>
+			<td>height</td>
+			<td>Integer</td>
+			<td>Height in (real not virtual) pixels</td>
+		</tr>
+		<tr>
+			<td>key</td>
+			<td>Integer</td>
+			<td>Scancode or string of key name of key to trigger opening the developer console</td>
+		</tr>
+		<tr>
+			<td>on_error</td>
+			<td>Integer boolean</td>
+			<td>Whether to automatically open the developer console on error</td>
+		</tr>
+	</table>
+<br>
+You will also want to check the <a href="allegro_docs\">Allegro documentation's</a> section "Configuration routines" which has at its bottom some Allegro-specific sections and configurations.<br>
+To be honest, the only useful ones are listed below:
+<table border="1">
+		<tr>
+			<th>sound</th>
+		</tr>
+		<tr>
+			<td>midi_card</td>
+			<td>String</td>
+			<td>If not set, the MIDI card will automatically detected - under MS-DOS, this is likely fine. However, under Windows this will pick the default awful sounding Microsoft synthesizer, and under Linux there may be no MIDI, so you may want to set this to "DIGI" - see the <a href="midi.html">MIDI page.</a></td>
+		</tr>
+</table>
 </body>
 </html>

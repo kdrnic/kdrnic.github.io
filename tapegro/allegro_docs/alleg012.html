@@ -1,0 +1,182 @@
+<html><head><title>Blitting and sprites</title><body>
+<h1><a name="Blitting and sprites">Blitting and sprites</a></h1>
+<p>
+<ul><h4>
+<li><a href="#clear">clear</a>
+<li><a href="#clear_to_color">clear_to_color</a>
+<li><a href="#blit">blit</a>
+<li><a href="#masked_blit">masked_blit</a>
+<li><a href="#stretch_blit">stretch_blit</a>
+<li><a href="#draw_sprite">draw_sprite</a>
+<li><a href="#draw_sprite_v_flip">draw_sprite_v_flip</a>
+<li><a href="#draw_sprite_h_flip">draw_sprite_h_flip</a>
+<li><a href="#draw_sprite_vh_flip">draw_sprite_vh_flip</a>
+<li><a href="#draw_trans_sprite">draw_trans_sprite</a>
+<li><a href="#draw_lit_sprite">draw_lit_sprite</a>
+<li><a href="#draw_gouraud_sprite">draw_gouraud_sprite</a>
+<li><a href="#draw_character">draw_character</a>
+<li><a href="#rotate_sprite">rotate_sprite</a>
+<li><a href="#rotate_scaled_sprite">rotate_scaled_sprite</a>
+<li><a href="#stretch_sprite">stretch_sprite</a>
+</h4></ul>
+<p><br><br>
+<p>
+All these routines are affected by the clipping rectangle of the destination 
+bitmap.
+<p>
+<b>void <a name="clear">clear</a>(bitmap);</b><br>
+   Clears the bitmap to color 0.
+<p>
+<b>void <a name="clear_to_color">clear_to_color</a>(BITMAP *bitmap, int color);</b><br>
+   Clears the bitmap to the specified color.
+<p>
+<b>void <a name="blit">blit</a>(BITMAP *source, BITMAP *dest, int source_x, int source_y,</b>
+<b>          int dest_x, int dest_y, int width, int height);</b><br>
+   Copies a rectangular area of the source bitmap to the destination bitmap. 
+   The source_x and source_y parameters are the top left corner of the area 
+   to copy from the source bitmap, and dest_x and dest_y are the 
+   corresponding position in the destination bitmap. This routine respects 
+   the destination clipping rectangle, and it will also clip if you try to 
+   blit from areas outside the source bitmap.
+<p>
+   You can blit between any parts of any two bitmaps, even if the two memory 
+   areas overlap (ie. source and dest are the same, or one is sub-bitmap of 
+   the other). You should be aware, however, that a lot of SVGA cards don't 
+   provide separate read and write banks, which means that blitting from one 
+   part of the screen to another requires the use of a temporary bitmap in 
+   memory, and is therefore extremely slow. As a general rule you should 
+   avoid blitting from the screen onto itself in SVGA modes.
+<p>
+   In mode-X, on the other hand, blitting from one part of the screen to 
+   another can be significantly faster than blitting from memory onto the 
+   screen, as long as the source and destination are correctly aligned with 
+   each other. Copying between overlapping screen rectangles is slow, but if 
+   the areas don't overlap, and if they have the same plane alignment (ie. 
+   (source_x%4) == (dest_x%4)), the VGA latch registers can be used for a 
+   very fast data transfer. To take advantage of this, in mode-X it is often 
+   worth storing tile graphics in a hidden area of video memory (using a 
+   large virtual screen), and blitting them from there onto the visible part 
+   of the screen.
+<p>
+   If the GFX_HW_VRAM_BLIT bit in the gfx_capabilities flag is set, the 
+   current driver supports hardware accelerated blits from one part of the 
+   screen onto another. This is extremely fast, so when this flag is set it 
+   may be worth storing some of your more frequently used graphics in an 
+   offscreen portion of the video memory.
+<p>
+   Unlike most of the graphics routines, blit() allows the source and 
+   destination bitmaps to be of different color depths, so it can be used to 
+   convert images from one pixel format to another.
+<p>
+<b>void <a name="masked_blit">masked_blit</a>(BITMAP *source, BITMAP *dest, int source_x, int source_y,</b>
+<b>                  int dest_x, int dest_y, int width, int height);</b><br>
+   Like blit(), but skips transparent pixels, which are marked by a zero in 
+   256 color modes or bright pink for truecolor data (maximum red and blue, 
+   zero green). The source and destination regions must not overlap.
+<p>
+   If the GFX_HW_VRAM_BLIT_MASKED bit in the gfx_capabilities flag is set, 
+   the current driver supports hardware accelerated masked blits from one 
+   part of the screen onto another. This is extremely fast, so when this 
+   flag is set it may be worth storing some of your more frequently used 
+   sprites in an offscreen portion of the video memory.
+<p>
+   Warning: if the hardware acceleration flag is not set, masked_blit() will 
+   not work correctly when used with a video memory source image, and the 
+   input graphic must always be a memory bitmap!
+<p>
+<b>void <a name="stretch_blit">stretch_blit</a>(BITMAP *source, BITMAP *dest,</b>
+<b>                  int source_x, source_y, source_width, source_height,</b>
+<b>                  int dest_x, dest_y, dest_width, dest_height);</b><br>
+   Like blit(), except it can scale images so the source and destination 
+   rectangles don't need to be the same size. This routine doesn't do as 
+   much safety checking as the regular blit: in particular you must take 
+   care not to copy from areas outside the source bitmap, and you cannot 
+   blit between overlapping regions, ie. you must use different bitmaps for 
+   the source and the destination. Also, the source must be a memory bitmap 
+   or sub-bitmap, not the hardware screen.
+<p>
+<b>void <a name="draw_sprite">draw_sprite</a>(BITMAP *bmp, BITMAP *sprite, int x, int y);</b><br>
+   Draws a copy of the sprite bitmap onto the destination bitmap at the 
+   specified position. This is almost the same as blit(sprite, bmp, 0, 0, x, 
+   y, sprite-&gt;w, sprite-&gt;h), but it uses a masked drawing mode where 
+   transparent pixels are skipped, so the background image will show through 
+   the masked parts of the sprite. Transparent pixels are marked by a zero 
+   in 256 color modes or bright pink for truecolor data (maximum red and 
+   blue, zero green).
+<p>
+   If the GFX_HW_VRAM_BLIT_MASKED bit in the gfx_capabilities flag is set, 
+   the current driver supports hardware accelerated sprite drawing when the 
+   source image is a video memory bitmap or a sub-bitmap of the screen. This 
+   is extremely fast, so when this flag is set it may be worth storing some 
+   of your more frequently used sprites in an offscreen portion of the video 
+   memory.
+<p>
+   Warning: if the hardware acceleration flag is not set, draw_sprite() will 
+   not work correctly when used with a video memory source image, and the 
+   input graphic must always be a memory bitmap!
+<p>
+   Although generally not supporting graphics of mixed color depths, as a 
+   special case this function can be used to draw 256 color source images 
+   onto truecolor destination bitmaps, so you can use palette effects on 
+   specific sprites within a truecolor program.
+<p>
+<b>void <a name="draw_sprite_v_flip">draw_sprite_v_flip</a>(BITMAP *bmp, BITMAP *sprite, int x, int y);</b><br>
+<b>void <a name="draw_sprite_h_flip">draw_sprite_h_flip</a>(BITMAP *bmp, BITMAP *sprite, int x, int y);</b><br>
+<b>void <a name="draw_sprite_vh_flip">draw_sprite_vh_flip</a>(BITMAP *bmp, BITMAP *sprite, int x, int y);</b><br>
+   These are like draw_sprite(), but they flip the image about the vertical, 
+   horizontal, or diagonal, axis. This produces exact mirror images, which 
+   is not the same as rotating the sprite (and it is a lot faster than the 
+   rotation routine). The sprite must be a memory bitmap.
+<p>
+<b>void <a name="draw_trans_sprite">draw_trans_sprite</a>(BITMAP *bmp, BITMAP *sprite, int x, int y);</b><br>
+   Uses the global color_map table or truecolor blender functions to overlay 
+   the sprite on top of the existing image. This must only be used after you 
+   have set up the color mapping table (for 256 color modes) or blender map 
+   (for truecolor modes). Because it involves reading as well as writing the 
+   bitmap memory, translucent drawing is very slow if you draw directly to 
+   video RAM, so wherever possible you should use a memory bitmap instead.
+<p>
+<b>void <a name="draw_lit_sprite">draw_lit_sprite</a>(BITMAP *bmp, BITMAP *sprite, int x, int y, int color);</b><br>
+   Tints the sprite image to the specified color or light level, using the 
+   global color_map table, and draws the resulting image to the destination 
+   bitmap. This must only be used after you have set up the color mapping 
+   table (for 256 color modes) or blender map (for truecolor modes).
+<p>
+<b>void <a name="draw_gouraud_sprite">draw_gouraud_sprite</a>(BITMAP *bmp, BITMAP *sprite, int x, int y,</b>
+<b>                         int c1, int c2, int c3, int c4);</b><br>
+   Tints the sprite to the specified color or light level, interpolating the 
+   four corner colors across the surface of the image. This must only be 
+   used after you have set up the color mapping table (for 256 color modes) 
+   or blender map (for truecolor modes).
+<p>
+<b>void <a name="draw_character">draw_character</a>(BITMAP *bmp, BITMAP *sprite, int x, int y, int color);</b><br>
+   Draws a copy of the sprite bitmap onto the destination bitmap at the 
+   specified position, drawing transparent pixels in the current text mode 
+   (skipping them if the text mode is -1, otherwise drawing them in the text 
+   background color), and setting all other pixels to the specified color. 
+   Transparent pixels are marked by a zero in 256 color modes or bright pink 
+   for truecolor data (maximum red and blue, zero green). The sprite must be 
+   an 8 bit image, even if the destination is a truecolor bitmap.
+<p>
+<b>void <a name="rotate_sprite">rotate_sprite</a>(BITMAP *bmp, BITMAP *sprite, int x, int y, fixed angle);</b><br>
+   Draws the sprite image onto the bitmap at the specified position, 
+   rotating it by the specified angle. The angle is a fixed point 16.16 
+   number in the same format used by the fixed point trig routines, with 256 
+   equal to a full circle, 64 a right angle, etc. The sprite must be a 
+   memory bitmap.
+<p>
+<b>void <a name="rotate_scaled_sprite">rotate_scaled_sprite</a>(BITMAP *bmp, BITMAP *sprite, int x, int y,</b>
+<b>                          fixed angle, fixed scale);</b><br>
+   Like rotate_sprite(), but stretches or shrinks the image at the same time 
+   as rotating it.
+<p>
+<b>void <a name="stretch_sprite">stretch_sprite</a>(BITMAP *bmp, BITMAP *sprite, int x, int y, int w, int h);</b><br>
+   Draws the sprite image onto the bitmap at the specified position, 
+   stretching it to the specified width and height. The difference between 
+   stretch_sprite() and stretch_blit() is that stretch_sprite() masks out 
+   transparent pixels, which are marked by a zero in 256 color modes or 
+   bright pink for truecolor data (maximum red and blue, zero green).
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

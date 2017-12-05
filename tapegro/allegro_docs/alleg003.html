@@ -1,0 +1,196 @@
+<html><head><title>Timer routines</title><body>
+<h1><a name="Timer routines">Timer routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#install_timer">install_timer</a>
+<li><a href="#remove_timer">remove_timer</a>
+<li><a href="#install_int">install_int</a>
+<li><a href="#install_int_ex">install_int_ex</a>
+<li><a href="#remove_int">remove_int</a>
+<li><a href="#i_love_bill">i_love_bill</a>
+<li><a href="#timer_simulate_retrace">timer_simulate_retrace</a>
+<li><a href="#retrace_count">retrace_count</a>
+<li><a href="#retrace_proc">retrace_proc</a>
+<li><a href="#rest">rest</a>
+<li><a href="#rest_callback">rest_callback</a>
+</h4></ul>
+<p><br><br>
+<p>
+The standard PC clock only ticks 18.2 times a second, which is not much good 
+for fast action games. Allegro can replace the system timer routine with a 
+custom one, which reprograms the clock for higher tick rates while still 
+calling the BIOS handler at the old speed. You can set up several virtual 
+timers of your own, all going at different speeds, and Allegro will 
+constantly reprogram the clock to make sure they are all called at the 
+correct times. Because Allegro alters the PIT timer chip settings, it should 
+not be used together with the uclock() function from the djgpp libc.
+<p>
+<b>int <a name="install_timer">install_timer</a>();</b><br>
+   Installs the Allegro timer interrupt handler. You must do this before 
+   installing any user timer routines, and also before displaying a mouse 
+   pointer, playing FLI animations or MIDI music, and using any of the GUI 
+   routines.
+<p>
+<b>void <a name="remove_timer">remove_timer</a>();</b><br>
+   Removes the Allegro timer handler and passes control of the clock back to 
+   the BIOS. You don't normally need to bother calling this, because 
+   allegro_exit() will do it for you.
+<p>
+<b>int <a name="install_int">install_int</a>(void (*proc)(), int speed);</b><br>
+   Installs a user timer handler, with the speed given as the number of 
+   milliseconds between ticks. This is the same thing as 
+   install_int_ex(proc, MSEC_TO_TIMER(speed)).
+<p>
+<b>int <a name="install_int_ex">install_int_ex</a>(void (*proc)(), int speed);</b><br>
+   Adds a function to the list of user timer handlers, or if it is already 
+   installed, adjusts its speed. The speed is given in hardware clock ticks, 
+   of which there are 1193181 a second. You can convert from other time 
+   formats to hardware clock ticks with the macros:
+<p><pre>
+      SECS_TO_TIMER(secs)  - give the number of seconds between each tick
+      MSEC_TO_TIMER(msec)  - give the number of milliseconds between ticks
+      BPS_TO_TIMER(bps)    - give the number of ticks each second
+      BPM_TO_TIMER(bpm)    - give the number of ticks per minute
+<p></pre>
+   If there is no room to add a new user timer, install_int_ex() will return 
+   a negative number, otherwise it returns zero. There can only be sixteen 
+   timers in use at a time, and some other parts of Allegro (the GUI code, 
+   the mouse pointer display routines, rest(), the FLI player, and the MIDI 
+   player) need to install handlers of their own, so you should avoid using 
+   too many at the same time.
+<p>
+   Your function will be called by the Allegro interrupt handler and not 
+   directly by the processor, so it can be a normal C function and does not 
+   need a special wrapper. You should be aware, however, that it will be 
+   called in an interrupt context, which imposes a lot of restrictions on 
+   what you can do in it. It should not use large amounts of stack, it must 
+   not make any calls to DOS or use C library functions which may in turn 
+   call DOS routines, and it must execute very quickly. Don't try to do lots 
+   of complicated code in a timer handler: as a general rule you should just 
+   set some flags and respond to these later in your main control loop.
+<p>
+   In a protected mode environment like djgpp, memory is virtualised and can 
+   be swapped to disk. Due to the non-reentrancy of DOS, if a disk swap 
+   occurs inside an interrupt handler the system will die a painful death, 
+   so you need to make sure you lock all the memory (both code and data) 
+   that is touched inside timer routines. Allegro will lock everything it 
+   uses, but you are responsible for locking your handler functions. The 
+   macros LOCK_VARIABLE(variable), END_OF_FUNCTION(function_name), and 
+   LOCK_FUNCTION(function_name) can be used to simplify this task. For 
+   example, if you want an interrupt handler that increments a counter 
+   variable, you should write:
+<p><pre>
+      volatile int counter;
+<p>
+      void my_timer_handler()
+      {
+         counter++;
+      }
+<p>
+      END_OF_FUNCTION(my_timer_handler);
+<p></pre>
+   and in your initialisation code you should lock the memory:
+<p><pre>
+      LOCK_VARIABLE(counter);
+      LOCK_FUNCTION(my_timer_handler);
+<p></pre>
+   Obviously this can get awkward if you use complicated data structures and 
+   call other functions from within your handler, so you should try to keep 
+   your interrupt routines as simple as possible.
+<p>
+<b>void <a name="remove_int">remove_int</a>(void (*proc)());</b><br>
+   Removes a function from the list of user interrupt routines. At program 
+   termination, allegro_exit() does this automatically.
+<p>
+<b>extern int <a name="i_love_bill">i_love_bill</a>;</b><br>
+   If set to TRUE, enables the special 'windows friendly' timer mode, which 
+   locks the hardware timer interrupt to a speed of 200 ticks per second 
+   rather than dynamically reprogramming it. This mode reduces the accuracy 
+   of the timer (for instance, rest() will round the delay time to the 
+   nearest 5 milliseconds), and prevents the vertical retrace simulator from 
+   working (calls to timer_simulate_retrace() are ignored while in this 
+   mode). On the plus side, though, it makes Allegro programs work under 
+   windows 3.1, and stops win95 from complaining that it should be run in 
+   DOS mode. This flag should be set before you install the timer module, 
+   and you should not change it while the timer is active. By default, 
+   allegro_init() will enable this mode if it detects the presence of 
+   Windows.
+<p>
+<b>void <a name="timer_simulate_retrace">timer_simulate_retrace</a>(int enable);</b><br>
+   The timer handler can be used to simulate vertical retrace interrupts. 
+   An retrace interrupt can be extremely useful for implementing smooth 
+   animation, but unfortunately the VGA hardware doesn't support it. The EGA 
+   did, and some SVGA chipsets do, but not enough, and not in a sufficiently 
+   standardised way, for it to be useful. Allegro works around this by 
+   programming the timer to generate an interrupt when it thinks a retrace 
+   is next likely to occur, and polling the VGA inside the interrupt handler 
+   to make sure it stays in sync with the monitor refresh. This works quite 
+   well in some situations, but there are a lot of caveats:
+<p>
+   - Don't ever use the retrace simulator in SVGA modes. It will work with 
+     some chipsets, but not others, and it conflicts with most VESA 
+     implementations. Retrace simulation is only reliable in VGA mode 13h 
+     and mode-X.
+<p>
+   - Retrace simulation doesn't work under win95, because win95 returns 
+     garbage when I try to read the elapsed time from the PIT. If anyone 
+     knows how I can make this work, please tell me!
+<p>
+   - Retrace simulation involves a lot of waiting around in the timer 
+     handler with interrupts disabled. This will significantly slow down 
+     your entire system, and may also cause static when playing samples on 
+     SB 1.0 cards (because they don't support auto-initialised DMA: SB 2.0 
+     and above will be fine).
+<p>
+   Bearing all those problems in mind, I'd strongly advise against relying 
+   on the retrace simulator. If you are coding in mode-X, and don't care 
+   about your program working under win95, it is great, but it would be a 
+   good idea to give the user an option to disable it.
+<p>
+   Retrace simulation must be enabled before you use the triple buffering 
+   functions in a mode-X resolution. It can also be useful for simple 
+   retrace detection, because the polling vsync() function can occasionally 
+   miss retraces if a soundcard or timer interrupt occurs at exactly the 
+   same time as the retrace. When retrace interrupt simulation is enabled, 
+   vsync() will check the retrace_count variable rather than polling the 
+   VGA, so it won't miss retraces even if they are masked by other 
+   interrupts.
+<p>
+<b>extern volatile int <a name="retrace_count">retrace_count</a>;</b><br>
+   If the retrace simulator is installed, this is incremented on each 
+   vertical retrace, otherwise it is incremented 70 times a second (ignoring 
+   retraces). This provides a useful way of controlling the speed of your 
+   program without the hassle of installing user timer functions.
+<p>
+   The speed of retraces varies depending on the graphics mode. In mode 13h 
+   and 200/400 line mode-X resolutions there are 70 retraces a second, and 
+   in 240/480 line modes there are 60. It can be as low as 50 (in 376x282 
+   mode) or as high as 92 (in 400x300 mode).
+<p>
+<b>extern void (*<a name="retrace_proc">retrace_proc</a>)();</b><br>
+   If the retrace simulator is installed, this function is called during 
+   every vertical retrace, otherwise it is called 70 times a second 
+   (ignoring retraces). Set it to NULL to disable the callback. The function 
+   must obey the same rules as regular timer handlers (ie. it must be 
+   locked, and mustn't call DOS or libc functions) but even more so: it must 
+   execute _very_ quickly, or it will mess up the timer synchronisation. The 
+   only use I can see for this function is for doing palette manipulations, 
+   because triple buffering can be done with the request_scroll() function, 
+   and the retrace_count variable can be used for timing your code. If you 
+   want to alter the palette in the retrace_proc you should use the inline 
+   _set_color() function rather than the regular set_color() or 
+   set_palette(), and you shouldn't try to alter more than two or three 
+   palette entries in a single retrace.
+<p>
+<b>void <a name="rest">rest</a>(long time);</b><br>
+   Once Allegro has taken over the timer the standard delay() function will 
+   no longer work, so you should use this routine instead. The time is given 
+   in milliseconds.
+<p>
+<b>void <a name="rest_callback">rest_callback</a>(long time, void (*callback)())</b><br>
+   Like rest(), but continually calls the specified function while it is 
+   waiting for the required time to elapse.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

@@ -1,0 +1,81 @@
+<html><head><title>Debugging</title><body>
+<h1><a name="Debugging">Debugging</a></h1>
+<p>
+By default Allegro builds with maximum optimisation, no debug information, 
+and the -fomit-frame-pointer option. This produces the most efficient code, 
+but makes it very hard to debug your program if it is crashing inside an 
+Allegro function. There are several variables to control the code generation 
+options, which may be useful while debugging or if you want to modify 
+Allegro. These can either be set as environment variables from the command 
+prompt (eg. "set DEBUGMODE=1") or passed to make on the command line (eg. 
+"make install DEBUGMODE=1"). To build a new version, run "make clean" to get 
+rid of the previous build, set the appropriate variable, and then run "make 
+install" to build a version with the new options. Don't forget to backup 
+your previous liballeg.a first, or to recompile with the normal options when 
+you are done!
+<p><ul><li>
+   DEBUGMODE<br>
+   Creates a version with no optimisation and full debug information, so you 
+   can get proper symify tracebacks and debug inside the Allegro routines. 
+   This library will be very slow!
+<p><li>
+   PROFILEMODE<br>
+   Creates an optimised version that includes profiling information (using 
+   the -pg option).
+<p><li>
+   SYMBOLMODE<br>
+   Builds a normal optimised version, but doesn't strip out the symbol table 
+   at the link stage. This is really only useful if you are modifying 
+   Allegro itself, and want to run symify on the test programs.
+<p><li>
+   PGCC<br>
+   Uses optimisation options suitable for the Pentium optimising compiler, 
+   rather than the stock djgpp version of gcc.
+<p><li>
+   WARNMODE<br>
+   Enables stricter compiler warnings. I strongly recommend that all Allegro 
+   developers enable this option: I won't accept any code that doesn't 
+   compile cleanly with it.
+<p></ul>
+If you only want to recompile a specific test program or utility, you can 
+specify it as an argument to make, eg. "make demo" or "make grabber". The 
+makefile also provides some special pseudo-targets:
+<p><ul><li>
+   'all'<br>
+   The normal build process. Compiles the library, all the test and example 
+   programs, and the documentation files, and then copies allegro.h, 
+   liballeg.a, and allegro.inf into your djgpp directories.
+<p><li>
+   'lib'<br>
+   Builds a new version of liballeg.a, without installing it into your 
+   djgpp/lib/ directory.
+<p><li>
+   'docs'<br>
+   Converts the documentation files from the ._tx sources.
+<p><li>
+   'install'<br>
+   Updates the versions of allegro.h, liballeg.a, and allegro.inf in your 
+   djgpp directories, recompiling them as necessary.
+<p><li>
+   'compress'<br>
+   Uses the DJP or UPX executable compressors (whichever you have installed) 
+   to compress the example executables and utility programs, which can 
+   recover a significant amount of disk space.
+<p><li>
+   'clean'<br>
+   Removes all the temporary generated files from your Allegro directories, 
+   forcing a complete rebuild the next time you run make. This requires the 
+   'rm' utility from the fileutils package.
+<p><li>
+   'veryclean'<br>
+   Removes every generated file from your Allegro directories, including all 
+   the example executables and utility programs. This requires the 'rm' 
+   utility from the fileutils package.
+<p><li>
+   'uninstall'<br>
+   Removes allegro.h, liballeg.a, and allegro.inf from your djgpp 
+   directories. This requires the 'rm' utility from the fileutils package.
+<p></ul>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

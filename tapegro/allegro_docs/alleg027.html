@@ -1,0 +1,111 @@
+<html><head><title>Datafile routines</title><body>
+<h1><a name="Datafile routines">Datafile routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#load_datafile">load_datafile</a>
+<li><a href="#unload_datafile">unload_datafile</a>
+<li><a href="#load_datafile_object">load_datafile_object</a>
+<li><a href="#unload_datafile_object">unload_datafile_object</a>
+<li><a href="#get_datafile_property">get_datafile_property</a>
+<li><a href="#register_datafile_object">register_datafile_object</a>
+<li><a href="#fixup_datafile">fixup_datafile</a>
+</h4></ul>
+<p><br><br>
+<p>
+Datafiles are created by the grabber utility, and have a .dat extension. 
+They can contain bitmaps, palettes, fonts, samples, MIDI music, FLI/FLC 
+animations, and any other binary data that you import.
+<p>
+Warning: when using truecolor images, you should always set the graphics 
+mode before loading any bitmap data! Otherwise the pixel format (RGB or BGR)
+will not be known, so the file may be converted wrongly.
+<p>
+See the documentation for pack_fopen() for information about how to read 
+directly from a specific datafile object.
+<p>
+<b>DATAFILE *<a name="load_datafile">load_datafile</a>(char *filename);</b><br>
+   Loads a datafile into memory, and returns a pointer to it, or NULL on 
+   error. If the datafile has been encrypted, you must first use the 
+   packfile_password() function to set the appropriate key. See grabber.txt 
+   for more information. If the datafile contains truecolor graphics, you 
+   must set the video mode or call set_color_conversion() before loading it.
+<p>
+<b>void <a name="unload_datafile">unload_datafile</a>(DATAFILE *dat);</b><br>
+   Frees all the objects in a datafile.
+<p>
+<b>DATAFILE *<a name="load_datafile_object">load_datafile_object</a>(char *filename, char *objectname);</b><br>
+   Loads a specific object from a datafile. This won't work if you strip the 
+   object names from the file, and it will be very slow if you save the file 
+   with global compression. See grabber.txt for more information.
+<p>
+<b>void <a name="unload_datafile_object">unload_datafile_object</a>(DATAFILE *dat);</b><br>
+   Frees an object previously loaded by load_datafile_object().
+<p>
+<b>char *<a name="get_datafile_property">get_datafile_property</a>(DATAFILE *dat, int type);</b><br>
+   Returns the specified property string for the object, or an empty string 
+   if the property isn't present. See grabber.txt for more information.
+<p>
+<b>void <a name="register_datafile_object">register_datafile_object</a>(int id, void *(*load)(PACKFILE *f, long size),</b>
+<b>                                      void (*destroy)(void *data));</b><br>
+   Used to add custom object types, specifying functions to load and destroy 
+   objects of this type. See grabber.txt for more information.
+<p>
+<b>void <a name="fixup_datafile">fixup_datafile</a>(DATAFILE *data);</b><br>
+   If you are using compiled datafiles (produced by the dat2s utility) that 
+   contain truecolor images, you must call this function once after your set 
+   the video mode that you will be using, to convert the color values into 
+   the appropriate format. It handles flipping between RGB and BGR formats, 
+   and converting between different color depths whenever that can be done 
+   without changing the size of the image (ie. changing between 15&lt;-&gt;16 
+   bit hicolor for both bitmaps and RLE sprites, and 24&lt;-&gt;32 bit 
+   truecolor for RLE sprites).
+<p>
+<p><hr><p>
+When you load a datafile, you will obtain a pointer to an array of DATAFILE 
+structures:
+<p><pre>
+typedef struct DATAFILE
+{
+   void *dat;     - pointer to the actual data
+   int type;      - type of the data
+   long size;     - size of the data in bytes
+   void *prop;    - list of object properties
+} DATAFILE;
+<p></pre>
+The type field will be one of the values:
+<pre>
+   DAT_FILE       - dat points to a nested datafile
+   DAT_DATA       - dat points to a block of binary data
+   DAT_FONT       - dat points to a font object
+   DAT_SAMPLE     - dat points to a sample structure
+   DAT_MIDI       - dat points to a MIDI file
+   DAT_PATCH      - dat points to a GUS patch file
+   DAT_FLI        - dat points to an FLI/FLC animation
+   DAT_BITMAP     - dat points to a BITMAP structure
+   DAT_RLE_SPRITE - dat points to a RLE_SPRITE structure
+   DAT_C_SPRITE   - dat points to a linear compiled sprite
+   DAT_XC_SPRITE  - dat points to a mode-X compiled sprite
+   DAT_PALETTE    - dat points to an array of 256 RGB structures
+   DAT_END        - special flag to mark the end of the data list
+<p></pre>
+The grabber program can also produce a header file defining the index of 
+each object within the file as a series of #defined constants, using the 
+names you gave the objects in the grabber. So, for example, if you have made 
+a datafile called foo.dat which contains a bitmap called THE_IMAGE, you 
+could display it with the code fragment:
+<p><pre>
+   #include "foo.h"
+<p>
+   DATAFILE *data = load_datafile("foo.dat");
+   draw_sprite(screen, data[THE_IMAGE].dat, x, y);
+<p></pre>
+If you are programming in C++ you will get an error because the dat field is 
+a void pointer and draw_sprite() expects a BITMAP pointer. You can get 
+around this with a cast, eg:
+<p><pre>
+   draw_sprite(screen, (BITMAP *)data[THE_IMAGE].dat, x, y);
+<p></pre>
+<br>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

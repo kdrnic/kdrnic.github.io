@@ -1,0 +1,236 @@
+<html><head><title>Digital sample routines</title><body>
+<h1><a name="Digital sample routines">Digital sample routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#load_sample">load_sample</a>
+<li><a href="#load_wav">load_wav</a>
+<li><a href="#load_voc">load_voc</a>
+<li><a href="#create_sample">create_sample</a>
+<li><a href="#destroy_sample">destroy_sample</a>
+<li><a href="#play_sample">play_sample</a>
+<li><a href="#adjust_sample">adjust_sample</a>
+<li><a href="#stop_sample">stop_sample</a>
+<li><a href="#allocate_voice">allocate_voice</a>
+<li><a href="#deallocate_voice">deallocate_voice</a>
+<li><a href="#reallocate_voice">reallocate_voice</a>
+<li><a href="#release_voice">release_voice</a>
+<li><a href="#voice_start">voice_start</a>
+<li><a href="#voice_stop">voice_stop</a>
+<li><a href="#voice_set_priority">voice_set_priority</a>
+<li><a href="#voice_check">voice_check</a>
+<li><a href="#voice_get_position">voice_get_position</a>
+<li><a href="#voice_set_position">voice_set_position</a>
+<li><a href="#voice_set_playmode">voice_set_playmode</a>
+<li><a href="#voice_get_volume">voice_get_volume</a>
+<li><a href="#voice_set_volume">voice_set_volume</a>
+<li><a href="#voice_ramp_volume">voice_ramp_volume</a>
+<li><a href="#voice_stop_volumeramp">voice_stop_volumeramp</a>
+<li><a href="#voice_get_frequency">voice_get_frequency</a>
+<li><a href="#voice_set_frequency">voice_set_frequency</a>
+<li><a href="#voice_sweep_frequency">voice_sweep_frequency</a>
+<li><a href="#voice_stop_frequency_sweep">voice_stop_frequency_sweep</a>
+<li><a href="#voice_get_pan">voice_get_pan</a>
+<li><a href="#voice_set_pan">voice_set_pan</a>
+<li><a href="#voice_sweep_pan">voice_sweep_pan</a>
+<li><a href="#voice_stop_pan_sweep">voice_stop_pan_sweep</a>
+<li><a href="#voice_set_echo">voice_set_echo</a>
+<li><a href="#voice_set_tremolo">voice_set_tremolo</a>
+<li><a href="#voice_set_vibrato">voice_set_vibrato</a>
+</h4></ul>
+<p><br><br>
+<p>
+<b>SAMPLE *<a name="load_sample">load_sample</a>(char *filename);</b><br>
+   Loads a sample from a file, returning a pointer to it, or NULL on error. 
+   At present this function supports both mono and stereo WAV and mono VOC 
+   files, in 8 or 16 bit formats.
+<p>
+<b>SAMPLE *<a name="load_wav">load_wav</a>(char *filename);</b><br>
+   Loads a sample from a RIFF WAV file.
+<p>
+<b>SAMPLE *<a name="load_voc">load_voc</a>(char *filename);</b><br>
+   Loads a sample from a Creative Labs VOC file.
+<p>
+<b>SAMPLE *<a name="create_sample">create_sample</a>(int bits, int stereo, int freq, int len);</b><br>
+   Constructs a new sample structure of the specified type. The data field 
+   points to a block of waveform data: see the structure definition in 
+   allegro.h for details.
+<p>
+<b>void <a name="destroy_sample">destroy_sample</a>(SAMPLE *spl);</b><br>
+   Destroys a sample structure when you are done with it. It is safe to call 
+   this even when the sample might be playing, because it checks and will 
+   kill it off if it is active.
+<p>
+<b>int <a name="play_sample">play_sample</a>(SAMPLE *spl, int vol, int pan, int freq, int loop);</b><br>
+   Triggers a sample at the specified volume, pan position, and frequency. 
+   The volume and pan range from 0 (min/left) to 255 (max/right). Frequency 
+   is relative rather than absolute: 1000 represents the frequency that the 
+   sample was recorded at, 2000 is twice this, etc. If the loop flag is set, 
+   the sample will repeat until you call stop_sample(), and can be 
+   manipulated while it is playing by calling adjust_sample().
+<p>
+<b>void <a name="adjust_sample">adjust_sample</a>(SAMPLE *spl, int vol, int pan, int freq, int loop);</b><br>
+   Alters the parameters of a sample while it is playing (useful for 
+   manipulating looped sounds). You can alter the volume, pan, and 
+   frequency, and can also clear the loop flag, which will stop the sample 
+   when it next reaches the end of its loop. If there are several copies of 
+   the same sample playing, this will adjust the first one it comes across. 
+   If the sample is not playing it has no effect.
+<p>
+<b>void <a name="stop_sample">stop_sample</a>(SAMPLE *spl);</b><br>
+   Kills off a sample, which is required if you have set a sample going in 
+   looped mode. If there are several copies of the sample playing, it will 
+   stop them all.
+<p>
+<p><hr><p>
+If you need more detailed control over how samples are played, you can use 
+the lower level voice functions rather than just calling play_sample(). This 
+is rather more work, because you have to explicitly allocate and free the 
+voices rather than them being automatically released when they finish 
+playing, but allows far more precise specification of exactly how you want 
+everything to sound. You may also want to modify a couple of fields from the 
+sample structure:
+<p><pre>
+   int priority;
+      Ranging 0-255 (default 128), this controls how voices are allocated if 
+      you attempt to play more than the driver can handle. This may be used 
+      to ensure that the less important sounds are cut off while the 
+      important ones are preserved.
+<p>
+   unsigned long loop_start;
+   unsigned long loop_end;
+      Loop position in sample units, by default set to the start and end of 
+      the sample.
+<p></pre>
+<b>int <a name="allocate_voice">allocate_voice</a>(SAMPLE *spl);</b><br>
+   Allocates a soundcard voice and prepares it for playing the specified 
+   sample, setting up sensible default parameters (maximum volume, centre 
+   pan, no change of pitch, no looping). When you are finished with the 
+   voice you must free it by calling deallocate_voice() or release_voice(). 
+   Returns the voice number, or -1 if no voices are available.
+<p>
+<b>void <a name="deallocate_voice">deallocate_voice</a>(int voice);</b><br>
+   Frees a soundcard voice, stopping it from playing and releasing whatever 
+   resources it is using.
+<p>
+<b>void <a name="reallocate_voice">reallocate_voice</a>(int voice, SAMPLE *spl);</b><br>
+   Switches an already-allocated voice to use a different sample. Calling 
+   reallocate_voice(voice, sample) is equivalent to:
+<p><pre>
+      deallocate_voice(voice);
+      voice = allocate_voice(sample);
+<p></pre>
+<b>void <a name="release_voice">release_voice</a>(int voice);</b><br>
+   Releases a soundcard voice, indicating that you are no longer interested 
+   in manipulating it. The sound will continue to play, and any resources 
+   that it is using will automatically be freed when it finishes. This is 
+   essentially the same as deallocate_voice(), but it waits for the sound to 
+   stop playing before taking effect.
+<p>
+<b>void <a name="voice_start">voice_start</a>(int voice);</b><br>
+   Activates a voice, using whatever parameters have been set for it.
+<p>
+<b>void <a name="voice_stop">voice_stop</a>(int voice);</b><br>
+   Stops a voice, storing the current position and state so that it may 
+   later be resumed by calling voice_start().
+<p>
+<b>void <a name="voice_set_priority">voice_set_priority</a>(int voice, int priority);</b><br>
+   Sets the priority of a voice (range 0-255). This is used to decide which 
+   voices should be chopped off, if you attempt to play more than the 
+   soundcard driver can handle.
+<p>
+<b>SAMPLE *<a name="voice_check">voice_check</a>(int voice);</b><br>
+   Checks whether a voice is currently allocated. It returns a copy of the 
+   sample that the voice is using, or NULL if the voice is inactive (ie. it 
+   has been deallocated, or the release_voice() function has been called and 
+   the sample has then finished playing).
+<p>
+<b>int <a name="voice_get_position">voice_get_position</a>(int voice);</b><br>
+   Returns the current position of a voice, in sample units, or -1 if it has 
+   finished playing.
+<p>
+<b>void <a name="voice_set_position">voice_set_position</a>(int voice, int position);</b><br>
+   Sets the position of a voice, in sample units.
+<p>
+<b>void <a name="voice_set_playmode">voice_set_playmode</a>(int voice, int playmode);</b><br>
+   Adjusts the loop status of the specified voice. This can be done while 
+   the voice is playing, so you can start a sample in looped mode (having 
+   set the loop start and end positions to the appropriate values), and then 
+   clear the loop flag when you want to end the sound, which will cause it 
+   to continue past the loop end, play the subsequent part of the sample, 
+   and finish in the normal way. The mode parameter is a bitfield containing 
+   the following values:
+<p>   <ul><li>
+   PLAYMODE_PLAY<br>
+      Plays the sample a single time. This is the default if you don't set 
+      the loop flag.
+<p>   <li>
+   PLAYMODE_LOOP<br>
+      Loops repeatedly through the sample, jumping back to the loop start 
+      position upon reaching the loop end.
+<p>   <li>
+   PLAYMODE_FORWARD<br>
+      Plays the sample from beginning to end. This is the default if you 
+      don't set the backward flag.
+<p>   <li>
+   PLAYMODE_BACKWARD<br>
+      Reverses the direction of the sample. If you combine this with the 
+      loop flag, the sample jumps to the loop end position upon reaching the 
+      loop start (ie. you do not need to reverse the loop start and end 
+      values when you play the sample in reverse).
+<p>   <li>
+   PLAYMODE_BIDIR<br>
+      When used in combination with the loop flag, causes the sample to 
+      change direction each time it reaches one of the loop points, so it 
+      alternates between playing forwards and in reverse.
+<p>   </ul>
+<b>int <a name="voice_get_volume">voice_get_volume</a>(int voice);</b><br>
+   Returns the current volume of the voice, range 0-255.
+<p>
+<b>void <a name="voice_set_volume">voice_set_volume</a>(int voice, int volume);</b><br>
+   Sets the volume of the voice, range 0-255.
+<p>
+<b>void <a name="voice_ramp_volume">voice_ramp_volume</a>(int voice, int time, int endvol);</b><br>
+   Starts a volume ramp (crescendo or diminuendo) from the current volume to 
+   the specified ending volume, lasting for time milliseconds.
+<p>
+<b>void <a name="voice_stop_volumeramp">voice_stop_volumeramp</a>(int voice);</b><br>
+   Interrupts a volume ramp operation.
+<p>
+<b>int <a name="voice_get_frequency">voice_get_frequency</a>(int voice);</b><br>
+   Returns the current pitch of the voice, in Hz.
+<p>
+<b>void <a name="voice_set_frequency">voice_set_frequency</a>(int voice, int frequency);</b><br>
+   Sets the pitch of the voice, in Hz.
+<p>
+<b>void <a name="voice_sweep_frequency">voice_sweep_frequency</a>(int voice, int time, int endfreq);</b><br>
+   Starts a frequency sweep (glissando) from the current pitch to the 
+   specified ending pitch, lasting for time milliseconds.
+<p>
+<b>void <a name="voice_stop_frequency_sweep">voice_stop_frequency_sweep</a>(int voice);</b><br>
+   Interrupts a frequency sweep operation.
+<p>
+<b>int <a name="voice_get_pan">voice_get_pan</a>(int voice);</b><br>
+   Returns the current pan position, from 0 (left) to 255 (right).
+<p>
+<b>void <a name="voice_set_pan">voice_set_pan</a>(int voice, int pan);</b><br>
+   Sets the pan position, ranging from 0 (left) to 255 (right).
+<p>
+<b>void <a name="voice_sweep_pan">voice_sweep_pan</a>(int voice, int time, int endpan);</b><br>
+   Starts a pan sweep (left <-> right movement) from the current position to 
+   the specified ending position, lasting for time milliseconds.
+<p>
+<b>void <a name="voice_stop_pan_sweep">voice_stop_pan_sweep</a>(int voice);</b><br>
+   Interrupts a pan sweep operation.
+<p>
+<b>void <a name="voice_set_echo">voice_set_echo</a>(int voice, int strength, int delay);</b><br>
+   Sets the echo parameters for a voice (not currently implemented).
+<p>
+<b>void <a name="voice_set_tremolo">voice_set_tremolo</a>(int voice, int rate, int depth);</b><br>
+   Sets the tremolo parameters for a voice (not currently implemented).
+<p>
+<b>void <a name="voice_set_vibrato">voice_set_vibrato</a>(int voice, int rate, int depth);</b><br>
+   Sets the vibrato parameters for a voice (not currently implemented).
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

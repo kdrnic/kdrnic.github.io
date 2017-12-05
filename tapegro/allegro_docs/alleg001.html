@@ -1,0 +1,399 @@
+<html><head><title>Configuration routines</title><body>
+<h1><a name="Configuration routines">Configuration routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#set_config_file">set_config_file</a>
+<li><a href="#set_config_data">set_config_data</a>
+<li><a href="#override_config_file">override_config_file</a>
+<li><a href="#override_config_data">override_config_data</a>
+<li><a href="#push_config_state">push_config_state</a>
+<li><a href="#pop_config_state">pop_config_state</a>
+<li><a href="#hook_config_section">hook_config_section</a>
+<li><a href="#config_is_hooked">config_is_hooked</a>
+<li><a href="#get_config_string">get_config_string</a>
+<li><a href="#get_config_int">get_config_int</a>
+<li><a href="#get_config_hex">get_config_hex</a>
+<li><a href="#get_config_float">get_config_float</a>
+<li><a href="#get_config_id">get_config_id</a>
+<li><a href="#get_config_argv">get_config_argv</a>
+<li><a href="#get_config_text">get_config_text</a>
+<li><a href="#set_config_string">set_config_string</a>
+<li><a href="#set_config_int">set_config_int</a>
+<li><a href="#set_config_hex">set_config_hex</a>
+<li><a href="#set_config_float">set_config_float</a>
+<li><a href="#set_config_id">set_config_id</a>
+</h4></ul>
+<p><br><br>
+<p>
+Various parts of Allegro, such as the sound routines and the 
+load_joystick_data() function, require some configuration information. This 
+data is stored in text files as a collection of "variable=value" lines, 
+along with comments that begin with a '#' character and continue to the end 
+of the line. The configuration file may optionally be divided into sections, 
+which begin with a "[sectionname]" line. Each section has a unique 
+namespace, to prevent variable name conflicts, but any variables that aren't 
+in a section are considered to belong to all the sections simultaneously.
+<p>
+By default the configuration data is read from a file called allegro.cfg or 
+sound.cfg, which can be located either in the same directory as the program 
+executable, or the directory pointed to by the ALLEGRO environment variable. 
+If you don't like this approach, you can specify any filename you like, or 
+use a block of binary configuration data provided by your program (which 
+could for example be loaded from a datafile).
+<p>
+You can store whatever custom information you like in the config file, along 
+with the standard variables that are used by Allegro (see below).
+<p>
+<b>void <a name="set_config_file">set_config_file</a>(char *filename);</b><br>
+   Sets the configuration file to be used by all subsequent config 
+   functions. If you don't call this function, Allegro will use the default 
+   allegro.cfg file, looking first in the same directory as your program and 
+   then in the directory pointed to by the ALLEGRO environment variable.
+<p>
+<b>void <a name="set_config_data">set_config_data</a>(char *data, int length);</b><br>
+   Specifies a block of data to be used by all subsequent config functions, 
+   which you have already loaded from disk (eg. as part of some more 
+   complicated format of your own, or in a grabber datafile). This routine 
+   makes a copy of the information, so you can safely free the data after 
+   calling it.
+<p>
+<b>void <a name="override_config_file">override_config_file</a>(char *filename);</b><br>
+   Specifies a file containing config overrides. These settings will be used 
+   in addition to the parameters in the main config file, and where a 
+   variable is present in both files this version will take priority. This 
+   can be used by application programmers to override some of the config 
+   settings from their code, while still leaving the main config file free 
+   for the end user to customise. For example, you could specify a 
+   particular sample frequency and IBK instrument file, but the user could 
+   still use a sound.cfg or allegro.cfg file to specify the port settings 
+   and irq numbers.
+<p>
+<b>void <a name="override_config_data">override_config_data</a>(char *data, int length);</b><br>
+   Version of override_config_file() which uses a block of data that has 
+   already been read into memory.
+<p>
+<b>void <a name="push_config_state">push_config_state</a>();</b><br>
+   Pushes the current configuration state (filename, variable values, etc). 
+   onto an internal stack, allowing you to select some other config source 
+   and later restore the current settings by calling pop_config_state(). 
+   This function is mostly intended for internal use by other library 
+   functions, for example when you specify a config filename to the 
+   save_joystick_data() function, it pushes the config state before 
+   switching to the file you specified.
+<p>
+<b>void <a name="pop_config_state">pop_config_state</a>();</b><br>
+   Pops a configuration state previously stored by push_config_state(), 
+   replacing the current config source with it.
+<p>
+<b>void <a name="hook_config_section">hook_config_section</a>(char *section,</b><br>
+<b>                         int (*intgetter)(char *name, int def),</b><br>
+<b>                         char *(*stringgetter)(char *name, char *def),</b><br>
+<b>                         void (*stringsetter)(char *name, char *value));</b><br>
+   Takes control of the specified config file section, so that your hook 
+   functions will be used to manipulate it instead of the normal disk file 
+   access. If both the getter and setter functions are NULL, a currently 
+   present hook will be unhooked. Hooked functions have the highest 
+   priority. If a section is hooked, the hook will always be called, so you 
+   can also hook a '#' section: even override_config_file() cannot override 
+   a hooked section.
+<p>
+<b>int <a name="config_is_hooked">config_is_hooked</a>(char *section);</b><br>
+   Returns TRUE if the specified config section has been hooked.
+<p>
+<b>char *<a name="get_config_string">get_config_string</a>(char *section, char *name, char *def);</b><br>
+   Retrieves a string variable from the current config file. If the named 
+   variable cannot be found, the value of def is returned. The section name 
+   may be set to NULL to accept variables from any part of the file, or used 
+   to control which set of parameters (eg. sound or joystick) you are 
+   interested in reading.
+<p>
+<b>int <a name="get_config_int">get_config_int</a>(char *section, char *name, int def);</b><br>
+   Reads an integer variable from the current config file. See the comments 
+   about get_config_string().
+<p>
+<b>int <a name="get_config_hex">get_config_hex</a>(char *section, char *name, int def);</b><br>
+   Reads an integer variable from the current config file, in hexadecimal 
+   format. See the comments about get_config_string().
+<p>
+<b>float <a name="get_config_float">get_config_float</a>(char *section, char *name, float def);</b><br>
+   Reads a floating point variable from the current config file. See the 
+   comments about get_config_string().
+<p>
+<b>int <a name="get_config_id">get_config_id</a>(char *section, char *name, int def);</b><br>
+   Reads a 4-letter driver ID variable from the current config file. See the 
+   comments about get_config_string().
+<p>
+<b>char **<a name="get_config_argv">get_config_argv</a>(char *section, char *name, int *argc);</b><br>
+   Reads a token list (words separated by spaces) from the current config 
+   file, returning a an argv style argument list, and setting argc to the 
+   number of tokens (unlike argc/argv, this list is zero based). Returns 
+   NULL and sets argc to zero if the variable is not present. The token list 
+   is stored in a temporary buffer that will be clobbered by the next call 
+   to get_config_argv(), so the data should not be expected to persist.
+<p>
+<b>char *<a name="get_config_text">get_config_text</a>(char *msg);</b><br>
+   This function is primarily intended for use by internal library code, but 
+   it may perhaps be helpful to application programmers as well. It uses the 
+   language.dat file to look up a translated version of the parameter in the 
+   currently selected language, returning a suitable translation if one can 
+   be found or a copy of the parameter if nothing else is available. This is 
+   basically the same thing as calling get_config_string() with [language] 
+   as the section, msg as the variable name, and msg as the default value.
+<p>
+<b>void <a name="set_config_string">set_config_string</a>(char *section, char *name, char *val);</b><br>
+   Writes a string variable to the current config file, replacing any 
+   existing value it may have, or removes the variable if val is NULL. The 
+   section name may be set to NULL to write the variable to the root of the 
+   file, or used to control which section the variable is inserted into. The 
+   altered file will be cached in memory, and not actually written to disk 
+   until you call allegro_exit(). Note that you can only write to files in 
+   this way, so the function will have no effect if the current config 
+   source was specified with set_config_data() rather than set_config_file().
+<p>
+   As a special case, variable or section names that begin with a '#' 
+   character are treated specially and will not be read from or written to 
+   the disk. Addon packages can use this to store version info or other 
+   status information into the config module, from where it can be read with 
+   the get_config_string() function.
+<p>
+<b>void <a name="set_config_int">set_config_int</a>(char *section, char *name, int val);</b><br>
+   Writes an integer variable to the current config file. See the comments 
+   about set_config_string().
+<p>
+<b>void <a name="set_config_hex">set_config_hex</a>(char *section, char *name, int val);</b><br>
+   Writes an integer variable to the current config file, in hexadecimal 
+   format. See the comments about set_config_string().
+<p>
+<b>void <a name="set_config_float">set_config_float</a>(char *section, char *name, float val);</b><br>
+   Writes a floating point variable to the current config file. See the 
+   comments about set_config_string().
+<p>
+<b>void <a name="set_config_id">set_config_id</a>(char *section, char *name, int val);</b><br>
+   Writes a 4-letter driver ID variable to the current config file. See the 
+   comments about set_config_string().
+<p>
+<p><hr><p>
+Allegro uses these standard variables from the configuration file:
+<p><ul><li>
+gfx_card = x<br>
+   Specifies which graphics driver to use when the program requests 
+   GFX_AUTODETECT. Multiple possible drivers can be suggested with extra 
+   lines in the form "gfx_card2 = x", "gfx_card3 = x", etc. The driver ID 
+   should be one of the values:
+<p><pre>
+      VGA      - Standard VGA
+      MODX     - Mode-X
+      VBE1     - VESA 1.x
+      VB2B     - VBE 2.0 (banked)
+      VB2L     - VBE 2.0 (linear)
+      VBE3     - VBE 3.0
+      VBAF     - VBE/AF
+      XTND     - Xtended mode
+<p></pre><li>
+vbeaf_driver = x<br>
+   Specifies where to look for the VBE/AF driver (vbeaf.drv). If this 
+   variable is not set, Allegro will look in the same directory as the 
+   program, and then fall back on the standard locations (c:\, or the 
+   directory specified with the VBEAF_PATH environment variable).
+<p><li>
+keyboard = x<br>
+   Specifies which keyboard layout to use. The parameter is the name of a 
+   keyboard mapping file produced by the keyconf utility, and can either be 
+   a fully qualified file path or a basename like "us" or "uk". If the 
+   latter, Allegro will look first for a separate config file with that name 
+   (eg. "uk.cfg") and then for an object with that name in the keyboard.dat 
+   file (eg. "UK_CFG"). The config file or keyboard.dat file can be stored 
+   in the same directory as the program, or in the location pointed to by 
+   the ALLEGRO environment variable. Look in the keyboard.dat file to see 
+   which mappings are available: at the time of this writing there are:
+<p><pre>
+      BE       - Belgium
+      CH       - Swiss
+      CZ       - Czech
+      DE       - Germany
+      DK       - Denmark
+      DVORAK   - Dvorak
+      ES       - Spain
+      FI       - Finland
+      FR       - France
+      IT       - Italy
+      NO       - Norway
+      PT       - Portugal
+      RU       - Russian
+      SE       - Sweden
+      UK       - United Kingdom
+      US       - United States
+<p></pre><li>
+language = x<br>
+   Specifies which language file to use for error messages and other bits of 
+   system text. The parameter is the name of a translation file, and can 
+   either be a fully qualified file path or a basename like "en" or "sp". If 
+   the latter, Allegro will look first for a separate config file with a 
+   name in the form "entext.cfg", and then for an object with that name in 
+   the language.dat file (eg. "ENTEXT_CFG"). The config file or language.dat 
+   file can be stored in the same directory as the program, or in the 
+   location pointed to by the ALLEGRO environment variable. Look in the 
+   language.dat file to see which mappings are available: at the time of 
+   this writing there are:
+<p><pre>
+      CZ       - Czech
+      DE       - German
+      DK       - Danish
+      EN       - English
+      ES       - Spanish
+      FI       - Finnish
+      FR       - French
+      IT       - Italian
+      RU       - Russian
+      SE       - Swedish
+<p></pre><li>
+mouse = x<br>
+   Mouse type (Microsoft, Logitech, or NT). Any input method should work on 
+   most systems, although the Microsoft code is probably more reliable. Some 
+   Logitech drivers have a bug that causes the mouse to move at eighth 
+   speed, though, and you should use the Logitech setting if you suffer from 
+   this problem.
+<p><li>
+[sound]<br>
+   Section containing sound configuration information, using the variables:
+<p><ul><li>
+digi_card = x<br>
+   Sets the driver to use for playing samples, where x is one of the values:
+<p><pre>
+      0        - none
+      SB       - Sound Blaster (autodetect breed)
+      SB10     - Sound Blaster 1.0
+      SB15     - Sound Blaster 1.5
+      SB20     - Sound Blaster 2.0
+      SBP      - Sound Blaster Pro
+      SB16     - Sound Blaster 16
+      ESS      - ESS AudioDrive
+      ESC      - Ensoniq Soundscape
+<p></pre><li>
+midi_card = x<br>
+   Sets the driver to use for MIDI music, where x is one of the values:
+<p><pre>
+      0        - none
+      OPL      - Adlib (autodetect OPL version)
+      OPL2     - OPL2 FM synth
+      OPLX     - Dual OPL2 (SB Pro-1)
+      OPL3     - OPL3 FM synth
+      SB       - raw SB MIDI interface
+      MPU      - MPU-401 MIDI interface
+      DIGI     - DIGMID software wavetable
+      AWE      - AWE32
+<p></pre><li>
+digi_input_card = x<br>
+   Sets the driver to use for digital sample input, in the same format as 
+   the digi_card variable. This can usually be left blank.
+<p><li>
+midi_input_card = x<br>
+   Sets the driver to use for MIDI data input, in the same format as the 
+   midi_card variable. This can usually be left blank.
+<p><li>
+digi_voices = x<br>
+   Specifies the minimum number of voices to reserve for use by the digital 
+   sound driver. How many are possible depends on the driver.
+<p><li>
+midi_voices = x<br>
+   Specifies the minimum number of voices to reserve for use by the MIDI 
+   sound driver. How many are possible depends on the driver.
+<p><li>
+quality = x<br>
+   Controls the sound quality vs. performance tradeoff for the sample mixing 
+   code. This can be set to any of the values:<pre>
+      0 - fast mixing of 8 bit data into 16 bit buffers
+      1 - true 16 bit mixing (requires a 16 bit stereo soundcard)
+      2 - interpolated 16 bit mixing</pre>
+<p><li>
+flip_pan = x<br>
+   Toggling this between 0 and 1 reverses the left/right panning of samples, 
+   which might be needed because some SB cards (including mine :-) get the 
+   stereo image the wrong way round.
+<p><li>
+sb_port = x<br>
+   Sets the port address of the SB (this is usually 220).
+<p><li>
+sb_dma = x<br>
+   Sets the DMA channel for the SB (this is usually 1).
+<p><li>
+sb_irq = x<br>
+   Sets the IRQ for the SB (this is usually 7).
+<p><li>
+sb_freq = x<br>
+   Sets the sample frequency. With the SB driver, possible rates are 11906 
+   (any), 16129 (any), 22727 (SB 2.0 and above), and 45454 (only on SB 2.0 
+   or SB16, not the stereo SB Pro driver). On the ESS Audiodrive, possible 
+   rates are 11363, 17046, 22729, or 44194. On the Ensoniq Soundscape, 
+   possible rates are 11025, 16000, 22050, or 48000. Don't worry if you set 
+   some other number by mistake: Allegro will automatically round it to the 
+   closest supported frequency.
+<p><li>
+fm_port = x<br>
+   Sets the port address of the OPL synth (this is usually 388).
+<p><li>
+mpu_port = x<br>
+   Sets the port address of the MPU-401 MIDI interface (this is usually 330).
+<p><li>
+mpu_irq = x<br>
+   Sets the IRQ for the MPU-401 (this is usually the same as sb_irq).
+<p><li>
+digi_volume = x<br>
+   Sets the volume for digital sample playback, from 0 to 255.
+<p><li>
+midi_volume = x<br>
+   Sets the volume for midi music playback, from 0 to 255.
+<p><li>
+ibk_file = x<br>
+   Specifies the name of a .IBK file which will be used to replace the 
+   standard Adlib patch set.
+<p><li>
+ibk_drum_file = x<br>
+   Specifies the name of a .IBK file which will be used to replace the 
+   standard set of Adlib percussion patches.
+<p><li>
+patches = x<br>
+   Specifies where to find the sample set for the DIGMID driver. This can 
+   either be a Gravis style directory containing a collection of .pat files 
+   and a default.cfg index, or an Allegro datafile produced by the pat2dat 
+   utility. If this variable is not set, Allegro will look either for a 
+   default.cfg or patches.dat file in the same directory as the program, the 
+   directory pointed to by the ALLEGRO environment variable, and the 
+   standard GUS directory pointed to by the ULTRASND environment variable.
+<p></ul><li>
+[midimap]<br>
+   If you are using the SB MIDI output or MPU-401 drivers with an external 
+   synthesiser that is not General MIDI compatible, you can use the midimap 
+   section of the config file to specify a patch mapping table for 
+   converting GM patch numbers into whatever bank and program change 
+   messages will select the appropriate sound on your synth. This is a real 
+   piece of self-indulgence. I have a Yamaha TG500, which has some great 
+   sounds but no GM patch set, and I just had to make it work somehow...
+<p>
+   This section consists of a set of lines in the form:
+<p><ul><li>
+p&lt;n&gt; = bank0 bank1 prog pitch<br>
+   With this statement, n is the GM program change number (1-128), bank0 and 
+   bank1 are the two bank change messages to send to your synth (on 
+   controllers #0 and #32), prog is the program change message to send to 
+   your synth, and pitch is the number of semitones to shift everything that 
+   is played with that sound. Setting the bank change numbers to -1 will 
+   prevent them from being sent.
+<p>
+   For example, the line:
+<p>
+      p36 = 0 34 9 12
+<p>
+   specifies that whenever GM program 36 (which happens to be a fretless 
+   bass) is selected, Allegro should send a bank change message #0 with a 
+   parameter of 0, a bank change message #32 with a parameter of 34, a 
+   program change with a parameter of 9, and then should shift everything up 
+   by an octave.
+<p></ul><li>
+[joystick]<br>
+   Section containing a set of variables used by the save_joystick_data() 
+   and load_joystick_data() functions.
+<p></ul>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>

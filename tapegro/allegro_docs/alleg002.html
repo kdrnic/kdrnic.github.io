@@ -1,0 +1,132 @@
+<html><head><title>Mouse routines</title><body>
+<h1><a name="Mouse routines">Mouse routines</a></h1>
+<p>
+<ul><h4>
+<li><a href="#install_mouse">install_mouse</a>
+<li><a href="#remove_mouse">remove_mouse</a>
+<li><a href="#mouse_x">mouse_x</a>
+<li><a href="#mouse_y">mouse_y</a>
+<li><a href="#mouse_b">mouse_b</a>
+<li><a href="#mouse_pos">mouse_pos</a>
+<li><a href="#show_mouse">show_mouse</a>
+<li><a href="#scare_mouse">scare_mouse</a>
+<li><a href="#unscare_mouse">unscare_mouse</a>
+<li><a href="#freeze_mouse_flag">freeze_mouse_flag</a>
+<li><a href="#position_mouse">position_mouse</a>
+<li><a href="#set_mouse_range">set_mouse_range</a>
+<li><a href="#set_mouse_speed">set_mouse_speed</a>
+<li><a href="#set_mouse_sprite">set_mouse_sprite</a>
+<li><a href="#set_mouse_sprite_focus">set_mouse_sprite_focus</a>
+<li><a href="#get_mouse_mickeys">get_mouse_mickeys</a>
+<li><a href="#mouse_callback">mouse_callback</a>
+</h4></ul>
+<p><br><br>
+<p>
+The Allegro mouse handler runs on top of the DOS int33 mouse driver, so it 
+will only work when the DOS driver (usually mouse.com or mouse.exe) is 
+active. It is useful as a simple wrapper for the int33 functions, and also 
+because it can display mouse pointers in SVGA modes, which most 
+implementations of the standard driver cannot.
+<p>
+<b>int <a name="install_mouse">install_mouse</a>();</b><br>
+   Installs the Allegro mouse handler. You must do this before using any 
+   other mouse functions. Returns -1 on failure (ie. if the int33 driver is 
+   not loaded), otherwise the number of buttons on the mouse.
+<p>
+<b>void <a name="remove_mouse">remove_mouse</a>();</b><br>
+   Removes the mouse handler. You don't normally need to bother calling 
+   this, because allegro_exit() will do it for you.
+<p>
+<b>extern volatile int <a name="mouse_x">mouse_x</a>;</b><br>
+<b>extern volatile int <a name="mouse_y">mouse_y</a>;</b><br>
+<b>extern volatile int <a name="mouse_b">mouse_b</a>;</b><br>
+<b>extern volatile int <a name="mouse_pos">mouse_pos</a>;</b><br>
+   Global variables containing the current mouse position and button state. 
+   The mouse_x and mouse_y positions are integers ranging from zero to the 
+   bottom right corner of the screen. The mouse_b variable is a bitfield 
+   indicating the state of each button: bit 0 is the left button, bit 1 the 
+   right, and bit 2 the middle button. For example:
+<p><pre>
+      if (mouse_b & 1)
+         printf("Left button is pressed\n");
+<p>
+      if (!(mouse_b & 2))
+         printf("Right button is not pressed\n");
+<p></pre>
+   The mouse_pos variable has the current X coordinate in the high word and 
+   the Y in the low word. This may be useful in tight polling loops where a 
+   mouse interrupt could occur between your reading of the two separate 
+   variables, since you can copy this value into a local variable with a 
+   single instruction and then split it up at your leisure.
+<p>
+<b>void <a name="show_mouse">show_mouse</a>(BITMAP *bmp);</b><br>
+   Tells Allegro to display a mouse pointer on the screen. This will only 
+   work if the timer module has been installed. The mouse pointer will be 
+   drawn onto the specified bitmap, which should normally be 'screen' (see 
+   later for information about bitmaps). To hide the mouse pointer, call 
+   show_mouse(NULL). Warning: if you draw anything onto the screen while the 
+   pointer is visible, a mouse movement interrupt could occur in the middle 
+   of your drawing operation. If this happens the mouse buffering and SVGA 
+   bank switching code will get confused and will leave 'mouse droppings' 
+   all over the screen. To prevent this, you must make sure you turn off the 
+   mouse pointer whenever you draw onto the screen.
+<p>
+<b>void <a name="scare_mouse">scare_mouse</a>();</b><br>
+   Helper for hiding the mouse pointer prior to a drawing operation. This 
+   will temporarily get rid of the pointer, but only if that is really 
+   required (ie. the mouse is visible, and is displayed on the physical 
+   screen rather than some other memory surface, and it is not a hardware 
+   cursor). The previous mouse state is stored for subsequent calls to 
+   unscare_mouse().
+<p>
+<b>void <a name="unscare_mouse">unscare_mouse</a>();</b><br>
+   Undoes the effect of a previous call to scare_mouse(), restoring the 
+   original pointer state.
+<p>
+<b>extern int <a name="freeze_mouse_flag">freeze_mouse_flag</a>;</b><br>
+   If this flag is set, the mouse pointer won't be redrawn when the mouse 
+   moves. This can avoid the need to hide the pointer every time you draw to 
+   the screen, as long as you make sure your drawing doesn't overlap with 
+   the current pointer position.
+<p>
+<b>void <a name="position_mouse">position_mouse</a>(int x, int y);</b><br>
+   Moves the mouse to the specified screen position. It is safe to call even 
+   when a mouse pointer is being displayed.
+<p>
+<b>void <a name="set_mouse_range">set_mouse_range</a>(int x1, int y1, int x2, int y2);</b><br>
+   Sets the area of the screen within which the mouse can move. Pass the top 
+   left corner and the bottom right corner (inclusive). If you don't call 
+   this function the range defaults to (0, 0, SCREEN_W-1, SCREEN_H-1).
+<p>
+<b>void <a name="set_mouse_speed">set_mouse_speed</a>(int xspeed, int yspeed);</b><br>
+   Sets the mouse speed. Larger values of xspeed and yspeed represent slower 
+   mouse movement: the default for both is 2.
+<p>
+<b>void <a name="set_mouse_sprite">set_mouse_sprite</a>(BITMAP *sprite);</b><br>
+   You don't like my mouse pointer? No problem. Use this function to supply 
+   an alternative of your own. If you change the pointer and then want to 
+   get my lovely arrow back again, call set_mouse_sprite(NULL).
+<p>
+<b>void <a name="set_mouse_sprite_focus">set_mouse_sprite_focus</a>(int x, int y);</b><br>
+   The mouse focus is the bit of the pointer that represents the actual 
+   mouse position, ie. the (mouse_x, mouse_y) position. By default this is 
+   the top left corner of the arrow, but if you are using a different mouse 
+   pointer you might need to alter it.
+<p>
+<b>void <a name="get_mouse_mickeys">get_mouse_mickeys</a>(int *mickeyx, int *mickeyy);</b><br>
+   Measures how far the mouse has moved since the last call to this 
+   function. The mouse will continue to generate movement mickeys even when 
+   it reaches the edge of the screen, so this form of input can be useful 
+   for games that require an infinite range of mouse movement.
+<p>
+<b>extern void (*<a name="mouse_callback">mouse_callback</a>)(int flags);</b><br>
+   Called by the interrupt handler whenever the mouse moves or one of the 
+   buttons changes state. This function must be in locked memory, and must 
+   execute _very_ quickly! It is passed the event flags that triggered the 
+   call, which is a bitmask containing any of the values MOUSE_FLAG_MOVE, 
+   MOUSE_FLAG_LEFT_DOWN, MOUSE_FLAG_LEFT_UP, MOUSE_FLAG_RIGHT_DOWN, 
+   MOUSE_FLAG_RIGHT_UP, MOUSE_FLAG_MIDDLE_DOWN, and MOUSE_FLAG_MIDDLE_UP.
+<p>
+<br>
+<br>
+<p><hr><p><a href="allegro.html">Back to Contents</a><p>
