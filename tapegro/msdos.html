@@ -3,6 +3,55 @@
 <body bgcolor="black" text="green">
 <bgsound src="ALLEGRO.MID" loop="infinite">
 <center><img src="dosrulss.gif"></center>
-TODO
+<h3>Configuring Tapegro for MS-DOS</h3>
+You'll likely want use_vsync not to be set, as not all graphics modes support vsync anyway.<br>
+The window_w,window_h,color_depth must correspond to an existing graphics mode. 320,200,8 is the classic mode 13h, highly recommended.<br>
+<h3>Other things to keep in mind</h3>
+Be careful with filenames - keep all your resources in MS-DOS 8.3 filename format (8 for name, 3 for extension).
+<h3>Testing performance under DOSBox</h3>
+The following two lines can be typed into DOSBox to simulate a 486:
+<pre>
+core=normal
+cycles=26800
+</pre>
+Alternatively, use cycles value of 77000 for a Pentium I.<br>
+One can see that performance is often not so brilliant - if you want your game played like a real MS-DOS era PC could, you will have to optimise carefully. See optimising for MS-DOS, below.
+<h3>Things that don't work in MS-DOS</h3>
+Currently the differences below are caused by deficits in the older version of Allegro used:
+<ul>
+<li>TEXT_RIGHT has no effect and will default to TEXT_LEFT
+<li>Sprites which are rotated, scaled or both will ignore flips
+<li>LoadFont does nothing and just returns the default font
+<li>MaskedStretchBlit does an unmasked stretch blit instead
+<li>GetMIDILength always returns 0
+</ul>
+<h3>Optimising for MS-DOS</h3>
+It seems most often what will take the most time will be Js execution, not rendering.<br>
+Some tips follow:
+<h4>Use macros where possible</h3>
+You can invoke gcc as below to use it to preprocess files not in the C language:
+<pre>
+gcc -E -P - < main_src.js > main.js
+</pre>
+Knowing that, changing this
+<pre>
+function Move(obj){
+	obj.x += obj.dx;
+	obj.y += obj.dy;
+}
+
+function Collision(a, b){
+	return (Math.abs(a.x - b.x) < (a.radius + b.radius) && Math.abs(a.y - b.y) < (a.radius + b.radius));
+}
+</pre>
+into this
+<pre>
+#define Move(obj)	\
+obj.x += obj.dx;	\
+obj.y += obj.dy;
+
+#define Collision(a, b) (Math.abs(a.x - b.x) < (a.radius + b.radius) && Math.abs(a.y - b.y) < (a.radius + b.radius))
+</pre>
+can enable a significant performance improvement, due to the cost of function calls.
 </body>
 </html>
