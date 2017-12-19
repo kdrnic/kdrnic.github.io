@@ -8,12 +8,26 @@ When TAPEGRO.EXE starts, it looks for two files in the current directory: <b>con
 The former will contain a number of settings, which include how many frames per second will the game run at, graphics mode, controls, and whether to enable the developer console, plus any Allegro-specific settings.<br>
 The latter will be executed as soon as Allegro is initialised, and must include at least one global "Loop" function which will be called every frame. Both drawing and logic is done on this function.<br>
 The default files included together with Tapegro will be fine for starting your first game.<br>
-<br><br><br>Now, some Tapegro-specific features will be discussed.
+<br>Now, some Tapegro-specific features will be discussed.
 <h3>Handling input</h3>
 There are 4 "virtual" gamepad states. Each includes directional controls and 12 buttons, much alike the SNES controller. The directional input, however, may be either analog (mouse or analog sticks) or digital (D-pads or keyboard).<br>
 There are two arrays, <b>dpad</b> and <b>button</b>. Each element of this array is one controller.<br>
 <b>dpad</b> elements have <b>x</b> and <b>y</b> floating point properties, while <b>button</b> is an integer bitfield.
+<h3>The garbage collector</h3>
+The garbage collector is voluntary, so you should remember to call it eventually.
+<pre>
+Duktape.gc();
+</pre>
 <h3>The developer console</h3>
-You can type anything there and it will be executed just as if it was in main.js.
+Enable it on the <a href="cfgdoc.html">config file</a>.<br>
+You can type anything there and it will be executed just as if it was in main.js.<br>
+Input is treated specially if the first character is a colon. If followed by a number, it offers a multiline editor, like that in the C64. It also accepts commands "print" and "run".
+<pre>
+: 10 for(var i = 0; i < entities.length; i++){
+: 20 Cout(entities[i].name);
+: 30 }
+: 15 if(!entities[i].alive) break;
+: run
+</pre>
 </body>
 </html>
