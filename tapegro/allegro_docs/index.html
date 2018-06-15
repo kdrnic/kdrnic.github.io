@@ -44,7 +44,7 @@ ul{
 		</style>
 		<script>
 $(function(){
-	$("#index").children("li:has(ul)").prepend("<a class='expander' href='#'><img src='/minus.png'></a>");
+	$("#index").children("li:has(ul)").prepend("<a class='expander' href='#'><img src='minus.png'></a>");
 	$("#index").children("li").children("a").not(".expander").click(function(a){
 		$('#content').attr('src', this.href);
 		return false;
@@ -59,7 +59,7 @@ $(function(){
 		var a = $(this);
 		var sublist = a.parent().children("ul").first();
 		sublist.toggle();
-		a.children("img").first().attr("src", sublist.is(":visible") ? "/minus.png" : "/plus.png");
+		a.children("img").first().attr("src", sublist.is(":visible") ? "minus.png" : "plus.png");
 	});
 	$(".expander").trigger("click");
 	
