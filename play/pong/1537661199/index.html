@@ -107,14 +107,14 @@ WISHLIST
 </head>
 
 <body>
-  	<div style="display:flex;">
+    <div style="display:flex;">
       <div style="flex:1;min-width:300px;max-width:400px;overflow-y:auto;">
          <div id="playerStats"></div>
       </div>
-  		<div style="flex:2;" id="map-pane">
-  			 <canvas id="canvas" width="480" height="480"></canvas>
-  		</div>
-  		<div id="textLogScrollPane" style="flex:2;">
+        <div style="flex:2;" id="map-pane">
+            <canvas id="canvas" width="480" height="480"></canvas>
+        </div>
+        <div id="textLogScrollPane" style="flex:2;">
           <div id="textLog">
              <div>You're in a maze of twisty little passages, all alike.</div>
           </div>
@@ -122,9 +122,9 @@ WISHLIST
               <span id="prompt_text"></span>
               <span class="cursor"></span>
           </div>
-  		</div>
-  	</div>
-  	
+        </div>
+    </div>
+    
     <div id="actionDiv">
         What do you want to do?
         <div id="buttonsDiv">
@@ -235,7 +235,7 @@ WISHLIST
             symbol: "@",
             floor: 0, // 0 is ground floor, only way is down
             name: "player",
-            health: 10,
+            maxHealth: 10,
             accuracy : 1.0, // optional, defaults to 1
             slots : {
               weapon : false,
@@ -573,7 +573,8 @@ WISHLIST
                 renderTile(i, j, curX, curY, visibilityCache);
             }
         }
-        showTileInfo(player.x, player.y);
+        //please don't add showTileInfo here, for wait and other commands that tick,
+        //and call renderMap may cause repeated displays
     }
     
     function tileBlocksLight(t) {
@@ -951,10 +952,10 @@ WISHLIST
         showInventory : function() {
             var inv = "You are carrying:<br/>";
             for(var i = 0; i < inventoryShortcuts.length; i++) {
-	            var shortcut = inventoryShortcuts.substr(i, 1);
-	            var item = player.inventory[shortcut];
-	            if(item)
-	            	inv += ' ' + shortcut + ' - ' + getName(item, 'a ') + '<br/>'; 
+                var shortcut = inventoryShortcuts.substr(i, 1);
+                var item = player.inventory[shortcut];
+                if(item)
+                    inv += ' ' + shortcut + ' - ' + getName(item, 'a ') + '<br/>'; 
             }
             if(player.inventoryCount == 0) 
                 inv += "nothing";
@@ -1167,20 +1168,20 @@ WISHLIST
     
     function itemPrompt(text, callback, acceptNone, typeRestrict){
         prompt(text, function(ans){
-	        var item = player.inventory[ans];
-	        if(!item) {
-		        textLog("No such item");
+            var item = player.inventory[ans];
+            if(!item) {
+                textLog("No such item");
                 return;
-	        }
+            }
             if(ans == "-" && acceptNone){
                 callback(null);
             } else {
-	            if(typeRestrict && (typeRestrict != item.type)){
-	                textLog("That item is not " + typeRestrict + "!");
-	            } else {
-		            callback(item);
-	            }
-            }	        
+                if(typeRestrict && (typeRestrict != item.type)){
+                    textLog("That item is not " + typeRestrict + "!");
+                } else {
+                    callback(item);
+                }
+            }           
         });
     }
 
@@ -1260,8 +1261,7 @@ WISHLIST
 
     function initUI() {
         display.canvas = document.getElementById('canvas');
-        display.context = display.canvas.getContext('2d')
-        display.context.textBaseline = "top";
+        display.context = display.canvas.getContext('2d');
         document.addEventListener("keyup", handleKeyPress);
         resizeUI();
         window.onresize = resizeUI();
@@ -1275,6 +1275,9 @@ WISHLIST
         display.columns = display.canvas.width / display.tileSize;
         display.rows = display.canvas.height / display.tileSize;
         display.context.font = display.tileSize+'px monospace';
+        //so characters are drawn in the correct tile
+        //apparently it gets resetted every time the font is changed
+        display.context.textBaseline = "top";
         textLogScrollElement.style.height = display.canvas.height+'px';
         if(oldWidth != display.canvas.width || oldHeight != display.canvas.height)
             renderMap(player.x, player.y);
