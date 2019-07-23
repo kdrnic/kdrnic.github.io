@@ -1,0 +1,21 @@
+body{
+	margin:2.5em auto;
+	max-width: 41em;
+	line-height: 1.6;
+	font-size: 1.125em;
+	color:#444;
+	padding: 0.625em
+}
+h1,h2,h3{
+	line-height:1.2
+}
+code{
+	font: normal 0.833em Consolas, Monaco, monospace;
+	display: block;
+	padding: 1em;
+	overflow-y: auto;
+	overflow-x: auto;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #444 #777 #777 #444;
+}
