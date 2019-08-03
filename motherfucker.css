@@ -1,6 +1,6 @@
 body{
-	margin:2.5em auto;
-	max-width: 41em;
+	margin: 2.5vw auto;
+	max-width: 41vw;
 	line-height: 1.6;
 	font-size: 1.125em;
 	color:#444;
@@ -18,4 +18,13 @@ code{
 	border-width: 1px;
 	border-style: solid;
 	border-color: #444 #777 #777 #444;
+}
+.article-index{
+    border: solid 1px black;
+    white-space: nowrap;
+    margin-right: 1vw;
+    width: 25vw;
+	position: absolute;
+	left: 1vw;
+    overflow-x: scroll;
 }

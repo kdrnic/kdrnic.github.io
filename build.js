@@ -16,13 +16,11 @@ var filedates = {};
 
 //Skip processing those files
 
-var skip_filenames = [
-	"frameset.html",	//Just frameset definition, can be broken easily
-	"index.html",		//The index page with the title, which is hand-styled
-	"latest.html",		//Just a copy of the newest article
-];
+//Skips certain files
+var skip_filenames = /^(index|latest|(index_.+))\.html/;
+
 //When ordering filenames, those files are last (must include those which will have indices of articles)
-var last_filenames = ["index_.html"];
+var last_filenames = [];
 
 //Sort files
 filenames.sort(function(a, b){
@@ -51,15 +49,31 @@ hljs.configure({
 	],
 });
 
-for(filename of filenames){
-	if(skip_filenames.includes(filename)) continue;
-	//Process only HTML files
-	if(!/\.html$/.test(filename)) continue;
-	try{
-	filetext = fs.readFileSync(filename);
-	//JQuery like API
-	$ = cheerio.load(filetext);
-	
+function DoPass(func){
+	for(var fn of filenames){
+		if(skip_filenames.test(fn)) continue;
+		//Process only HTML files
+		if(!/\.html$/.test(fn)) continue;
+		try{
+			filetext = fs.readFileSync(fn);
+			
+			//JQuery like API
+			$ = cheerio.load(filetext);
+			
+			//Process file
+			func(fn, $);
+			
+			//Overwrite file
+			fs.writeFileSync(fn, $.html());
+		}
+		catch(e){
+			console.log("Failed for file " + fn, e);
+		}
+	}
+}
+
+//First pass - most processing
+DoPass(function(filename, $){
 	//Always have <head> tag
 	if(!$('head')) $('html').prepend('head');
 	//Creation/publishing date in YYYY MM DD format
@@ -124,6 +138,23 @@ for(filename of filenames){
 		$('head').append("<link rel='stylesheet' href='motherfucker.css'>");
 	}
 	
+	//Force target on all links
+	$("a").each(function(idx, el){
+		if($(el).attr('target')) return;
+		$(el).attr('target', '_top');
+	});
+	
+	//Checks for the article index, insert if not present
+	if(!$("ul[data-type='pages_index']").length){
+		$('body').prepend("<div class='article-index'><ul data-type='pages_index'></ul></div>");
+	}
+	
+	//Create index.html based page for this article
+	fs.writeFileSync("index_"+filename, fs.readFileSync("index.html").toString().replace('latest.html', filename));
+});
+
+//Second pass - add articles' index
+DoPass(function(filename, $){
 	//Creates indices of articles
 	$("ul[data-type='pages_index']").each(function(idx, el){
 		var codes = [];
@@ -131,10 +162,18 @@ for(filename of filenames){
 		
 		for(var page in filetitles){
 			var title = filetitles[page];
-			//The regex turns into a more clearer YYYY MM DD HH mm SS format
+			//This regex turns "Game:" into the videogame emoji
+			title = title.replace(/^Game:/, "&#x1F3AE;");
+			//This regex turns into a more clearer YYYY MM DD HH mm SS format
 			var date = filedates[page].replace(/T/, ' ').replace(/\..+/, '');
+			//This regex removes the seconds
+			date = date.replace(/:\d\d$/, '');
+			//This regex removes the beginning of the year
+			date = date.replace(/^20/, "'");
+			//This regex changes - to /
+			date = date.replace(/-/g, "/");
 			
-			codes.push("<li><span>"+date+"   </span><a target='content' href='"+page+"'>"+title+"</a></li>");
+			codes.push("<li><span>"+date+"   </span><a target='_top' href='index_"+page+"'>"+title+"</a></li>");
 		}
 		
 		//This will sort by date first, title second
@@ -145,14 +184,7 @@ for(filename of filenames){
 		
 		$(el).append(codes.join(""));
 	});
-	
-	//Overwrite file
-	fs.writeFileSync(filename, $.html());
-	}
-	catch(e){
-		console.log("Failed for file " + filename, e);
-	}
-}
+});
 
 //Copy newest page to latest.html
 var filedates_arr = [];
