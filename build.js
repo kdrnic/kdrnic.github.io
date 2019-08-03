@@ -172,8 +172,13 @@ DoPass(function(filename, $){
 	}
 	
 	WriteIndex_(filename, {
-		//Text of body but without text of childrens
-		summary: $('body').clone().children().remove().end().text().replace(/\n/g, "").substr(0, 140) + "...",
+		//Text of body but without text of childrens, escaped
+		summary: ($('body').clone().children().remove().end().text().replace(/\n/g, "").substr(0, 140) + "...")
+			.replace(/&/g, '&amp;')
+			.replace(/>/g, '&gt;')
+			.replace(/</g, '&lt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&apos;'),
 		//src of first image, or just my avatar
 		img: "https://kdrnic.github.io/" + ($('img').length ? $('img').first().attr('src') : 'images/kdrnic.jpg'),
 		//title of article
