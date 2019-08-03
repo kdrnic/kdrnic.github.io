@@ -149,7 +149,7 @@ DoPass(function(filename, $){
 		$('body').prepend("<div class='article-index'><ul data-type='pages_index'></ul></div>");
 	}
 	
-	//Create index.html based page for this article
+	//Create index_.html based superframe page for this article
 	fs.writeFileSync("index_"+filename, fs.readFileSync("index.html").toString().replace('latest.html', filename));
 });
 
