@@ -55,10 +55,10 @@ function DoPass(func){
 		//Process only HTML files
 		if(!/\.html$/.test(fn)) continue;
 		try{
-			filetext = fs.readFileSync(fn);
+			var filetext = fs.readFileSync(fn);
 			
 			//JQuery like API
-			$ = cheerio.load(filetext);
+			var $ = cheerio.load(filetext);
 			
 			//Process file
 			func(fn, $);
@@ -70,6 +70,28 @@ function DoPass(func){
 			console.log("Failed for file " + fn, e);
 		}
 	}
+}
+
+//Create index_.html based superframe page for this article
+//card is twitter-card stuff https://developer.twitter.com/en/docs/tweets/optimize-with-cards/guides/getting-started.html
+function WriteIndex_(filename, card){
+	var filetext = fs.readFileSync("index.html");
+	var $ = cheerio.load(filetext);
+	
+	//Replace 'latest.html' with the article name
+	$('iframe').first().attr('src', filename);
+	
+	//Twitter metas
+	$('head').append(`
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:creator" content="@kdrnic" />
+<meta property="og:title" content="${card.title}" />
+<meta property="og:description" content="${card.summary}" />
+<meta property="og:image" content="${card.img}" />
+	`);
+	
+	//Write file
+	fs.writeFileSync("index_" + filename, $.html());
 }
 
 //First pass - most processing
@@ -149,8 +171,14 @@ DoPass(function(filename, $){
 		$('body').prepend("<div class='article-index'><ul data-type='pages_index'></ul></div>");
 	}
 	
-	//Create index_.html based superframe page for this article
-	fs.writeFileSync("index_"+filename, fs.readFileSync("index.html").toString().replace('latest.html', filename));
+	WriteIndex_(filename, {
+		//Text of body but without text of childrens
+		summary: $('body').clone().children().remove().end().text().replace(/\n/g, "").substr(0, 140) + "...",
+		//src of first image, or just my avatar
+		img: "https://kdrnic.github.io/" + ($('img').length ? $('img').first().attr('src') : 'images/kdrnic.jpg'),
+		//title of article
+		title: filetitles[filename],
+	});
 });
 
 //Second pass - add articles' index
