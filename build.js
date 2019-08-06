@@ -3,6 +3,18 @@ hljs = require('highlight.js');
 fs = require('fs');
 //HTML processing
 cheerio = require('cheerio');
+//RSS feed
+var RSS = require('rss');
+
+var feed = new RSS({
+	title: "kdrnic's page",
+	description: "kdrnic's page",
+	feed_url: 'https://kdrnic.github.io/rss.xml',
+	site_url: 'https://kdrnic.github.io',
+	image_url: 'https://kdrnic.github.io/images/kdrnic.png',
+	managingEditor: 'kdrnic', webMaster: 'kdrnic', copyright: '2019 kdrnic',
+	language: 'en',
+});
 
 //Name of code highlighter style sheet
 var hlcss = "hlstyles/default.css";
@@ -171,18 +183,37 @@ DoPass(function(filename, $){
 		$('body').prepend("<div class='article-index'><ul data-type='pages_index'></ul></div>");
 	}
 	
+	//Text of body but without text of childrens, escaped
+	//used by both Twitter cards and RSS feed
+	var summary = ($('body').clone().children().remove().end().text().replace(/\n/g, "").substr(0, 140) + "...")
+		.replace(/&/g, '&amp;')
+		.replace(/>/g, '&gt;')
+		.replace(/</g, '&lt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&apos;');
+	
+	//src of first image, or just my avatar
+	//used by both Twitter cards and RSS feed
+	var image = "https://kdrnic.github.io/" + ($('img').length ? $('img').first().attr('src') : 'images/kdrnic.jpg');
+	
+	//Write index_ page with Twitter card
 	WriteIndex_(filename, {
-		//Text of body but without text of childrens, escaped
-		summary: ($('body').clone().children().remove().end().text().replace(/\n/g, "").substr(0, 140) + "...")
-			.replace(/&/g, '&amp;')
-			.replace(/>/g, '&gt;')
-			.replace(/</g, '&lt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&apos;'),
-		//src of first image, or just my avatar
-		img: "https://kdrnic.github.io/" + ($('img').length ? $('img').first().attr('src') : 'images/kdrnic.jpg'),
+		summary: summary,
+		img: image,
 		//title of article
 		title: filetitles[filename],
+	});
+	
+	//prepare RSS feed
+	feed.item({
+		title:  filetitles[filename],
+		description: summary,
+		url: 'https://kdrnic.github.io/index_' + filename,
+		author: 'kdrnic',
+		date: filedates[filename],
+		enclosure: {
+			'url': image,
+		}
 	});
 });
 
@@ -230,3 +261,6 @@ filedates_arr.sort(function(b, a){
 var latest = filedates_arr[0];
 latest = latest.substr(latest.indexOf(' ')+1);
 fs.writeFileSync("latest.html", fs.readFileSync(latest));
+
+//Write RSS XML
+fs.writeFileSync("rss.xml", feed.xml({indent: true}));
