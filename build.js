@@ -93,6 +93,10 @@ function WriteIndex_(filename, card){
 	//Replace 'latest.html' with the article name
 	$('iframe').first().attr('src', filename);
 	
+	//Add title tag if not present
+	if(!$('title')) $('head').prepend('title');
+	$('title').text(filetitles[filename]);
+	
 	//Twitter metas
 	$('head').append(`
 <meta name="twitter:card" content="summary" />
