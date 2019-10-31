@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 08 Aug 2019 22:47:03 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 31 Oct 2019 02:40:37 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -122,6 +122,15 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Tue, 23 Jul 2019 22:18:02 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/keystone.png" length="0" type="image/png"/>
+        </item>
+        <item>
+            <title><![CDATA[Game: Kori Yogan Mushi]]></title>
+            <description><![CDATA[A game made for Halloween 2019. It is a score attack arcade shooter, in NES style. You play as a worm getting rid of corpse parts.It feature...]]></description>
+            <link>https://kdrnic.github.io/index_kym.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_kym.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Thu, 31 Oct 2019 02:37:47 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/kym.png" length="0" type="image/png"/>
         </item>
         <item>
             <title><![CDATA[Game: Ludum Dare 23]]></title>
