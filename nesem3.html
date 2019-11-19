@@ -1,0 +1,177 @@
+<html><body data-title="NES Emulation Saga Part III">
+<h1>NES Emulation Saga - Writing a NES emulator
+Part III: the APU</h1>
+
+This is a series <a href="index_nesem1.html">(part1, </a><a href="index_nesem2.html"> part2)</a> of articles on the development of my own NES emulator.
+It is coded in a mixture of C/C++, using Allegro 4, and is hosted at bitbucket <a href="https://bitbucket.org/kdrnic/nesem/src/master/">
+(link to repository)</a>.<br><br>
+
+The APU is NES' Audio Processing Unit. It has the following:
+<ul>
+<li>Square wave (pulse) 1 channel</li>
+<li>Square wave (pulse) 2 channel</li>
+<li>Triangle wave channel</li>
+<li>Noise generator channel</li>
+<li>Differential pulse-code modulation (DCM) sample playback channel</li>
+<li>Envelope generator for the pulse and noise channels</li>
+<li>Length counter for all channels</li>
+<li>Sweep generator for the pulse channels</li>
+<li>Fancy non-linear mixing, sort of by accident</li>
+</ul>
+
+A <a href="https://wiki.nesdev.com/w/index.php/APU">more detailed explanation is available at the NESDev
+wiki</a>, and here I will focus on the issues I met.<br><br>
+
+<h1>VGM file format</h1>
+
+I (correctly) predicted that emulating both the CPU/APU interface and the audio synthesis together would be challenging,
+so I employed divide-and-conquer and tackled the latter first. As
+<a href="https://www.reddit.com/r/arduino/comments/9o5scz/8bit_nes_music_emulated_on_esp32/">this ESP232-based NES song player</a>
+<a href="https://web.archive.org/web/20191119052847/https://www.reddit.com/r/arduino/comments/9o5scz/8bit_nes_music_emulated_on_esp32/">
+(archive)</a> <a href="https://github.com/connornishijima/Cartridge">(source code)</a> I found in a preliminary Google search had done,
+I opted to make use of VGM format music rips. Those are timed logs of register writes, which are much more approachable.<br><br>
+
+I fetched VGM packs from Super Mario Bros., Castlevania, Rockman, Journey to Silius, which together form a very representative sample
+of the great NES sound. Unzipped, the files were all .VGZ, so gzip-compressed. I could've used a bash script to pass them all through gzip,
+but I opted to put together zlib code to decompress the files in memory with the help of <a href="https://www.lemoda.net/c/zlib-open-read/">
+this example code</a> <a href="https://web.archive.org/web/20191119053804/https://www.lemoda.net/c/zlib-open-read/">(archive)</a>.<br><br>
+
+That done, <a href="https://vgmrips.net/wiki/VGM_Specification">the VGM specification</a> was simple to follow and only a few commands needed
+for the NES files I had.<br><br>
+
+Together with direct audio output, I also implemented an oscilloscope view and an option to record to a .WAV file. Inspecting the waveforms both
+in real time and with Audacity was of good help.<br><br>
+
+The VGM player has its own repository at bitbucket <a href="https://bitbucket.org/kdrnic/nes_vgm_player/src/master/">here</a>.<br><br>
+
+Now for synthesis details.<br><br>
+
+<h1>Aliasing annoyance</h1>
+
+Back in <a href="https://mitxela.com/projects/swotGB/about">mitxela's post that started it all</a>
+<a href="https://web.archive.org/web/20191119022334/https://mitxela.com/projects/swotGB/about">(archive)</a>,
+he said:<br><br>
+
+<i>"Sound is supposed to be the hardest part to emulate. I think this is mostly because if you're not familiar with Nyquist aliasing,
+ square waves sound easy, until you hear them, and they sound terrible."</i><br><br>
+ 
+I was indeed familiar with the implications of the theorem, and thus already feared from the outset this task. mitxela then proceeded to describe
+how easy he had it with the synthesis tools in the WebAudio API. In my case, the API I have is a buffer of uint16_t which my code must fill,
+so the challenge is increased.<br><br>
+
+<h1>Additive synthesis</h1>
+
+My first idea was then to emulate what mitxela did, but without the magic from WebAudio createPeriodicWaveform - i.e. express each waveform
+as a sum of sine waves, cutting off those with a frequency higher than half the sampling frequency, thus producing perfect band-limited
+square or triangle waves. Other than mitxela's own maths, I also found <a href="https://lpsa.swarthmore.edu/Fourier/Series/ExFS.html">a 
+ good reference for the Fourier terms</a><a href="https://web.archive.org/web/20191119044314/https://lpsa.swarthmore.edu/Fourier/Series/ExFS.html">
+(archive)</a> belonging to some course on Fourier analysis. I found others, but the formulas were not as well explained or so succinctly.<br><br>
+
+This is what the code for the square wave ended up like, simplified for clarity:
+<code class="cpp">
+double time_multiplier = 2 * pi / 44100.0;
+/*
+Duty cycle is as such:
+0 - 12.5%		
+1 - 25%			
+2 - 50%			
+3 - 75% i.e. 25% but upside down
+*/
+int sq_duty_tbl2[4] = {8, 4, 2, 4};
+double sq_duty_tbl[4] = {0.125, 0.25, 0.5, 0.25};
+sq_time += sq_freq;
+//Synthesize band limited square wave
+for(int n = 1; sq_freq * n &lt; 44100 / 2; n++){
+	double An = 2 * sin(n * pi * sq_duty_tbl[sq_duty]) / (n * pi);
+	if(n % sq_duty_tbl2[sq_duty] == 0) continue;
+	
+	sq_ampl += cos(sq_time * time_multiplier * n) * An;
+}
+//Normalize to 0.0-1.0 range (although Gibbs' phenomenon exceeds the interval)
+sq_ampl += sq_duty_tbl[sq_duty];
+</code><br><br>
+
+And the simpler still code for the triangle wave (The NES doesn't actually generate a pretty triangle wave,
+the one it has visible steps since it has only 4 bits of resolution. However, I actually preferred the sound of a real triangle wave,
+and it was simpler to additive-synthesise):
+<code class="cpp">
+tri_time += tri_freq;
+////Synthesize band limited triangle wave
+for(int n = 0; tri_freq * n &lt; 44100 / 2; n++){
+	if((n % 2) == 0) continue;
+	double An = (1.0 - pow(-1, n)) / (pow(n, 2.0) * pow(pi, 2.0));
+	tri_ampl += cos(tri_time * time_multiplier * n) * An;
+}
+//Normalize to 0.0-1.0 range
+tri_ampl += 0.25;
+tri_ampl *= 2.0;
+</code><br><br>
+
+I didn't at this point make an attempt to synthesise bandlimited noise or to fix the (much smaller in amplitude) aliasing from DPCM playback.<br><br>
+
+The main issue with this approach was that it is slow. The audio would glitch and pop as it could not keep up with real time
+playback, and on top of CPU emulation it left the emulator extremely laggy. A <a href="files/VGMPlayProfiling.txt">profiling log</a>
+generated with the <a href="https://github.com/VerySleepy/verysleepy"> VerySleepy profiler</a> shows that as expected most time
+ is spent in the inner sine summation loops. The approach was considered unsalvageable.<br><br>
+
+<h1>Another approach</h1>
+
+The one other simple approach is to generate a signal in the straightforward and aliased manner and then apply a low-pass filter to it,
+in hopes of fixing the damage.<br><br>
+
+I opted for a FIR (Finite Impulse Response) over an IIR (Infinite Impulse Response) filter due to believing it would have better phase
+characteristics.<br><br>
+
+I am familiar with FIR (and DSP lingo in general) from implementing image resampling, where a Mitchell-Netravali or Lanczos filter is a good
+standard and the formula for it is simple to turn into a convolution matrix. This OTOH requires a custom filter, and Googling how to calculate
+the coefficients for a filter turns up DSP tutorials and introductory theory involving ideal sinc filters. Googling "fir filter design tools"
+had more success, and I found the <a href="http://www.iowahills.com/5FIRFiltersPage.html">Iowa Hills FIR Filter design tool</a>
+<a href="https://web.archive.org/web/20191119045629/http://www.iowahills.com/5FIRFiltersPage.html">(archive)</a>. It was relatively straightforward
+to use and generates the coefficients as a .TXT file.<br><br>
+
+I designed a low-pass filter with the Kaiser method as it was highly praised, and set it for minimum phase as we don't want to mess with the timing
+of the game sounds. I picked a frequency cutoff of 14kHz as the NES seems to have such a filtering, in practice. I arbitrarily picked 63 taps.<br><br>
+
+<img src="images/nesem10.png"><br><br>
+
+This simple approach worked well and produced decent sound, comparable to the quality of the additive synthesis but now running much faster.
+Time to synthesize and record a 1 minute song went down from almost 1 minute to a couple seconds, and now audio was fast enough to keep in sync
+with 60 FPS gameplay.<br><br>
+
+TODO: add embdedded player and wave pictures for additive, FIR and aliased
+
+<h1>Emulator integration</h1>
+
+In the NES the APU runs at 1.79 MHz together with the CPU. My APU runs at 44.1kHz which will have timings off of course but is enough for
+a low accuracy emulator. It of course won't allow for games that use the APU to time raster chasing tricks, which are only a few.<br><br>
+
+My approach was to keep a CPU cycles counter, and on every APU register access, before completing the read or write, convert those to an equivalent
+number of 44.1kHz cycles and run the APU, which updates the registers and also buffers the next samples to be played. I keep two copies of the APU
+registers, since some are used for other things like joystick reading, and have to copy them to and fro.
+<code class="cpp">
+void SyncAPU(bool sync_regs = true)
+{
+    if(sync_regs){
+        memcpy(apu_state.regs, apu, sizeof(apu));
+        memcpy(apu_state.reg_w, apu_w, sizeof(apu));
+    }
+    int nsamples = (apuCycles * 44100) / apu_state.clock;
+    nsamples = apu_sample(&amp;apu_state, &amp;ptrSampled, ptrSampled + nsamples, nsamples);
+    apuCycles -= (nsamples * apu_state.clock) / 44100;
+    
+    memcpy(apu, apu_state.regs, sizeof(apu));
+    memcpy(apu_w, apu_state.reg_w, sizeof(apu));
+}
+</code><br><br>
+
+<h1>Bugs of note</h1>
+
+While playing music alone with the VGM Player it wasn't ever obvious, likely because the square channels would play notes similar to each other,
+but once integrated with the emulator and the games would have sound effects sharing the channels (usually the 1st) and interrupting notes
+of the music, there was a clear glitching of the volume envelopes. Turned out I forgot to index by channel number and used the first channel envelope
+for both:<br><br>
+
+<img src="images/nesem11.png"><br><br>
+
+</body>
+</html>

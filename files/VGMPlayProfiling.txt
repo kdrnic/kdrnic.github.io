@@ -1,0 +1,341 @@
+	#include <math.h>
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <string.h>
+	
+	#include "apu.h"
+	
+	#define bit0  0x1u
+	#define bit1  0x2u
+	#define bit2  0x4u
+	#define bit3  0x8u
+	#define bit4  0x10u
+	#define bit5  0x20u
+	#define bit6  0x40u
+	#define bit7  0x80u
+	#define bit8  0x100u
+	#define bit9  0x200u
+	#define bit10 0x400u
+	#define bit11 0x800u
+	#define bit12 0x1000u
+	#define bit13 0x2000u
+	#define bit14 0x4000u
+	#define bit15 0x8000u
+	
+	//Reference for additive synthesis of square and triangle waves:
+	//https://lpsa.swarthmore.edu/Fourier/Series/ExFS.html
+	int apu_sample(apu_data *apu, uint16_t **sample, uint16_t *samples_end, int num_samples)
+	{
+		const double pi = 3.141592653;
+		int i;
+		
+		const int apu_len_tbl[0x20] = {
+			10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,
+			12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30
+		};
+		
+		//Load length counters if set, and clear length setter
+		//Also set envelope start flags
+		if(apu->reg_w[APU_SQ1_HI]){
+			apu->sq_len[0] = apu_len_tbl[apu->regs[APU_SQ1_HI] >> 3u];
+			apu->reg_w[APU_SQ1_HI] = 0;
+			apu->sq_env[0].start = 1;
+		}
+		if(apu->reg_w[APU_SQ2_HI]){
+			apu->sq_len[1] = apu_len_tbl[apu->regs[APU_SQ2_HI] >> 3u];
+			apu->reg_w[APU_SQ2_HI] = 0;
+			apu->sq_env[1].start = 1;
+		}
+		if(apu->reg_w[APU_TRI_HI]){
+			apu->tri_len = apu_len_tbl[apu->regs[APU_TRI_HI] >> 3u];
+			apu->reg_w[APU_TRI_HI] = 0;
+		}
+		if(apu->reg_w[APU_NOISE_HI]){
+			apu->noise_len = apu_len_tbl[apu->regs[APU_NOISE_HI] >> 3u];
+			apu->reg_w[APU_NOISE_HI] = 0;
+			apu->noise_env.start = 1;
+		}
+		
+		//If channel disabled, clear lengths / active flag
+		if(!apu->ignore_snd_chn){
+			if(!(apu->regs[APU_SND_CHN] & APU_SND_CHN_P1))	apu->sq_len[0] = 0;
+			if(!(apu->regs[APU_SND_CHN] & APU_SND_CHN_P2))	apu->sq_len[1] = 0;
+			if(!(apu->regs[APU_SND_CHN] & APU_SND_CHN_T))	apu->tri_len = 0;
+			if(!(apu->regs[APU_SND_CHN] & APU_SND_CHN_N))	apu->noise_len = 0;
+			if(!(apu->regs[APU_SND_CHN] & APU_SND_CHN_D))	apu->dmc_active = 0;
+		}
+		
+		int dmc_activate = 0;
+		if(apu->reg_w[APU_SND_CHN] && (apu->regs[APU_SND_CHN] & APU_SND_CHN_D)){
+			dmc_activate = 1;
+		}
+		apu->reg_w[APU_SND_CHN] = 0;
+		
+0.05s		for(i = 0; (i < num_samples) && ((*sample) != samples_end); i++, (*sample)++){
+			double time_multiplier = 2 * pi / 44100.0;
+			
+			int envelope_tick = 0;
+			int len_tick = 0;
+			
+			//Frame counter logic
+			const double frame_delta = 240.0 / 44100;
+0.00s			apu->frame_counter += 240.0 / 44100;
+0.04s			if(floor(apu->frame_counter) > apu->frame_counter - frame_delta){
+				int frame_mode = apu->regs[APU_FRAME] >> 7u;
+				int frame_step = ((int) apu->frame_counter) % (4 + frame_mode);
+				if((frame_step != 3) || !frame_mode) envelope_tick = 1;
+				if(frame_step == 2) len_tick = 1;
+				if((frame_step == 3) && !frame_mode){
+					len_tick = 1;
+					//NMI
+				}
+				if((frame_step == 4) && frame_mode) len_tick = 1;
+			}
+			
+			//Length counter logic
+			if(len_tick){
+				if(apu->sq_len[0]	&& !(apu->regs[APU_SQ1_VOL] & bit5))	apu->sq_len[0]--;
+				else apu->regs[APU_SND_CHN] &= ~APU_SND_CHN_P1;
+				if(apu->sq_len[1]	&& !(apu->regs[APU_SQ2_VOL] & bit5))	apu->sq_len[1]--;
+				else apu->regs[APU_SND_CHN] &= ~APU_SND_CHN_P2;
+				if(apu->noise_len	&& !(apu->regs[APU_NOISE_VOL] & bit5))	apu->noise_len--;
+				else apu->regs[APU_SND_CHN] &= ~APU_SND_CHN_N;
+				if(apu->tri_len		&& !(apu->regs[APU_TRI_LINEAR] & bit7))	apu->tri_len--;
+				else apu->regs[APU_SND_CHN] &= ~APU_SND_CHN_T;
+			}
+			
+			//Envelope logic
+			if(envelope_tick){
+				#define DO_ENVELOPE(x_env, APU_X_VOL)\
+				if(!apu->x_env.start){\
+					if(apu->x_env.divider) apu->x_env.divider--;\
+					else{\
+						apu->x_env.divider = apu->regs[APU_X_VOL] & 15;\
+						if(apu->x_env.decay) apu->x_env.decay--;\
+						else if(apu->regs[APU_X_VOL] & bit5){\
+							apu->x_env.decay = 15;\
+						}\
+					}\
+				}\
+				else{\
+					apu->x_env.start = 0;\
+					apu->x_env.decay = 15;\
+					apu->x_env.divider = apu->regs[APU_X_VOL] & 15;\
+				}
+0.00s				DO_ENVELOPE(noise_env, APU_NOISE_VOL)
+				DO_ENVELOPE(sq_env[0], APU_SQ1_VOL)
+0.00s				DO_ENVELOPE(sq_env[1], APU_SQ2_VOL)
+			}
+			
+0.00s			double sq_ampl[2] = {0, 0};
+			for(int sqn = 0; sqn < 2; sqn++){
+				uint8_t sq_vol = 0;
+0.01s				if(apu->regs[APU_SQ1_VOL] & bit4) sq_vol = apu->regs[APU_SQ1_VOL] & 15;
+				else sq_vol = apu->sq_env[sqn].decay;
+				
+0.00s				uint16_t sq_period = apu->regs[APU_SQ1_LO + sqn * 4] + ((apu->regs[APU_SQ1_HI + sqn * 4] & (bit3 - 1u)) << 8u);
+				
+				//Sweep unit logic
+0.01s				uint8_t sweep_shift = apu->regs[APU_SQ1_SWEEP + sqn * 4] & (bit3 - 1u);
+				uint8_t sweep_neg = apu->regs[APU_SQ1_SWEEP + sqn * 4] & bit3;
+				uint16_t sweep_target = sq_period >> sweep_shift;
+0.01s				if(sweep_neg){
+					sweep_target = ~sweep_target;
+0.00s					if(sqn) sweep_target++;
+				}
+				sweep_target += sq_period;
+				if(
+					(!sweep_neg && (sweep_target & bit11))
+					|| (sq_period < 8)
+				){
+					//Silence the channel works even when not changing the period
+					sq_vol = 0;
+				}
+0.00s				else if(
+					len_tick
+					&& (apu->regs[APU_SQ1_SWEEP + sqn * 4] & bit7)
+					&& (!apu->sweep_counter[sqn])
+					&& sweep_shift
+					&& apu->sq_len[sqn]
+				){
+					sq_period = sweep_target;
+					apu->regs[APU_SQ1_LO + sqn * 4] = sq_period & 0xFFu;
+					apu->regs[APU_SQ1_HI + sqn * 4] &= ~(bit3 - 1u);
+					apu->regs[APU_SQ1_HI + sqn * 4] |= (sq_period >> 8u) & (bit3 - 1u);
+				}
+0.01s				if((!apu->sweep_counter[sqn]) || apu->reg_w[APU_SQ1_SWEEP + sqn * 4]){
+					//Reload and clear reload flag
+0.01s					apu->sweep_counter[sqn] = ((apu->regs[APU_SQ1_SWEEP + sqn * 4] >> 4u) & (bit3 - 1u)) + 1;
+0.01s					apu->reg_w[APU_SQ1_SWEEP + sqn * 4] = 0;
+				}
+				else apu->sweep_counter[sqn]--;
+				
+				if(!apu->sq_len[sqn]) continue;
+0.02s				if(!sq_vol) continue;
+				
+				/*
+				0 - 12.5%		
+				1 - 25%			
+				2 - 50%			
+				3 - 25% negated	
+				*/
+				uint8_t sq_duty_bits = apu->regs[APU_SQ1_VOL] >> 6u;
+0.01s				int sq_duty_tbl2[4] = {8, 4, 2, 4};
+0.01s				double sq_duty_tbl[4] = {0.125, 0.25, 0.5, 0.25};
+0.00s				double sq_duty = sq_duty_tbl[sq_duty_bits];
+				
+0.05s				double sq_freq = ((double) apu->clock) / (16.0 * ((double)(sq_period + 1u)));
+0.01s				apu->sq_time[sqn] += sq_freq;
+				
+				//Synthesize band limited square wave
+0.63s				for(int n = 1; sq_freq * n < 22050; n++){
+1.40s					double an = 2 * sin(n * pi * sq_duty) / (n * pi);
+0.45s					if(n % sq_duty_tbl2[sq_duty_bits] == 0) continue;
+					
+4.05s					sq_ampl[sqn] += cos(apu->sq_time[sqn] * time_multiplier * n) * an;
+				}
+				
+				//Normalize to 0.0-1.0 range (although Gibbs' phenomenon exceeds the interval)
+0.01s				sq_ampl[sqn] += sq_duty;
+				
+0.01s				if(sq_duty_bits == 3) sq_ampl[sqn] = 1.0 - sq_ampl[sqn];
+				
+				//Multiply by volume, leaving 0.0-15.0 range
+0.01s				sq_ampl[sqn] *= sq_vol;
+			}
+			
+0.00s			double tri_ampl = 0.0;
+0.01s			if(apu->tri_len){
+0.00s				uint16_t tri_period = apu->regs[APU_TRI_LO] + ((apu->regs[APU_TRI_HI] & (bit3 - 1u)) << 8u);
+0.01s				double tri_freq = ((double) apu->clock) / (32.0 * ((double)(tri_period + 1u)));
+0.02s				apu->tri_time += tri_freq;
+				
+				////Synthesize band limited triangle wave
+0.72s				for(int n = 0; tri_freq * n < 22050; n++){
+0.00s					if((n%2) == 0) continue;
+0.74s					double an = (1.0 - pow(-1, n)) / (pow(n, 2.0) * pow(pi, 2.0));
+					
+2.64s					tri_ampl += cos(apu->tri_time * time_multiplier * n) * an;
+				}
+				
+				//Normalize to 0.0-1.0 range
+				tri_ampl += 0.25;
+				tri_ampl *= 2.0;
+				
+				//Multiply by volume, leaving 0.0-15.0 range
+				tri_ampl *= 15.0;
+			}
+			
+			double noise_ampl = 0.0;
+0.01s			if(apu->noise_len){
+				uint8_t noise_vol = 0;
+0.00s				if(apu->regs[APU_NOISE_VOL] & bit4) noise_vol = apu->regs[APU_NOISE_VOL] & 15;
+0.01s				else noise_vol = apu->noise_env.decay;
+				
+				uint8_t noise_period_bits = apu->regs[APU_NOISE_LO] & (bit4 - 1u);
+0.01s				int noise_period_tbl[0x10] = {4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068};
+				int noise_period = noise_period_tbl[noise_period_bits];
+0.00s				apu->noise_time += apu->clock / 44100.0;
+0.01s				if(apu->noise_time > noise_period){
+0.00s					apu->noise_time -= noise_period;
+0.01s					apu->noise_rng = rand() > (RAND_MAX / 2);
+				}
+				
+0.00s				noise_ampl = apu->noise_rng;
+0.01s				noise_ampl *= noise_vol;
+			}
+			
+			double dmc_ampl = 0.0;
+0.00s			if((apu->regs[APU_SND_CHN] & APU_SND_CHN_D)){
+0.00s				uint8_t dmc_period_bits = apu->regs[APU_DMC_FREQ] & (bit4 - 1u);
+0.02s				int dmc_period_tbl[0x10] = {428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106,  84,  72,  54};
+				int dmc_period = dmc_period_tbl[dmc_period_bits];
+				
+				if(apu->reg_w[APU_DMC_RAW]){
+					apu->reg_w[APU_DMC_RAW] = 0;
+					apu->dmc_level = apu->regs[APU_DMC_RAW] & 0x7F;
+				}
+				
+				dmc_load_len:
+0.01s				if(dmc_activate){
+					apu->dmc_len = (apu->regs[APU_DMC_LEN] * 0x10) + 1;
+					apu->dmc_addr = (apu->regs[APU_DMC_START] * 0x40) + 0xC000;
+					apu->dmc_time = 0;
+					apu->dmc_active = 1;
+					dmc_activate = 0;
+					
+					/*
+					printf("%d bpm, %d bytes, %d period, %02X APU_DMC_LEN, %02X APU_DMC_FREQ\n",
+						(60 * apu->clock) / (dmc_period * 8 * apu->dmc_len),
+						apu->dmc_len,
+						dmc_period,
+						apu->regs[APU_DMC_LEN],
+						apu->regs[APU_DMC_FREQ]
+					);
+					*/
+				}
+				
+				//Bit-based loop
+				//Quite high-level emulation
+0.01s				if(apu->dmc_active){
+					double old_time = apu->dmc_time;
+					double dmc_freq = ((double) apu->clock) / dmc_period;
+0.04s					apu->dmc_time += (dmc_freq) / 44100.0;
+					
+0.04s					for(int b = floor(old_time); b < floor(apu->dmc_time); b++){
+0.01s						int byte = b / 8;
+						
+						if(byte > apu->dmc_len){
+							apu->dmc_active = 0;
+							if(apu->regs[APU_DMC_FREQ] & bit6){
+								dmc_activate = 1;
+								goto dmc_load_len;
+							}
+							else{
+								apu->regs[APU_SND_CHN] &= ~APU_SND_CHN_D;
+								if(apu->regs[APU_DMC_FREQ] & bit7){
+									//NMI
+								}
+								break;
+							}
+						}
+						
+						int bit = b % 8;
+						if(apu->dmc_read(apu->dmc_addr + byte) & (1 << bit))
+							apu->dmc_level += 2.0;
+						else
+0.04s							apu->dmc_level -= 2.0;
+0.00s						if(apu->dmc_level > 126.0) apu->dmc_level = 126.0;
+0.00s						if(apu->dmc_level < 0.0) apu->dmc_level = 0.0;
+					}
+				}
+				
+				dmc_ampl = apu->dmc_level;
+			}
+			
+0.01s			if(apu->mute & APU_SND_CHN_P1) sq_ampl[0] = 0;
+			if(apu->mute & APU_SND_CHN_P2) sq_ampl[1] = 0;
+0.00s			if(apu->mute & APU_SND_CHN_N) noise_ampl = 0;
+0.01s			if(apu->mute & APU_SND_CHN_T) tri_ampl = 0;
+0.01s			if(apu->mute & APU_SND_CHN_D) dmc_ampl = 0;
+			
+			//Fancy mixer formulae
+0.01s			double pulse_mix = (sq_ampl[0] || sq_ampl[1]) ? 95.88 / ((8128.0 / (sq_ampl[0] + sq_ampl[1])) + 100.0) : 0;
+0.02s			double tnd_mix = (tri_ampl || noise_ampl || dmc_ampl) ? 
+				159.79 / (
+0.04s					(1.0 / ((tri_ampl / 8227.0) + (noise_ampl / 12241.0) + (dmc_ampl / 22638.0)))
+0.04s					+ 100.0
+				)
+0.00s				: 0;
+			double mixed = pulse_mix + tnd_mix;
+			
+			//Avoid clipping
+0.00s			mixed *= 0.8;
+			mixed += 0.1;
+			
+			//Convert to 16bit unsigned
+0.04s			(**sample) = floor(mixed * 0xFFFF);
+		}
+		
+		return i;
+0.00s	}
