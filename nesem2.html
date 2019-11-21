@@ -1,12 +1,309 @@
-<html><body data-title="NES Emulation Saga Part II">
+<html><head data-created="2019-11-19T06:06:34.299Z" data-modified="2019-11-19T06:05:59.027Z"><meta charset="UTF8"><link rel="stylesheet" href="hlstyles/default.css"><link rel="stylesheet" href="motherfucker.css"></head><body data-title="NES Emulation Saga Part II"><div class="article-index"><ul data-type="pages_index"><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem3.html">NES Emulation Saga Part III</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem2.html">NES Emulation Saga Part II</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem1.html">NES Emulation Saga Part I</a></li><li><span>&apos;19/10/31 02:37   </span><a target="_top" href="index_kym.html">&#x1F3AE; Kori Yogan Mushi</a></li><li><span>&apos;19/08/03 20:43   </span><a target="_top" href="index_bespoke.html">&#x1F3AE; Bespoke Terror</a></li><li><span>&apos;19/08/03 20:32   </span><a target="_top" href="index_1hgj8.html">&#x1F3AE; Conker&apos;s BFD for Nintendo 486</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_trog.html">&#x1F3AE; TROG</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_stacker.html">&#x1F3AE; TTY Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_snake.html">&#x1F3AE; Snake</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_sm64.html">&#x1F3AE; SM64 HTML5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_ronaldo.html">&#x1F3AE; 3D Ronaldo Football</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_roguelike.html">&#x1F3AE; Batch Roguelike</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_prototype.html">&#x1F3AE; Prototype</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_nestest.html">&#x1F3AE; NEStest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_megamanblue.html">&#x1F3AE; MegaMan in the blue mountains</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD36.html">&#x1F3AE; Rune Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD31.html">&#x1F3AE; Doktornix And The Fetch Quest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29warmup.html">&#x1F3AE; Ludum Dare 29 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29.html">&#x1F3AE; Ground control to Major Tomashevsky</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23warmup.html">&#x1F3AE; Ludum Dare 23 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23.html">&#x1F3AE; Ludum Dare 23</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_keystone.html">&#x1F3AE; Keystone Kapers for NES</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_gbmine.html">&#x1F3AE; GBMINE</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_choplifter.html">&#x1F3AE; Choplifter</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_breakout.html">&#x1F3AE; 6502 breakout</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_alibaba.html">&#x1F3AE; Ali Baba and the 40 thieves</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj6.html">&#x1F3AE; 1HGJ6</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj5.html">&#x1F3AE; 1HGJ5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj4.html">&#x1F3AE; 1HGJ4</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj3.html">&#x1F3AE; 1HGJ3</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hg7.html">&#x1F3AE; 1HGJ7</a></li></ul></div>
 <h1>NES Emulation Saga - Writing a NES emulator
 Part II: the PPU</h1>
 
-This is a series <a href="index_nesem1.html">(part1, </a><a href="index_nesem3.html"> part3)</a> of articles on the development of my own NES emulator.
-It is coded in a mixture of C/C++, using Allegro 4, and is hosted at bitbucket <a href="https://bitbucket.org/kdrnic/nesem/src/master/">
+This is a series <a href="index_nesem1.html" target="_top">(part1, </a><a href="index_nesem3.html" target="_top"> part3)</a> of articles on the development of my own NES emulator.
+It is coded in a mixture of C/C++, using Allegro 4, and is hosted at bitbucket <a href="https://bitbucket.org/kdrnic/nesem/src/master/" target="_top">
 (link to repository)</a>.<br><br>
 
-TODO
+The PPU is NES&apos; Picture Processing Unit. It is fundamental in a NES emulator. The first thing a game does is usually check PPU registers in a loop
+to wait for two frames, and then after the reset code runs many games will go into an infinite loop and have everything run in the vblank interrupt handler.<br><br>
 
-</body>
-</html>
+<code class="plaintext" data-hled="true">; Clear the vblank flag if it was set at reset time
+    bit PPU_STATUS
+    ; Wait 2 vblanks
+    -	bit PPU_STATUS
+        bpl -
+    -	bit PPU_STATUS
+        bpl -
+        
+    ;Rest of init code
+    ;[...]
+    
+    loop:
+    jmp loop
+
+vblank:
+    ;Most of game code
+    rti
+</code><div style="display: none;">; Clear the vblank flag if it was set at reset time
+	bit PPU_STATUS
+	; Wait 2 vblanks
+	-	bit PPU_STATUS
+		bpl -
+	-	bit PPU_STATUS
+		bpl -
+        
+    ;Rest of init code
+    ;[...]
+    
+    loop:
+	jmp loop
+
+vblank:
+    ;Most of game code
+    rti
+</div>
+
+<h1>Main emulator loop</h1>
+Therefore, the main emulator loop ends up structured around the PPU, and looks like this:
+<code class="cpp" data-hled="true"><span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> cyclesCount = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> scanline = <span class="hljs-number">0</span>; scanline &lt; <span class="hljs-number">262</span>; scanline++){
+    <span class="hljs-keyword">switch</span>(scanline){
+        <span class="hljs-keyword">case</span> <span class="hljs-number">0</span> ... <span class="hljs-number">240</span>:
+            <span class="hljs-comment">//Visible lines</span>
+            RenderScanline(nes_mem, scanline, screen);
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-number">241</span>:
+            <span class="hljs-comment">//First vblank line</span>
+            <span class="hljs-keyword">if</span>(nes_mem.ppu[PPUCTRL] &amp; PPUCTRL_NMI) machine.NMI();
+            nes_mem.ppu[PPUSTATUS] |= PPUSTATUS_VBLANK;
+            <span class="hljs-comment">//Usually, since it is the most predictable state,</span>
+            <span class="hljs-comment">//emulators do savestate saving/loading here also</span>
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-number">261</span>:
+            <span class="hljs-comment">//Last line before rendering starts anew</span>
+            nes_mem.ppu[PPUSTATUS] &amp;= (<span class="hljs-number">255u</span> - PPUSTATUS_VBLANK);
+            nes_mem.ppu[PPUSTATUS] &amp;= (<span class="hljs-number">255u</span> - PPUSTATUS_SPR0HIT);
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">break</span>;
+    }
+    <span class="hljs-keyword">while</span>(cyclesCount &lt; <span class="hljs-number">113</span>){
+        <span class="hljs-keyword">int</span> cycles = machine.DoStep();
+        cyclesCount += cycles;
+    }
+    cyclesCount -= scanlineCycles;
+}
+</code><div style="display: none;">unsigned int cyclesCount = 0;
+for(int scanline = 0; scanline &lt; 262; scanline++){
+    switch(scanline){
+        case 0 ... 240:
+            //Visible lines
+            RenderScanline(nes_mem, scanline, screen);
+            break;
+        case 241:
+            //First vblank line
+            if(nes_mem.ppu[PPUCTRL] &amp; PPUCTRL_NMI) machine.NMI();
+            nes_mem.ppu[PPUSTATUS] |= PPUSTATUS_VBLANK;
+            //Usually, since it is the most predictable state,
+            //emulators do savestate saving/loading here also
+            break;
+        case 261:
+            //Last line before rendering starts anew
+            nes_mem.ppu[PPUSTATUS] &amp;= (255u - PPUSTATUS_VBLANK);
+            nes_mem.ppu[PPUSTATUS] &amp;= (255u - PPUSTATUS_SPR0HIT);
+            break;
+        default:
+            break;
+    }
+    while(cyclesCount &lt; 113){
+        int cycles = machine.DoStep();
+        cyclesCount += cycles;
+    }
+    cyclesCount -= scanlineCycles;
+}
+</div>
+
+<h1>Scrolling storm</h1>
+The main difficulty in emulating the PPU is the complex behaviour around scrolling and register writes. This seems to have been first well documented
+in a famous 1999 document called &quot;SKINNY.TXT&quot; and now well known as loopy&apos;s PPU doc. It is described in better detail at the NESdev wiki pages
+<a href="https://wiki.nesdev.com/w/index.php/PPU_rendering" target="_top">PPU rendering</a> and <a href="https://wiki.nesdev.com/w/index.php/PPU_scrolling" target="_top">
+PPU scrolling</a>.<br><br>
+
+Rather than emulate it closely, my first and quite successful attempt was to do a less accurate, hacky, sort of trial-and-error emulation.
+<code class="cpp" data-hled="true"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NESMemory</span> :</span> <span class="hljs-keyword">public</span> Memory
+{
+    <span class="hljs-keyword">public</span>:
+    <span class="hljs-keyword">uint8_t</span> ram[<span class="hljs-number">0x800</span>];
+    <span class="hljs-keyword">uint8_t</span> ppu[<span class="hljs-number">8</span>];
+    <span class="hljs-comment">//[...]</span>
+    <span class="hljs-keyword">uint8_t</span> ppu_pal[<span class="hljs-number">0x20</span>];
+    <span class="hljs-keyword">uint16_t</span> ppu_addr;
+    <span class="hljs-keyword">uint8_t</span> ppu_x, ppu_y, ppu_latch;
+    <span class="hljs-comment">//[...]</span>
+<span class="hljs-keyword">void</span> NESMemory::Write(<span class="hljs-keyword">const</span> MemoryByte &amp;mb)
+{
+    <span class="hljs-comment">//[...]</span>
+    <span class="hljs-keyword">if</span>(mb.ptr == ppu + PPUDATA){
+        GetPPU(ppu_addr) = ppu[PPUDATA];
+        <span class="hljs-keyword">if</span>(ppu[PPUCTRL] &amp; PPUCTRL_INC) ppu_addr += <span class="hljs-number">32</span>;
+        <span class="hljs-keyword">else</span> ppu_addr++;
+    }
+    <span class="hljs-keyword">if</span>(mb.ptr == ppu + PPUADDR){
+        <span class="hljs-keyword">if</span>(!(ppu_latch &amp; <span class="hljs-number">1</span>)){
+            ppu_addr &amp;= <span class="hljs-number">255u</span>;
+            ppu_addr |= ppu[PPUADDR] &lt;&lt; <span class="hljs-number">8u</span>;
+            
+            <span class="hljs-comment">//Hack based on loopy&apos;s PPU doc</span>
+            ppu[PPUCTRL] &amp;= <span class="hljs-number">0xFF</span>u - PPUCTRL_NAMETBL;
+            ppu[PPUCTRL] |= (ppu[PPUADDR] &gt;&gt; <span class="hljs-number">2u</span>) &amp; PPUCTRL_NAMETBL;
+        }
+        <span class="hljs-keyword">else</span>{
+            ppu_addr &amp;= <span class="hljs-number">255u</span> &lt;&lt; <span class="hljs-number">8u</span>;
+            ppu_addr |= ppu[PPUADDR];
+        }
+        ppu_latch++;
+    }
+    <span class="hljs-keyword">if</span>(mb.ptr == ppu + PPUSCROLL){
+        <span class="hljs-keyword">if</span>(!(ppu_latch &amp; <span class="hljs-number">1</span>)){
+            ppu_x = ppu[PPUSCROLL];
+        }
+        <span class="hljs-keyword">else</span>{
+            ppu_y = ppu[PPUSCROLL];
+        }
+        ppu_latch++;
+    }
+    <span class="hljs-comment">//[...]</span>
+<span class="hljs-keyword">void</span> NESMemory::Read(<span class="hljs-keyword">const</span> MemoryByte &amp;mb)
+{
+    <span class="hljs-keyword">if</span>(mb.ptr == ppu + PPUSTATUS){
+        ppu[PPUSTATUS] &amp;= (<span class="hljs-number">255u</span> - PPUSTATUS_VBLANK);
+        ppu[PPUSTATUS] &amp;= (<span class="hljs-number">255u</span> - PPUSTATUS_SPR0HIT);
+        ppu_latch = <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-keyword">if</span>(mb.ptr == ppu + PPUDATA){
+        ppu[PPUDATA] = GetPPU(ppu_addr);
+        
+        <span class="hljs-keyword">if</span>(ppu[PPUCTRL] &amp; PPUCTRL_INC) ppu_addr += <span class="hljs-number">32</span>;
+        <span class="hljs-keyword">else</span> ppu_addr++;
+    }
+</code><div style="display: none;">class NESMemory : public Memory
+{
+	public:
+	uint8_t ram[0x800];
+	uint8_t ppu[8];
+    //[...]
+	uint8_t ppu_pal[0x20];
+	uint16_t ppu_addr;
+	uint8_t ppu_x, ppu_y, ppu_latch;
+	//[...]
+void NESMemory::Write(const MemoryByte &amp;mb)
+{
+    //[...]
+	if(mb.ptr == ppu + PPUDATA){
+		GetPPU(ppu_addr) = ppu[PPUDATA];
+		if(ppu[PPUCTRL] &amp; PPUCTRL_INC) ppu_addr += 32;
+		else ppu_addr++;
+	}
+	if(mb.ptr == ppu + PPUADDR){
+		if(!(ppu_latch &amp; 1)){
+			ppu_addr &amp;= 255u;
+			ppu_addr |= ppu[PPUADDR] &lt;&lt; 8u;
+			
+			//Hack based on loopy&apos;s PPU doc
+			ppu[PPUCTRL] &amp;= 0xFFu - PPUCTRL_NAMETBL;
+			ppu[PPUCTRL] |= (ppu[PPUADDR] &gt;&gt; 2u) &amp; PPUCTRL_NAMETBL;
+		}
+		else{
+			ppu_addr &amp;= 255u &lt;&lt; 8u;
+			ppu_addr |= ppu[PPUADDR];
+		}
+		ppu_latch++;
+	}
+	if(mb.ptr == ppu + PPUSCROLL){
+		if(!(ppu_latch &amp; 1)){
+			ppu_x = ppu[PPUSCROLL];
+		}
+		else{
+			ppu_y = ppu[PPUSCROLL];
+		}
+		ppu_latch++;
+	}
+    //[...]
+void NESMemory::Read(const MemoryByte &amp;mb)
+{
+	if(mb.ptr == ppu + PPUSTATUS){
+		ppu[PPUSTATUS] &amp;= (255u - PPUSTATUS_VBLANK);
+		ppu[PPUSTATUS] &amp;= (255u - PPUSTATUS_SPR0HIT);
+		ppu_latch = 0;
+	}
+	if(mb.ptr == ppu + PPUDATA){
+		ppu[PPUDATA] = GetPPU(ppu_addr);
+		
+		if(ppu[PPUCTRL] &amp; PPUCTRL_INC) ppu_addr += 32;
+		else ppu_addr++;
+	}
+</div><br><br>
+
+While still quite simple, with the hack mentioned by the comment even Super Mario Bros plays fine, a notoriously difficult game to emulate. The way
+the renderer calculates the addresses for graphical data is also quite hacked together:<br>
+<code class="cpp" data-hled="true"><span class="hljs-keyword">for</span>(<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> scr_x = <span class="hljs-number">0</span>, x = nes_mem.ppu_x; scr_x &lt; <span class="hljs-number">256</span>; scr_x++, x++){
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> coarse_x_lo = (x &gt;&gt; <span class="hljs-number">3u</span>) &amp; (bit5 - <span class="hljs-number">1u</span>);
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> coarse_y_lo = ((y &gt;&gt; <span class="hljs-number">3u</span>) % <span class="hljs-number">30</span>);
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> coarse_x_hi = (x &gt;&gt; <span class="hljs-number">3u</span>) &gt;= <span class="hljs-number">32u</span>; <span class="hljs-comment">// (x &gt;&gt; 3u) &gt;= 32;</span>
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> coarse_y_hi = (y &gt;&gt; <span class="hljs-number">3u</span>) &gt;= <span class="hljs-number">30u</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> fine_x = x &amp; (bit3 - <span class="hljs-number">1u</span>);
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> fine_y = y &amp; (bit3 - <span class="hljs-number">1u</span>);
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> nametbl = nes_mem.ppu[PPUCTRL] &amp; PPUCTRL_NAMETBL;
+    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> bg_name_addr =
+        (coarse_x_lo) |
+        (coarse_y_lo &lt;&lt; <span class="hljs-number">5u</span>) |
+        ((nametbl &lt;&lt; <span class="hljs-number">10u</span>) ^ ((coarse_x_hi &lt;&lt; <span class="hljs-number">10u</span>) | (coarse_y_hi &lt;&lt; <span class="hljs-number">11u</span>))) |
+        bit13;
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> bg_name = nes_mem.GetPPU(bg_name_addr);
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> bg_table = (nes_mem.ppu[PPUCTRL] &amp; PPUCTRL_BGADDR) &gt;&gt; <span class="hljs-number">4u</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> bg_plane0_addr =
+        fine_y |
+        <span class="hljs-number">0</span> |
+        (bg_name &lt;&lt; <span class="hljs-number">4u</span>) |
+        (bg_table &lt;&lt; <span class="hljs-number">12u</span>);
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> bg_plane1_addr =
+        fine_y |
+        bit3 |
+        (bg_name &lt;&lt; <span class="hljs-number">4u</span>) |
+        (bg_table &lt;&lt; <span class="hljs-number">12u</span>);
+</code><div style="display: none;">for(unsigned int scr_x = 0, x = nes_mem.ppu_x; scr_x &lt; 256; scr_x++, x++){
+	const unsigned int coarse_x_lo = (x &gt;&gt; 3u) &amp; (bit5 - 1u);
+	const unsigned int coarse_y_lo = ((y &gt;&gt; 3u) % 30);
+	const unsigned int coarse_x_hi = (x &gt;&gt; 3u) &gt;= 32u; // (x &gt;&gt; 3u) &gt;= 32;
+	const unsigned int coarse_y_hi = (y &gt;&gt; 3u) &gt;= 30u;
+	const unsigned int fine_x = x &amp; (bit3 - 1u);
+	const unsigned int fine_y = y &amp; (bit3 - 1u);
+	const unsigned int nametbl = nes_mem.ppu[PPUCTRL] &amp; PPUCTRL_NAMETBL;
+	unsigned int bg_name_addr =
+		(coarse_x_lo) |
+		(coarse_y_lo &lt;&lt; 5u) |
+		((nametbl &lt;&lt; 10u) ^ ((coarse_x_hi &lt;&lt; 10u) | (coarse_y_hi &lt;&lt; 11u))) |
+		bit13;
+	const unsigned int bg_name = nes_mem.GetPPU(bg_name_addr);
+	const unsigned int bg_table = (nes_mem.ppu[PPUCTRL] &amp; PPUCTRL_BGADDR) &gt;&gt; 4u;
+	const unsigned int bg_plane0_addr =
+		fine_y |
+		0 |
+		(bg_name &lt;&lt; 4u) |
+		(bg_table &lt;&lt; 12u);
+	const unsigned int bg_plane1_addr =
+		fine_y |
+		bit3 |
+		(bg_name &lt;&lt; 4u) |
+		(bg_table &lt;&lt; 12u);
+</div>
+I suppose this must look terrible to someone familiar with how the NES PPU operates, or a more accurate emulator&apos;s writer.<br><br>
+
+<h1>Glitches in graphical detail</h1>
+I already shared some interesting, glitch-art like screens <a href="https://twitter.com/kdrnic/status/1192748124068028416" target="_top">on Twitter</a> when first
+starting to code this.<br><br>
+
+Before I implemented reading from the PPU, which is something a few, mostly older games do, some games would lack collision with the world. In PacMan,
+famously you can go right through walls. I don&apos;t think it looks as ridiculous/amusing as Mappy however:<br>
+<video controls height="256">
+    <source src="files/mappy.mp4" type="video/mp4">
+    Sorry, your browser sucks balls.
+</video><br><br>
+
+<h1>Limitations of the approach</h1>
+The approach to scrolling mentioned above works well for games that scroll horizontally, but it seems to fail when games do
+vertical scrolling at a split point - a more involved technique that involves both PPUSCROLL and PPUADDR writes in a particular sequence. This issue
+can be easily seen in The Legend of Zelda and in Duck Tales:<br>
+<video controls height="256">
+    <source src="files/nesem_scroll.mp4" type="video/mp4">
+    Sorry, your browser sucks balls.
+</video><br><br>
+
+I don&apos;t think it is worth it to keep to this hacky method, it makes more sense to rewrite the PPU to do the correct thing. It shouldn&apos;t be too much
+work, but annoying to read all the specs with great attention to detail.<br><br>
+
+<h3>(This hasn&apos;t been completed as of this writing)</h3>
+
+</body></html>

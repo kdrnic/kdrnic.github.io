@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 31 Oct 2019 02:40:37 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 21 Nov 2019 23:43:19 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -194,6 +194,33 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Tue, 23 Jul 2019 22:18:03 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/megaman.png" length="0" type="image/png"/>
+        </item>
+        <item>
+            <title><![CDATA[NES Emulation Saga Part I]]></title>
+            <description><![CDATA[This is a series  of articles on the development of my own NES emulator.It is coded in a mixture of C/C++, using Allegro 4, and is hosted at...]]></description>
+            <link>https://kdrnic.github.io/index_nesem1.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_nesem1.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Tue, 19 Nov 2019 06:06:34 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/nesem1.png" length="0" type="image/png"/>
+        </item>
+        <item>
+            <title><![CDATA[NES Emulation Saga Part II]]></title>
+            <description><![CDATA[This is a series  of articles on the development of my own NES emulator.It is coded in a mixture of C/C++, using Allegro 4, and is hosted at...]]></description>
+            <link>https://kdrnic.github.io/index_nesem2.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_nesem2.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Tue, 19 Nov 2019 06:06:34 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/kdrnic.jpg" length="0" type="image/jpeg"/>
+        </item>
+        <item>
+            <title><![CDATA[NES Emulation Saga Part III]]></title>
+            <description><![CDATA[This is a series  of articles on the development of my own NES emulator.It is coded in a mixture of C/C++, using Allegro 4, and is hosted at...]]></description>
+            <link>https://kdrnic.github.io/index_nesem3.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_nesem3.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Tue, 19 Nov 2019 06:06:34 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/nesem14.png" length="0" type="image/png"/>
         </item>
         <item>
             <title><![CDATA[Game: NEStest]]></title>
