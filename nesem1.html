@@ -26,7 +26,7 @@ So I decided to emulate the NES instead.<br><br>
 The result has been quite successful (the emulator already has some improvements since this video):<br>
 <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/0KvU5AUorXg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 <br><br>
-I will then, in 3 or so installments (CPU, video, sound...), recount its&apos; development.<br><br>
+I will then, in 3 or so installments (CPU, video, sound...), recount its development.<br><br>
 
 <h1>Resurrecting an old project</h1>
 Back in 2015, when I was still playing around with the <a href="http://www.6502asm.com/beta/index.html" target="_top">6502asm.com</a>/
@@ -147,7 +147,7 @@ A:00 X:FF Y:AB S:FF P:nvubdIZc  $C7AD:F0 F9     BEQ $C7A8
 Such trace logs have remained useful in finding bugs in CPU and in ROM mappers.<br><br>
 
 I also made use of the Unix tools &quot;cut -bXX,YY&quot; and &quot;cmp fileA fileB&quot; to help comparing the logs. Due to differences in timing,
-some manual editing also had to be tone to keep them in sync.<br><br>
+some manual editing also had to be done to keep them in sync.<br><br>
 
 Another very useful tool has been <a href="https://forums.nesdev.com/viewtopic.php?t=7466" target="_top">the DISASM6 NES-oriented disassembler</a>.
 Seeing a disassembly allows me to quickly identify parts of the code, such as the interrupt handlers, and check em out in the logs.<br><br>
