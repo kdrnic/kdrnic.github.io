@@ -1,0 +1,14 @@
+{"templates": {
+    "systemName"            : "Tapegro",
+    "copyright"             : "Copyright kdrnic all years",
+    "includeDate"           : false,
+	"outputSourceFiles"		: true,
+    "linenums"              : true,
+    "sort"                    : false
+},
+"plugins": ["plugins/markdown"],
+"markdown":
+{
+"hardwrap":true
+}
+}
