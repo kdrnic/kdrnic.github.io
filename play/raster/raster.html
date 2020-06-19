@@ -1146,7 +1146,12 @@ function kdr_polygon3d_f_(bmp, tex, verts0, verts1, verts2)
     verts2.v *= tex.h;
     
     KTAZ_RESET();
-	raster_triangle_func(bmp, tex, verts0, verts1, verts2);
+    try{
+        if(self[raster_triangle_func]) self[raster_triangle_func](bmp, tex, verts0, verts1, verts2);
+    }
+    catch(e){
+        console.log(e);
+    }
 }
 
 kdr_bf_cull = 0;
@@ -1205,12 +1210,12 @@ function drawsprite_ctx(ctx, bmp, x, y)
 
 function worker_rasterize(ctx, tex, verts, func)
 {
-	var worker_code = editor.getValue() + allegro_code;
+	var worker_code = "try{eval(`" + editor.getValue() + "`);\n}\ncatch(e){console.log(e);}\n" + allegro_code;
     worker_code += `
         self.onmessage = function(e){
             var t0 = performance.now();
-            raster_triangle_func = eval(e.data.raster_triangle_func);
-            kdr_polygon3d_f(e.data.bmp, e.data.tex, e.data.verts);
+            raster_triangle_func = e.data.raster_triangle_func;
+            if(self["kdr_polygon3d_f"]) self["kdr_polygon3d_f"](e.data.bmp, e.data.tex, e.data.verts);
             var t1 = performance.now();
             console.log("rasterized in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
             postMessage(e.data.bmp);
