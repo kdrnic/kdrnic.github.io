@@ -1182,100 +1182,54 @@ var rasterizer_funcs = [
     "kdr_triangle3d_f_affinezb32bpp"
 ];
 
-let drawsprite_ctx_fill_cache = {};
 function drawsprite_ctx(ctx, bmp, x, y)
 {
-    let fill_cache = drawsprite_ctx_fill_cache;
-	for(var cx = x, bx = 0; bx < bmp.w && cx < ctx.canvas.width; cx++, bx++){
-		for(var cy = y, by = 0; y < bmp.h && cy < ctx.canvas.height; cy++, by++){
-			let colour = 0, r = 0, g = 0, b = 0;
-			colour = bmp.line[by][bx];
-            if(!fill_cache[colour]){
-                if(bmp.depth == 32){
-                    r = (colour >> 16) & 0xFF;
-                    g = (colour >> 8) & 0xFF;
-                    b = (colour >> 0) & 0xFF;
-                }
-                if(bmp.depth == 16){
-                    r = ((colour >> 10) & 31) << 3;
-                    g = ((colour >>  5) & 31) << 3;
-                    b = ((colour >>  0) & 31) << 3;
-                }
-                if(bmp.depth == 8){
-                    r = palette[colour].r;
-                    g = palette[colour].g;
-                    b = palette[colour].b;
-                }
-                fill_cache[colour] = "rgb("+r+","+g+","+b+")";
-            }
-            ctx.fillStyle = fill_cache[colour];
-			ctx.fillRect(cx, cy, 1, 1);
-		}
-	}
+	var ab = new ArrayBuffer(bmp.w * bmp.h * 4);
+    var ui32 = new Uint32Array(ab);
+    if(bmp.depth == 32){
+        var bmpui32 = new Uint32Array(bmp.dat);
+        ui32.set(bmpui32);
+    }
+    for(let i = 0; i < ui32.length; i++){
+        let val = ui32[i];
+        ui32[i] = 0xFF000000
+           | ((val & 0xFF) << 16)
+           | ((val >> 16) & 0xFF)
+           | (val & 0xFF00);
+    }
+    
+    var id = ctx.getImageData(0, 0, bmp.w, bmp.h);
+    id.data.set(new Uint8ClampedArray(ab));
+    ctx.putImageData(id, 0, 0);
 }
 
 function worker_rasterize(ctx, tex, verts, func)
 {
-    var use_worker = eval(worker_select.value);
 	var worker_code = editor.getValue() + allegro_code;
-    if(use_worker){
-        worker_code += `
-            self.onmessage = function(e){
-                var t0 = performance.now();
-                raster_triangle_func = eval(e.data.raster_triangle_func);
-                kdr_polygon3d_f(e.data.bmp, e.data.tex, e.data.verts);
-                var t1 = performance.now();
-                //console.log("rasterized in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
-                postMessage(e.data.bmp);
-            }
-        `;
-    }
-    else{
-        worker_code = "var foo = function(data){" + worker_code + `
-                var t0 = performance.now();
-                raster_triangle_func = eval(data.raster_triangle_func);
-                kdr_polygon3d_f(data.bmp, data.tex, data.verts);
-                var t1 = performance.now();
-                //console.log("rasterized in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
-                return data.bmp;
-        ` + "}; foo";
-    }
-    if(1){
-        var t0 = performance.now();
-        var data = {
-            bmp: create_bitmap_ex(tex.depth, ctx.canvas.width, ctx.canvas.height),
-            tex: tex,
-            verts: verts,
-            raster_triangle_func: raster_select.value,
-        };
-        var t1 = performance.now();
-        //console.log("bmp created in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
-    }
-    if(use_worker){
-        var t0;
-        blob = new Blob([worker_code], {type: 'application/javascript'});
-        var worker = new Worker(URL.createObjectURL(blob));
-        worker.onmessage = function(e){
+    worker_code += `
+        self.onmessage = function(e){
+            var t0 = performance.now();
+            raster_triangle_func = eval(e.data.raster_triangle_func);
+            kdr_polygon3d_f(e.data.bmp, e.data.tex, e.data.verts);
             var t1 = performance.now();
-            //console.log("worker returned in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
-            drawsprite_ctx(ctx, e.data, 0, 0);
-            if(func) window.requestAnimationFrame(func);
-        };
-        t0 = performance.now();
-        worker.postMessage(data);
-    }
-    else{
-        var t0 = performance.now();
-        var func = eval(worker_code);
-        var bmp = func(data);
-        var t1 = performance.now();
-        //console.log("func returned in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
-        var t0 = performance.now();
-        drawsprite_ctx(ctx, bmp, 0, 0);
-        var t1 = performance.now();
-        //console.log("drawsprite_ctx in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
+            console.log("rasterized in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
+            postMessage(e.data.bmp);
+        }
+    `;
+    var data = {
+        bmp: create_bitmap_ex(tex.depth, ctx.canvas.width, ctx.canvas.height),
+        tex: tex,
+        verts: verts,
+        raster_triangle_func: raster_select.value,
+    };
+    blob = new Blob([worker_code], {type: 'application/javascript'});
+    var worker = new Worker(URL.createObjectURL(blob));
+    worker.onmessage = function(e){
+        drawsprite_ctx(ctx, e.data, 0, 0);
         if(func) window.requestAnimationFrame(func);
-    }
+    };
+    t0 = performance.now();
+    worker.postMessage(data);
 }
 
 function xor_texture(res)
@@ -1331,7 +1285,6 @@ function button_run(func)
     var ctx = screen.getContext("2d");
     var tex = xor_texture(256);
     set_projection_viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
-    //void get_camera_matrix_f(MATRIX_f *m, float x, float y, float z, float xfront, float yfront, float zfront, float xup, float yup, float zup, float fov, float aspect)
     var camera = matrix_f(), obj_t = matrix_f(), obj_r = matrix_f(), obj_comb = matrix_f(), comb = matrix_f();
     
     var dirx = sin(yaw) * cos(pitch);
@@ -1344,7 +1297,7 @@ function button_run(func)
     get_rotation_matrix_f(obj_r, obj_rot_x, obj_rot_y, obj_rot_z);
     
     matrix_mul_f(obj_r, obj_t, obj_comb);
-    matrix_mul_f(camera, obj_comb, comb);
+    matrix_mul_f(obj_comb, camera, comb);
     
     var verts = [V3D_f(-1, -1, 0, 0, 0), V3D_f(1, -1, 0, 1, 0), V3D_f(1, 1, 0, 1, 1), V3D_f(-1, 1, 0, 0, 1)];
     
@@ -1406,11 +1359,6 @@ function raster_change()
     localStorage.setItem("raster_select", raster_select.value);
 }
 
-function worker_change()
-{
-    localStorage.setItem("worker_select", worker_select.value);
-}
-
 </script>
 <style type="text/css" media="screen">
 #editor { 
@@ -1438,10 +1386,7 @@ canvas {
         <input type="button" onclick="button_spin()" value="Spin">
         <select id="res_select" onchange="res_change()"></select>
         <select id="raster_select" onchange="raster_change()"></select>
-        <select id="worker_select" onchange="worker_change()">
-            <option value="true">Use web worker</option>
-            <option value="false">Eval directly</option>
-        </select><br>
+        <br>
          <input type="button" onclick="button_rot('x',3)" value="Rx+">
           <input type="button" onclick="button_rot('x',-3)" value="Rx-">
            <input type="button" onclick="button_rot('y',3)" value="Ry+">
