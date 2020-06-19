@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<script src="ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+var allegro_code = `
+ceil = Math.ceil;
+floor = Math.floor;
+sin = Math.sin;
+cos = Math.cos;
+INT_MAX = 2147483647;
+KDR_NEAR = 0.1;
+function putpixel(bmp, x, y, c){
+    if(y < 0 || y >= bmp.h || x < 0 || x >= bmp.w) return;
+    bmp.line[y][x] = c;
+}
+function getpixel(bmp, x, y, c){
+    if(y < 0 || y >= bmp.h || x < 0 || x >= bmp.w) return 0;
+    return bmp.line[y][x];
+}
+
+POLYTYPE_FLAT = 0;
+POLYTYPE_ATEX = 1;
+POLYTYPE_ATEX_MASK = 2;
+POLYTYPE_PTEX = 3;
+POLYTYPE_PTEX_MASK = 4;
+function V3D_f(x, y, z, u, v)
+{
+    return {x: x, y: y, z: z, u: u, v: v};
+}
+
+var _persp_xscale_f;//= w/2;
+var _persp_yscale_f;//= h/2;
+var _persp_xoffset_f;//= x + w/2;
+var _persp_yoffset_f;//= y + h/2;
+
+function set_projection_viewport(x, y, w, h)
+{
+   _persp_xscale_f = w/2;
+   _persp_yscale_f = h/2;
+   _persp_xoffset_f = x + w/2;
+   _persp_yoffset_f = y + h/2;
+}
+
+function persp_project_f(v)
+{
+   let z1 = 1.0 / v.z;
+   let v2 = {...v};
+   v2.x = ((v.x * z1) * _persp_xscale_f) + _persp_xoffset_f;
+   v2.y = ((v.y * z1) * _persp_yscale_f) + _persp_yoffset_f;
+   return v2;
+}
+
+function create_bitmap_ex(depth, w, h)
+{
+	var bytes = (depth / 8) | 0;
+	var bmp = {depth: depth, w: w, h: h, dat: new ArrayBuffer(w * h * bytes), line: new Array(h)};
+	for(var y = 0; y < h; y++){
+		if(depth == 32) bmp.line[y] = new Uint32Array(bmp.dat, y * w * bytes, w);
+		else if(depth == 16) bmp.line[y] = new Uint16Array(bmp.dat, y * w * bytes, w);
+		else if(depth == 8) bmp.line[y] = new Uint8Array(bmp.dat, y * w * bytes, w);
+	}
+    return bmp;
+}
+
+function apply_matrix_f(m, vin)
+{
+    let vout = {...vin};
+    vout.x = (vin.x * m.v[(0)][0] + vin.y * m.v[(0)][1] + vin.z * m.v[(0)][2] + m.t[(0)]); 
+    vout.y = (vin.x * m.v[(1)][0] + vin.y * m.v[(1)][1] + vin.z * m.v[(1)][2] + m.t[(1)]);
+    vout.z = (vin.x * m.v[(2)][0] + vin.y * m.v[(2)][1] + vin.z * m.v[(2)][2] + m.t[(2)]);
+    return vout;
+}
+
+var identity_matrix_f = {
+   v: [
+      /* 3x3 identity */
+      [ 1.0, 0.0, 0.0 ],
+      [ 0.0, 1.0, 0.0 ],
+      [ 0.0, 0.0, 1.0 ],
+   ],
+
+   /* zero translation */
+   t: [ 0.0, 0.0, 0.0 ]
+};
+
+function matrix_f()
+{
+    return {
+        v: [
+          [ 1.0, 0.0, 0.0 ],
+          [ 0.0, 1.0, 0.0 ],
+          [ 0.0, 0.0, 1.0 ],
+       ],
+       t: [ 0.0, 0.0, 0.0 ]
+    };
+}
+
+function matrix_mul_f(m1, m2, out)
+{
+   let i, j;
+
+   if(m1 == out) {
+      Object.assign(temp, JSON.parse(JSON.stringify(m1)));
+      m1 = temp;
+   }
+   else if (m2 == out) {
+      Object.assign(temp, JSON.parse(JSON.stringify(m2)));
+      m2 = temp;
+   }
+
+   for (i=0; i<3; i++) {
+      for (j=0; j<3; j++) {
+	 out.v[i][j] = (m1.v[0][j] * m2.v[i][0]) +
+			(m1.v[1][j] * m2.v[i][1]) +
+			(m1.v[2][j] * m2.v[i][2]);
+      }
+
+      out.t[i] = (m1.t[0] * m2.v[i][0]) +
+		  (m1.t[1] * m2.v[i][1]) +
+		  (m1.t[2] * m2.v[i][2]) +
+		  m2.t[i];
+   }
+}
+
+function get_scaling_matrix_f(m, x, y, z)
+{
+   Object.assign(m, JSON.parse(JSON.stringify(identity_matrix_f)));
+
+   m.v[0][0] = x;
+   m.v[1][1] = y;
+   m.v[2][2] = z;
+}
+
+function vector_f_len(x, y, z)
+{
+    return Math.sqrt(x * x + y * y + z * z);
+}
+
+function dot_product_f(xup, yup, zup, xfront, yfront, zfront)
+{
+    return xup * xfront + yup * yfront + zup * zfront;
+}
+
+function floattan(v)
+{
+    return Math.tan(v * 128.0 / Math.PI);
+}
+
+function get_camera_matrix_f(m, x, y, z, xfront, yfront, zfront, xup, yup, zup, fov, aspect)
+{
+   let camera = matrix_f(), scale = matrix_f();
+   let xside, yside, zside, width, d;
+
+   /* make 'in-front' into a unit vector, and negate it */
+   let ilen = 1.0 / vector_f_len(xfront, yfront, zfront);
+   xfront *= -ilen;
+   yfront *= -ilen;
+   zfront *= -ilen;
+
+   /* make sure 'up' is at right angles to 'in-front', and normalize */
+   d = dot_product_f(xup, yup, zup, xfront, yfront, zfront);
+   xup -= d * xfront; 
+   yup -= d * yfront; 
+   zup -= d * zfront;
+   ilen = 1.0 / vector_f_len(xup, yup, zup);
+   xup *= ilen;
+   yup *= ilen;
+   zup *= ilen;
+
+   /* calculate the 'sideways' vector */
+   //cross_product_f(xup, yup, zup, xfront, yfront, zfront, &xside, &yside, &zside);
+   xside = yup * zfront - zup * yfront;
+   yside = zup * xfront - xup * zfront;
+   zside = xup * yfront - yup * xfront;
+
+   /* set matrix rotation parameters */
+   camera.v[0][0] = xside; 
+   camera.v[0][1] = yside;
+   camera.v[0][2] = zside;
+
+   camera.v[1][0] = xup; 
+   camera.v[1][1] = yup;
+   camera.v[1][2] = zup;
+
+   camera.v[2][0] = xfront; 
+   camera.v[2][1] = yfront;
+   camera.v[2][2] = zfront;
+
+   /* set matrix translation parameters */
+   camera.t[0] = -(x*xside  + y*yside  + z*zside);
+   camera.t[1] = -(x*xup    + y*yup    + z*zup);
+   camera.t[2] = -(x*xfront + y*yfront + z*zfront);
+
+   /* construct a scaling matrix to deal with aspect ratio and FOV */
+   width = floattan(64.0 - fov/2);
+   get_scaling_matrix_f(scale, width, -aspect*width, -1.0);
+
+   /* combine the camera and scaling matrices */
+   matrix_mul_f(camera, scale, m);
+}
+
+function get_translation_matrix_f(m, x, y, z)
+{
+   Object.assign(m, JSON.parse(JSON.stringify(identity_matrix_f)));
+
+   m.t[0] = x;
+   m.t[1] = y;
+   m.t[2] = z;
+}
+
+function FLOATSINCOS(o, a, s, c)
+{
+    o[s] = Math.sin(a * Math.PI / 128.0);
+    o[c] = Math.cos(a * Math.PI / 128.0);
+}
+
+function get_rotation_matrix_f(m, x, y, z)
+{
+   let o = {};		
+   let sinx_siny, cosx_siny;			
+						
+   FLOATSINCOS(o, x, "sin_x", "cos_x");		
+   FLOATSINCOS(o, y, "sin_y", "cos_y");		
+   FLOATSINCOS(o, z, "sin_z", "cos_z");		
+						
+   o.sinx_siny = o.sin_x * o.sin_y;			
+   o.cosx_siny = o.cos_x * o.sin_y;
+   
+   let R00_f = (o.cos_y * o.cos_z);
+   let R10_f = ((o.sinx_siny * o.cos_z) - (o.cos_x * o.sin_z));
+   let R20_f = ((o.cosx_siny * o.cos_z) + (o.sin_x * o.sin_z));
+   let R01_f = (o.cos_y * o.sin_z);
+   let R11_f = ((o.sinx_siny * o.sin_z) + (o.cos_x * o.cos_z));
+   let R21_f = ((o.cosx_siny * o.sin_z) - (o.sin_x * o.cos_z));
+   let R02_f = (-o.sin_y);
+   let R12_f = (o.sin_x * o.cos_y);
+   let R22_f = (o.cos_x * o.cos_y);
+
+   m.v[0][0] = R00_f;
+   m.v[0][1] = R01_f;
+   m.v[0][2] = R02_f;
+   m.v[1][0] = R10_f;
+   m.v[1][1] = R11_f;
+   m.v[1][2] = R12_f;
+   m.v[2][0] = R20_f;
+   m.v[2][1] = R21_f;
+   m.v[2][2] = R22_f;
+
+   m.t[0] = m.t[1] = m.t[2] = 0;
+}
+`;
+eval(allegro_code);
+var raster_code = `
+/*
+Illustration of the two subtriangles
+             -verts[0]                  -vs[0]=ve[0]                             
+            / \                        / \                                       
+           /   \-                     /   \-                                     
+          /      \                   /      \                                    
+         /        \                 /        \                                   
+        /          \-              /          \-                                 
+       /             \            /             \                           ve[0]
+      /             /-\verts[1]  -----------------ve[1]    -----------------     
+     /          /---                                      /          /---        
+    /       /---                                         /       /---            
+   /    /---                                            /    /---                
+  / /---                                               / /---                    
+ ---                                                  ---                        
+ verts[2]                                             vs[1]=ve[1]              
+*/
+function kdr_triangle3d_f_generic(bmp, tex, _v1, _v2, _v3){
+    kdr_triangle3d_f_generic_(bmp, POLYTYPE_PTEX, tex, _v1, _v2, _v3);
+}
+function kdr_triangle3d_f_generic_(bmp, shader, tex, _v1, _v2, _v3)
+{
+	//Holds ends of triangle scanlines
+	//'p' stands for perspective correction
+	//and the z is actually inverse
+    let scan_l, scan_r, scan_s = {}, scan_e = {};
+    
+    let x_i = 0, y_i = 0, u_i = 0, v_i = 0, up_i = 0, vp_i = 0;
+	let z_i = 0, along_x = 0, pass = 0;
+	//Calculated colour
+	let c = 0;
+	
+	let verts = [_v1, _v2, _v3];
+	//Used for swaps
+	//Triangle is cut into two triangles, by the horizontal line that goes through verts[1]
+	//vs is the segment that intersects this line
+	//Final values for each pixel
+	//Calculated colour
+	//One pass for each of the subtriangles
+    
+    let tmp_v = {};
+	
+	function SWAP_V(a, b){
+        Object.assign(tmp_v, a);
+        Object.assign(a, b);
+        Object.assign(b, tmp_v);
+    }
+	//Linearly interpolate between a and b by c amount
+	function LINTERP(a, b, c){
+        return ((a) + ((b) - (a)) * c);
+    }
+	//A ratio of how far along is c, in the segment a to b
+	function ALONG(a, b, c){
+        return (((b) - (a)) ? ((c) - (a)) / ((b) - (a)) : 0.0);
+    }
+	
+	//Order verts
+	if(verts[1].y < verts[0].y) SWAP_V(verts[1], verts[0]);
+	if(verts[2].y < verts[0].y) SWAP_V(verts[2], verts[0]);
+	if(verts[1].y > verts[2].y) SWAP_V(verts[1], verts[2]);
+	
+	let vs0 = verts[0];
+	let vs1 = verts[2];
+	
+	//Verts for upper subtriangle
+	ve0 = verts[0];
+	ve1 = verts[1];
+	//Two passes as discussed above
+	for(pass = 0; pass < 2; pass++){
+		//One iteration per horizontal scanline
+		for(y_i = ceil(ve0.y); y_i < ceil(ve1.y); y_i++){
+			//Calculate interpolated values for both ends of the scanline
+			//Of note, both those and the interpolations down below can have calculations
+			//simplified since they obviously move by constant steps
+			let along_s = ALONG(vs0.y, vs1.y, y_i);
+			let along_e = ALONG(ve0.y, ve1.y, y_i);
+			
+			scan_s.x = LINTERP(vs0.x, vs1.x, along_s);
+			scan_s.u = LINTERP(vs0.u, vs1.u, along_s);
+			scan_s.v = LINTERP(vs0.v, vs1.v, along_s);
+			scan_s.up = LINTERP(vs0.u / vs0.z, vs1.u / vs1.z, along_s);
+			scan_s.vp = LINTERP(vs0.v / vs0.z, vs1.v / vs1.z, along_s);
+			scan_s.zp = LINTERP(1.0 / vs0.z, 1.0 / vs1.z, along_s);
+			
+			scan_e.x = LINTERP(ve0.x, ve1.x, along_e);
+			scan_e.u = LINTERP(ve0.u, ve1.u, along_e);
+			scan_e.v = LINTERP(ve0.v, ve1.v, along_e);
+			scan_e.up = LINTERP(ve0.u / ve0.z, ve1.u / ve1.z, along_e);
+			scan_e.vp = LINTERP(ve0.v / ve0.z, ve1.v / ve1.z, along_e);
+			scan_e.zp = LINTERP(1.0 / ve0.z, 1.0 / ve1.z, along_e);
+			
+			//This test could actually be done only once
+			//scan_l to scan_r is strictly left to right
+			if(scan_e.x >= scan_s.x){
+				scan_l = scan_s;
+				scan_r = scan_e;
+            }
+			else{
+				scan_l = scan_e;
+				scan_r = scan_s;
+			}
+			
+			//Iterate through scanline
+			for(x_i = ceil(scan_l.x); x_i < ceil(scan_r.x); x_i++){
+				//Final interpolation for each pixel
+				along_x = ALONG(scan_l.x, scan_r.x, x_i);
+				u_i = floor(LINTERP(scan_l.u,	scan_r.u,	along_x));
+				v_i = floor(LINTERP(scan_l.v,	scan_r.v,	along_x));
+				//Some games only calculate the inverse of z_i every few pixels
+				//and add a further linear interpolation inbetween
+				z_i =		 LINTERP(scan_l.zp,	scan_r.zp,	along_x);
+				up_i = floor(LINTERP(scan_l.up,	scan_r.up,	along_x) / z_i);
+				vp_i = floor(LINTERP(scan_l.vp,	scan_r.vp,	along_x) / z_i);
+				
+				//Pick colour according to shader
+				switch(shader){
+					case POLYTYPE_FLAT:
+						c = verts[0].c;
+						break;
+
+					case POLYTYPE_PTEX:
+					case POLYTYPE_PTEX_MASK:
+						//Handle negative UVs and wrapping
+						up_i += tex.w << 8;
+						vp_i += tex.h << 8;
+						up_i %= tex.w;
+						vp_i %= tex.h;
+						c = getpixel(tex, up_i, vp_i);
+						break;
+
+					case POLYTYPE_ATEX:
+					case POLYTYPE_ATEX_MASK:
+						//Handle negative UVs and wrapping
+						u_i += tex.w << 8;
+						v_i += tex.h << 8;
+						u_i %= tex.w;
+						v_i %= tex.h;
+						c = getpixel(tex, u_i, v_i);
+						break;
+				}
+
+				putpixel(bmp, x_i, y_i, c);
+			}
+		}
+		//Verts for lower subtriangle
+		ve0 = verts[1];
+		ve1 = verts[2];
+	}
+}
+
+/*
+Persp-correct only, slightly faster version of the above
+Instead of using the linterp formula directly, keep current pos and increase with fixed steps
+*/
+function kdr_triangle3d_f_persp(bmp, tex,  _v1, _v2, _v3)
+{
+	let scan_s = {}, scan_e = {}, scan_l, scan_r, scan_x = {};
+	let scan_x_step = {}, scan_s_step = {}, scan_e_step = {};
+	
+	//Hard-copied so that u and v may be divided by z, and z inverted
+	let verts = [_v1, _v2, _v3];
+	let tmp_v = {};
+	let ve0, ve1;
+	let vs0, vs1;
+	let x_i, y_i, u_i, v_i, x_l, x_r;
+	let tmp;
+	let pass, c;
+	
+	function SWAP_V(a, b){ Object.assign(tmp_v, a); Object.assign(a, b); Object.assign(b, tmp_v); }
+	STEPSIZE = (a, b, c) => (((b) - (a)) * (c));
+	
+	if(verts[1].y < verts[0].y) SWAP_V(verts[1], verts[0]);
+	if(verts[2].y < verts[0].y) SWAP_V(verts[2], verts[0]);
+	if(verts[1].y > verts[2].y) SWAP_V(verts[1], verts[2]);
+	
+	//Applies perspective projection
+	verts[0].z = 1.0 / verts[0].z;
+	verts[1].z = 1.0 / verts[1].z;
+	verts[2].z = 1.0 / verts[2].z;
+	verts[0].u *= verts[0].z;
+	verts[1].u *= verts[1].z;
+	verts[2].u *= verts[2].z;
+	verts[0].v *= verts[0].z;
+	verts[1].v *= verts[1].z;
+	verts[2].v *= verts[2].z;
+	
+	vs0 = verts[0];
+	vs1 = verts[2];
+	
+	ve0 = verts[0];
+	ve1 = verts[1];
+	
+	//Step along Y
+	tmp = 1.0 / ((vs1.y) - (vs0.y));
+	scan_s_step.z = STEPSIZE(vs0.z, vs1.z, tmp);
+	scan_s_step.u = STEPSIZE(vs0.u, vs1.u, tmp);
+	scan_s_step.v = STEPSIZE(vs0.v, vs1.v, tmp);
+	scan_s_step.x = STEPSIZE(vs0.x, vs1.x, tmp);
+	
+	Object.assign(scan_s, vs0);
+	//Move to the height of the first line
+	tmp = ceil(ve0.y) - scan_s.y;
+	scan_s.z += scan_s_step.z * tmp;
+	scan_s.u += scan_s_step.u * tmp;
+	scan_s.v += scan_s_step.v * tmp;
+	scan_s.x += scan_s_step.x * tmp;
+	
+	for(pass = 0; pass < 2; pass++){
+		//Step along Y
+		tmp = 1.0 / ((ve1.y) - (ve0.y));
+		scan_e_step.z = STEPSIZE(ve0.z, ve1.z, tmp);
+		scan_e_step.u = STEPSIZE(ve0.u, ve1.u, tmp);
+		scan_e_step.v = STEPSIZE(ve0.v, ve1.v, tmp);
+		scan_e_step.x = STEPSIZE(ve0.x, ve1.x, tmp);
+		
+		Object.assign(scan_e, ve0);
+		//Move to the height of the first line
+		tmp = ceil(ve0.y) - scan_e.y;
+		scan_e.z += scan_e_step.z * tmp;
+		scan_e.u += scan_e_step.u * tmp;
+		scan_e.v += scan_e_step.v * tmp;
+		scan_e.x += scan_e_step.x * tmp;
+		
+		//This check stays relevant throughout a pass
+		if((scan_e_step.x > scan_s_step.x) ^ (pass)){
+			scan_l = scan_s;
+			scan_r = scan_e;
+		}
+		else{
+			scan_l = scan_e;
+			scan_r = scan_s;
+		}
+		
+		for(y_i = ceil(ve0.y); y_i < ceil(ve1.y); y_i++){
+			//Step along X
+			tmp = 1.0 / (ceil(scan_r.x) - ceil(scan_l.x));
+			scan_x_step.z = STEPSIZE(scan_l.z, scan_r.z, tmp);
+			scan_x_step.u = STEPSIZE(scan_l.u, scan_r.u, tmp);
+			scan_x_step.v = STEPSIZE(scan_l.v, scan_r.v, tmp);
+			
+			Object.assign(scan_x, scan_l);
+			
+			x_l = ceil(scan_l.x);
+			x_r = ceil(scan_r.x);
+			
+			for(x_i = x_l; x_i < x_r; x_i++){
+				tmp =  1.0 / scan_x.z;
+				u_i = floor(scan_x.u * tmp);
+				v_i = floor(scan_x.v * tmp);
+				
+				//Negative and wrapping UVs
+				u_i = (u_i + 0x10000) & (tex.w - 1);
+				v_i = (v_i + 0x10000) & (tex.h - 1);
+				
+				c = getpixel(tex, u_i, v_i);
+				putpixel(bmp, x_i, y_i, c);
+				
+				//Step along the scanline
+				scan_x.z += scan_x_step.z;
+				scan_x.u += scan_x_step.u;
+				scan_x.v += scan_x_step.v;
+			}
+			
+			//Step along Y for both the start and end of the scanline
+			scan_s.x += scan_s_step.x;
+			scan_s.z += scan_s_step.z;
+			scan_s.u += scan_s_step.u;
+			scan_s.v += scan_s_step.v;
+			
+			scan_e.x += scan_e_step.x;
+			scan_e.z += scan_e_step.z;
+			scan_e.u += scan_e_step.u;
+			scan_e.v += scan_e_step.v;
+		}
+		ve0 = verts[1];
+		ve1 = verts[2];
+	}
+}
+/*
+Faster version of the above
+Only perspective correct support in 32bpp
+Tries to calculate perspective correct UVs each 16 pixels, and linterp inbetween
+An enormous, ugly hack
+*/
+function kdr_triangle3d_f_persp32bpp(bmp, tex,  _v1, _v2, _v3)
+{
+	let scan_s = {}, scan_e = {}, scan_l, scan_r, scan_x = {};
+	let scan_x_step = {}, scan_s_step = {}, scan_e_step = {};
+	
+	let verts = [_v1, _v2, _v3];
+	let tmp_v = {};
+	let ve0, ve1;
+	let vs0, vs1;
+	let x_i, y_i, u_i, v_i, u_i_n, v_i_n, x_i_n, x_l, x_r;
+	let z_i, z_i_n;
+	let pass;
+	let tmp;
+	let pixel;
+	let w_1 = tex.w - 1;
+	
+	function SWAP_V(a, b){ Object.assign(tmp_v, a); Object.assign(a, b); Object.assign(b, tmp_v); };
+	let STEPSIZE = (a, b, c) => (((b) - (a)) * (c));
+	
+	if(verts[1].y < verts[0].y) SWAP_V(verts[1], verts[0]);
+	if(verts[2].y < verts[0].y) SWAP_V(verts[2], verts[0]);
+	if(verts[1].y > verts[2].y) SWAP_V(verts[1], verts[2]);
+	
+	verts[0].z = 1.0 / verts[0].z;
+	verts[1].z = 1.0 / verts[1].z;
+	verts[2].z = 1.0 / verts[2].z;
+	verts[0].u *= verts[0].z;
+	verts[1].u *= verts[1].z;
+	verts[2].u *= verts[2].z;
+	verts[0].v *= verts[0].z;
+	verts[1].v *= verts[1].z;
+	verts[2].v *= verts[2].z;
+	
+	vs0 = verts[0];
+	vs1 = verts[2];
+	
+	ve0 = verts[0];
+	ve1 = verts[1];
+	
+	tmp = 1.0 / ((vs1.y) - (vs0.y));
+	scan_s_step.z = STEPSIZE(vs0.z, vs1.z, tmp);
+	scan_s_step.u = STEPSIZE(vs0.u, vs1.u, tmp);
+	scan_s_step.v = STEPSIZE(vs0.v, vs1.v, tmp);
+	scan_s_step.x = STEPSIZE(vs0.x, vs1.x, tmp);
+	
+	Object.assign(scan_s, vs0);
+	tmp = ceil(ve0.y) - scan_s.y;
+	scan_s.z += scan_s_step.z * tmp;
+	scan_s.u += scan_s_step.u * tmp;
+	scan_s.v += scan_s_step.v * tmp;
+	scan_s.x += scan_s_step.x * tmp;
+	for(pass = 0; pass < 2; pass++){
+		tmp = 1.0 / ((ve1.y) - (ve0.y));
+		scan_e_step.z = STEPSIZE(ve0.z, ve1.z, tmp);
+		scan_e_step.u = STEPSIZE(ve0.u, ve1.u, tmp);
+		scan_e_step.v = STEPSIZE(ve0.v, ve1.v, tmp);
+		scan_e_step.x = STEPSIZE(ve0.x, ve1.x, tmp);
+		
+		Object.assign(scan_e, ve0);
+		tmp = ceil(ve0.y) - scan_e.y;
+		scan_e.z += scan_e_step.z * tmp;
+		scan_e.u += scan_e_step.u * tmp;
+		scan_e.v += scan_e_step.v * tmp;
+		scan_e.x += scan_e_step.x * tmp;
+		
+		if((scan_e_step.x > scan_s_step.x) ^ (pass)){
+			scan_l = scan_s;
+			scan_r = scan_e;
+		}
+		else{
+			scan_l = scan_e;
+			scan_r = scan_s;
+		}
+		
+		let STEPLEN = 16;
+		let STEPLENF = 16.0;
+		
+		for(y_i = ceil(ve0.y); y_i < ceil(ve1.y); y_i++){
+			tmp = 1.0 / ((scan_r.x) - (scan_l.x));
+			scan_x_step.z = STEPSIZE(scan_l.z, scan_r.z, tmp);
+			scan_x_step.u = STEPSIZE(scan_l.u, scan_r.u, tmp);
+			scan_x_step.v = STEPSIZE(scan_l.v, scan_r.v, tmp);
+			
+			Object.assign(scan_x, scan_l);
+			x_l = ceil(scan_l.x);
+			x_r = ceil(scan_r.x);
+			
+			scan_s.x += scan_s_step.x;
+			scan_s.z += scan_s_step.z;
+			scan_s.u += scan_s_step.u;
+			scan_s.v += scan_s_step.v;
+			
+			scan_e.x += scan_e_step.x;
+			scan_e.z += scan_e_step.z;
+			scan_e.u += scan_e_step.u;
+			scan_e.v += scan_e_step.v;
+			
+			//Avoid writes out of vertical bounds
+			if(y_i < 0) continue;
+			if(y_i >= bmp.h) continue;
+			
+			//Avoid writes out of horizontal bounds
+			if(scan_x.x < 0.0){
+				tmp = -scan_x.x;
+				scan_x.z += scan_x_step.z * tmp;
+				scan_x.u += scan_x_step.u * tmp;
+				scan_x.v += scan_x_step.v * tmp;
+				scan_x.x = 0.0;
+				x_l = 0;
+			}
+			if(x_r >= bmp.w) x_r = bmp.w;
+			
+			scan_x_step.z *= STEPLENF;
+			scan_x_step.u *= STEPLENF;
+			scan_x_step.v *= STEPLENF;
+			
+			let FIXCOEFF = 256.0;
+			let FIXSHIFT = 8;
+			
+			z_i =  1.0 / scan_x.z;
+			u_i = (FIXCOEFF * scan_x.u * z_i);
+			v_i = (FIXCOEFF * scan_x.v * z_i);
+			
+			scan_x.z += scan_x_step.z;
+			scan_x.u += scan_x_step.u;
+			scan_x.v += scan_x_step.v;
+			
+			z_i_n =  1.0 / scan_x.z;
+			
+			pixel = bmp.line[y_i].subarray(x_l);
+			
+			for(x_i = x_l; x_i < x_r; x_i = x_i_n){
+				x_i_n = x_i + STEPLEN;
+				
+				u_i_n = (FIXCOEFF * scan_x.u * z_i_n);
+				v_i_n = (FIXCOEFF * scan_x.v * z_i_n);
+				u_i_n -= u_i;
+				v_i_n -= v_i;
+				
+				//TODO: Check whether this branch may be expensive
+				if(x_i_n < x_r){
+					scan_x.z += scan_x_step.z;
+					scan_x.u += scan_x_step.u;
+					scan_x.v += scan_x_step.v;
+					z_i_n =  1.0 / scan_x.z;
+				}
+				//Note: seems replacing the wrapping with & 63 increases speed,
+				//likely also by simplifications to the linterp expression
+				let UP_I = (n) => (((u_i + (u_i_n * (n))) >> FIXSHIFT) & (w_1));
+				let VP_I = (n) => (((v_i + (v_i_n * (n))) >> FIXSHIFT) & (w_1));
+				let X_I = (n) => (x_i + (n));
+				//Direct memory access provides a significant boost,
+				//as it avoids bmp_* function calls
+				//Note: Accessing int ** by [y][x] is faster than int * by [y + x * w]
+				//unless w is one of {1,2,4,8}
+				let C = (n) => (tex.line[VP_I(n)][UP_I(n)]);
+				function PUTPIXEL(i, c) { pixel[i] = c; };
+				let TEXLINE = (l) => (tex.line[l]);
+				//This unrolling provides a quite radical performance boost
+				if(1){
+                    u_i_n >>= 4;
+                    v_i_n >>= 4;
+                    switch(x_r - x_i){
+                        default:
+                        case 16: PUTPIXEL(15, C(15)); case 15: PUTPIXEL(14, C(14));
+                        case 14: PUTPIXEL(13, C(13)); case 13: PUTPIXEL(12, C(12));
+                        case 12: PUTPIXEL(11, C(11)); case 11: PUTPIXEL(10, C(10));
+                        case 10: PUTPIXEL(9, C(9));	case 9: PUTPIXEL(8, C(8));
+                        case 8: PUTPIXEL(7, C(7)); case 7: PUTPIXEL(6, C(6));
+                        case 6:	PUTPIXEL(5, C(5)); case 5: PUTPIXEL(4, C(4));
+                        case 4: PUTPIXEL(3, C(3)); case 3: PUTPIXEL(2, C(2));
+                        case 2: PUTPIXEL(1, C(1));
+                        case 1: PUTPIXEL(0, C(0));
+                    }
+                    pixel = pixel.subarray(STEPLEN);
+                    u_i += u_i_n << 4;
+                    v_i += v_i_n << 4;
+				}
+                else{
+                    let ix = x_i_n - x_i;
+                    for(;
+                        x_i < x_i_n && x_i < x_r;
+                        x_i++, u_i += u_i_n / ix, v_i += v_i_n / ix, pixel = pixel.subarray(1)
+                    ){
+                        pixel[0] = TEXLINE((v_i >> FIXSHIFT) & w_1)[(u_i >> FIXSHIFT) & w_1];
+                    }
+				}
+			}
+		}
+		ve0 = verts[1];
+		ve1 = verts[2];
+	}
+}
+//Bilinear filtered no-wrap 1 channel rasteriser, assumes 8bpp bitmaps
+function kdr_triangle3d_f_persp_bilinear(bmp, tex,  _v1, _v2, _v3)
+{
+	let scan_s = {}, scan_e = {}, scan_l, scan_r, scan_x = {};
+	let scan_x_step = {}, scan_s_step = {}, scan_e_step = {};
+	
+	let verts = [_v1, _v2, _v3];
+	let tmp_v = {};
+	let ve0, ve1;
+	let vs0, vs1;
+	let x_i, y_i, u_i, v_i, u_i_n, v_i_n, x_i_n, x_l, x_r;
+	let z_i, z_i_n;
+	let pass;
+	let tmp;
+	let pixel;
+	let w_1 = tex.w - 1;
+	
+	function SWAP_V(a, b){ Object.assign(tmp_v, a); Object.assign(a, b); Object.assign(b, tmp_v); };
+	let STEPSIZE = (a, b, c) => (((b) - (a)) * (c)); 
+	
+	if(verts[1].y < verts[0].y) SWAP_V(verts[1], verts[0]);
+	if(verts[2].y < verts[0].y) SWAP_V(verts[2], verts[0]);
+	if(verts[1].y > verts[2].y) SWAP_V(verts[1], verts[2]);
+	
+	verts[0].z = 1.0 / verts[0].z;
+	verts[1].z = 1.0 / verts[1].z;
+	verts[2].z = 1.0 / verts[2].z;
+	verts[0].u *= verts[0].z;
+	verts[1].u *= verts[1].z;
+	verts[2].u *= verts[2].z;
+	verts[0].v *= verts[0].z;
+	verts[1].v *= verts[1].z;
+	verts[2].v *= verts[2].z;
+	
+	vs0 = verts[0];
+	vs1 = verts[2];
+	
+	ve0 = verts[0];
+	ve1 = verts[1];
+	
+	tmp = 1.0 / ((vs1.y) - (vs0.y));
+	scan_s_step.z = STEPSIZE(vs0.z, vs1.z, tmp);
+	scan_s_step.u = STEPSIZE(vs0.u, vs1.u, tmp);
+	scan_s_step.v = STEPSIZE(vs0.v, vs1.v, tmp);
+	scan_s_step.x = STEPSIZE(vs0.x, vs1.x, tmp);
+	
+	Object.assign(scan_s, vs0);
+	tmp = ceil(ve0.y) - scan_s.y;
+	scan_s.z += scan_s_step.z * tmp;
+	scan_s.u += scan_s_step.u * tmp;
+	scan_s.v += scan_s_step.v * tmp;
+	scan_s.x += scan_s_step.x * tmp;
+	for(pass = 0; pass < 2; pass++){
+		tmp = 1.0 / ((ve1.y) - (ve0.y));
+		scan_e_step.z = STEPSIZE(ve0.z, ve1.z, tmp);
+		scan_e_step.u = STEPSIZE(ve0.u, ve1.u, tmp);
+		scan_e_step.v = STEPSIZE(ve0.v, ve1.v, tmp);
+		scan_e_step.x = STEPSIZE(ve0.x, ve1.x, tmp);
+		
+		Object.assign(scan_e, ve0);
+		tmp = ceil(ve0.y) - scan_e.y;
+		scan_e.z += scan_e_step.z * tmp;
+		scan_e.u += scan_e_step.u * tmp;
+		scan_e.v += scan_e_step.v * tmp;
+		scan_e.x += scan_e_step.x * tmp;
+		
+		if((scan_e_step.x > scan_s_step.x) ^ (pass)){
+			scan_l = scan_s;
+			scan_r = scan_e;
+		}
+		else{
+			scan_l = scan_e;
+			scan_r = scan_s;
+		}
+		
+		let STEPLEN = 16;
+		let STEPLENF = 16.0;
+		
+		for(y_i = ceil(ve0.y); y_i < ceil(ve1.y); y_i++){
+			tmp = 1.0 / ((scan_r.x) - (scan_l.x));
+			scan_x_step.z = STEPSIZE(scan_l.z, scan_r.z, tmp);
+			scan_x_step.u = STEPSIZE(scan_l.u, scan_r.u, tmp);
+			scan_x_step.v = STEPSIZE(scan_l.v, scan_r.v, tmp);
+			
+			Object.assign(scan_x, scan_l);
+			x_l = ceil(scan_l.x);
+			x_r = ceil(scan_r.x);
+			
+			scan_s.x += scan_s_step.x;
+			scan_s.z += scan_s_step.z;
+			scan_s.u += scan_s_step.u;
+			scan_s.v += scan_s_step.v;
+			
+			scan_e.x += scan_e_step.x;
+			scan_e.z += scan_e_step.z;
+			scan_e.u += scan_e_step.u;
+			scan_e.v += scan_e_step.v;
+			
+			if(y_i < 0) continue;
+			if(y_i >= bmp.h) continue;
+			
+			if(scan_x.x < 0.0){
+				tmp = -scan_x.x;
+				scan_x.z += scan_x_step.z * tmp;
+				scan_x.u += scan_x_step.u * tmp;
+				scan_x.v += scan_x_step.v * tmp;
+				scan_x.x = 0.0;
+				x_l = 0;
+			}
+			if(x_r >= bmp.w) x_r = bmp.w;
+			
+			scan_x_step.z *= STEPLENF;
+			scan_x_step.u *= STEPLENF;
+			scan_x_step.v *= STEPLENF;
+			
+			let FIXCOEFF = 65536.0;
+			let FIXSHIFT = 16;
+			
+			z_i =  1.0 / scan_x.z;
+			u_i = (FIXCOEFF * scan_x.u * z_i);
+			v_i = (FIXCOEFF * scan_x.v * z_i);
+			
+			scan_x.z += scan_x_step.z;
+			scan_x.u += scan_x_step.u;
+			scan_x.v += scan_x_step.v;
+			
+			z_i_n =  1.0 / scan_x.z;
+			
+			pixel = bmp.line[y_i].subarray(x_l);
+			
+			for(x_i = x_l; x_i < x_r; x_i = x_i_n){
+				x_i_n = x_i + STEPLEN;
+				
+				u_i_n = (FIXCOEFF * scan_x.u * z_i_n);
+				v_i_n = (FIXCOEFF * scan_x.v * z_i_n);
+				u_i_n -= u_i;
+				v_i_n -= v_i;
+				
+				if(x_i_n < x_r){
+					scan_x.z += scan_x_step.z;
+					scan_x.u += scan_x_step.u;
+					scan_x.v += scan_x_step.v;
+					z_i_n =  1.0 / scan_x.z;
+				}
+				
+				let TEXLINE = (l) => (tex.line[l]);
+				let LINTERP = (a, b, c) => ((a) + ((((b) - (a)) * (c)) >> FIXSHIFT));
+				let U_I = (n) => (u_i + (u_i_n * (n)));
+				let V_I = (n) => (v_i + (v_i_n * (n)));
+				let UP_I = (n) => (U_I(n) >> FIXSHIFT);
+				let VP_I = (n) => (V_I(n) >> FIXSHIFT);
+				let UF_I = (n) => (U_I(n) & ((1 << FIXSHIFT) - 1));
+				let VF_I = (n) => (V_I(n) & ((1 << FIXSHIFT) - 1));
+				let C11 = (n) => (TEXLINE((VP_I(n)+0) & w_1)[(UP_I(n)+0) & w_1]);
+				let C12 = (n) => (TEXLINE((VP_I(n)+1) & w_1)[(UP_I(n)+0) & w_1]);
+				let C21 = (n) => (TEXLINE((VP_I(n)+0) & w_1)[(UP_I(n)+1) & w_1]);
+				let C22 = (n) => (TEXLINE((VP_I(n)+1) & w_1)[(UP_I(n)+1) & w_1]);
+				let C = (n) => (LINTERP(LINTERP(C11(n), C12(n), VF_I(n)), LINTERP(C21(n), C22(n), VF_I(n)), UF_I(n)));
+				function PUTPIXEL(i, c){ pixel[i] = c; }
+                
+				if(1){
+                    u_i_n >>= 4;
+                    v_i_n >>= 4;
+                    switch(x_r - x_i){
+                        default:
+                        case 16: PUTPIXEL(15, C(15)); case 15: PUTPIXEL(14, C(14));
+                        case 14: PUTPIXEL(13, C(13)); case 13: PUTPIXEL(12, C(12));
+                        case 12: PUTPIXEL(11, C(11)); case 11: PUTPIXEL(10, C(10));
+                        case 10: PUTPIXEL(9, C(9));	case 9: PUTPIXEL(8, C(8));
+                        case 8: PUTPIXEL(7, C(7)); case 7: PUTPIXEL(6, C(6));
+                        case 6:	PUTPIXEL(5, C(5)); case 5: PUTPIXEL(4, C(4));
+                        case 4: PUTPIXEL(3, C(3)); case 3: PUTPIXEL(2, C(2));
+                        case 2: PUTPIXEL(1, C(1));       
+                        case 1: PUTPIXEL(0, C(0));
+                    }
+                    u_i += u_i_n << 4;
+                    v_i += v_i_n << 4;
+                    pixel = pixel.subarray(STEPLEN);
+                }
+				else{
+                    let ix = x_i_n - x_i;
+                    for(;
+                        x_i < x_i_n && x_i < x_r;
+                        x_i++, u_i += u_i_n / ix, v_i += v_i_n / ix, pixel = pixel.subarray(1)
+                    ){
+                        let up_i = (u_i >> FIXSHIFT);
+                        let vp_i = (v_i >> FIXSHIFT);
+                        let uf_i = (u_i & ((1 << FIXSHIFT) - 1));
+                        let vf_i = (v_i & ((1 << FIXSHIFT) - 1));
+                        let c11 = (TEXLINE((vp_i+0) & w_1)[(up_i+0) & w_1]);
+                        let c12 = (TEXLINE((vp_i+1) & w_1)[(up_i+0) & w_1]);
+                        let c21 = (TEXLINE((vp_i+0) & w_1)[(up_i+1) & w_1]);
+                        let c22 = (TEXLINE((vp_i+1) & w_1)[(up_i+1) & w_1]);
+                        let c1 = LINTERP(c11, c12, vf_i);
+                        let c2 = LINTERP(c21, c22, vf_i);
+                        let c = LINTERP(c1, c2, uf_i);
+                        pixel[0] = c;
+                    }
+				}
+			}
+		}
+		ve0 = verts[1];
+		ve1 = verts[2];
+	}
+}
+/*
+static uint16_t ktaz_y[N1], ktaz_n[N2], ktaz_x[N2], ktaz_len[N2];
+typedef struct ktaz_ptrs
+{
+	uint16_t *y, *n, *x, *l;
+} ktaz_ptrs;
+const static ktaz_ptrs ktaz_p0 = {ktaz_y, ktaz_n, ktaz_x, ktaz_len};
+static ktaz_ptrs ktaz_ptr;
+*/
+
+function KTAZ_RESET()
+{
+	//ktaz_ptr = ktaz_p0;
+}
+function KTAZ_OPEN()
+{
+	//*ktaz_ptr.y = y_i;
+	//*ktaz_ptr.n = 0;
+	//*ktaz_ptr.l = 0;
+}
+function KTAZ_PIXEL()
+{
+	//if(!(*ktaz_ptr.l)) *ktaz_ptr.x = x_i;
+	//*ktaz_ptr.l += 1;
+}
+function KTAZ_EMPTY()
+{
+	//if(*ktaz_ptr.l){
+	//	*ktaz_ptr.n += 1;
+	//	ktaz_ptr.l++;
+	//	*ktaz_ptr.l = 0;
+	//	ktaz_ptr.x++;
+	//}
+}
+function KTAZ_CLOSE()
+{
+	KTAZ_EMPTY();
+	//if(*ktaz_ptr.n){
+	//	ktaz_ptr.n++;
+	//	ktaz_ptr.y++;
+	//}
+}
+
+var kdr_active_zbuf;
+//Affine textured triangle drawing function, with depth checks
+//Doesn't do masking
+function kdr_triangle3d_f_affinezb32bpp(bmp, tex,  _v1, _v2, _v3)
+{
+	let scan_s = {}, scan_e = {}, scan_l, scan_r, scan_x = {}, scan_x_step = {};
+	let scan_s_step = {}, scan_e_step = {};
+	
+	let verts = [_v1, _v2, _v3];
+	let tmp_v = {};
+	let ve0, ve1;
+	let vs0, vs1;
+	let x_i, y_i, x_l, x_r;
+	let tmp;
+	let pass;
+	let scan_x_z_i, scan_x_u_i, scan_x_v_i;
+	let scan_x_step_z_i, scan_x_step_u_i, scan_x_step_v_i;
+	let zb_pixel, pixel;
+	let w_1 = tex.w - 1;
+	
+	function SWAP_V(a, b){ Object.assign(tmp_v, a); Object.assign(a, b); Object.assign(b, tmp_v); };
+	let STEPSIZE = (a, b, c) => (((b) - (a)) * (c));
+	
+	if(verts[1].y < verts[0].y) SWAP_V(verts[1], verts[0]);
+	if(verts[2].y < verts[0].y) SWAP_V(verts[2], verts[0]);
+	if(verts[1].y > verts[2].y) SWAP_V(verts[1], verts[2]);
+	
+	verts[0].z = (INT_MAX * KDR_NEAR) / verts[0].z;
+	verts[1].z = (INT_MAX * KDR_NEAR) / verts[1].z;
+	verts[2].z = (INT_MAX * KDR_NEAR) / verts[2].z;
+	
+	let FIXCOEFF = 256.0;
+	let FIXSHIFT = 8;
+	
+	verts[0].u *= FIXCOEFF;
+	verts[1].u *= FIXCOEFF;
+	verts[2].u *= FIXCOEFF;
+	verts[0].v *= FIXCOEFF;
+	verts[1].v *= FIXCOEFF;
+	verts[2].v *= FIXCOEFF;
+	
+	vs0 = verts[0];
+	vs1 = verts[2];
+	
+	ve0 = verts[0];
+	ve1 = verts[1];
+	
+	tmp = 1.0 / ((vs1.y) - (vs0.y));
+	scan_s_step.z = STEPSIZE(vs0.z, vs1.z, tmp);
+	scan_s_step.u = STEPSIZE(vs0.u, vs1.u, tmp);
+	scan_s_step.v = STEPSIZE(vs0.v, vs1.v, tmp);
+	scan_s_step.x = STEPSIZE(vs0.x, vs1.x, tmp);
+	
+	Object.assign(scan_s, vs0);
+	tmp = ceil(ve0.y) - scan_s.y;
+	scan_s.z += scan_s_step.z * tmp;
+	scan_s.u += scan_s_step.u * tmp;
+	scan_s.v += scan_s_step.v * tmp;
+	scan_s.x += scan_s_step.x * tmp;
+	
+	for(pass = 0; pass < 2; pass++){
+		tmp = 1.0 / ((ve1.y) - (ve0.y));
+		scan_e_step.z = STEPSIZE(ve0.z, ve1.z, tmp);
+		scan_e_step.u = STEPSIZE(ve0.u, ve1.u, tmp);
+		scan_e_step.v = STEPSIZE(ve0.v, ve1.v, tmp);
+		scan_e_step.x = STEPSIZE(ve0.x, ve1.x, tmp);
+		
+		Object.assign(scan_e, ve0);
+		tmp = ceil(ve0.y) - scan_e.y;
+		scan_e.z += scan_e_step.z * tmp;
+		scan_e.u += scan_e_step.u * tmp;
+		scan_e.v += scan_e_step.v * tmp;
+		scan_e.x += scan_e_step.x * tmp;
+		
+		if((scan_e_step.x > scan_s_step.x) ^ (pass)){
+			scan_l = scan_s;
+			scan_r = scan_e;
+		}
+		else{
+			scan_l = scan_e;
+			scan_r = scan_s;
+		}
+		
+		for(y_i = ceil(ve0.y); y_i < ceil(ve1.y); y_i++){
+			tmp = 1.0 / (scan_r.x - scan_l.x);
+			scan_x_step.z = STEPSIZE(scan_l.z, scan_r.z, tmp);
+			scan_x_step.u = STEPSIZE(scan_l.u, scan_r.u, tmp);
+			scan_x_step.v = STEPSIZE(scan_l.v, scan_r.v, tmp);
+			
+            Object.assign(scan_x, scan_l);
+			
+			x_l = scan_l.x;
+			x_r = scan_r.x;
+			
+			if(y_i < 0) continue;
+			if(y_i >= bmp.h) continue;
+			
+			if(scan_x.x < 0.0){
+				tmp = -scan_x.x;
+				scan_x.z += scan_x_step.z * tmp;
+				scan_x.u += scan_x_step.u * tmp;
+				scan_x.v += scan_x_step.v * tmp;
+				scan_x.x = 0.0;
+				x_l = 0;
+			}
+			if(x_r >= bmp.w) x_r = bmp.w;
+			
+			scan_x_z_i = scan_x.z;
+			scan_x_u_i = scan_x.u;
+			scan_x_v_i = scan_x.v;
+			scan_x_step_z_i = scan_x_step.z;
+			scan_x_step_u_i = scan_x_step.u;
+			scan_x_step_v_i = scan_x_step.v;
+			
+			zb_pixel = kdr_active_zbuf.line[y_i].subarray(x_l);
+            pixel = bmp.line[y_i].subarray(x_l);
+			
+			KTAZ_OPEN(y_i);
+			
+			for(x_i = x_l; x_i < x_r; x_i++){
+				if(zb_pixel[0] < scan_x_z_i){
+					KTAZ_PIXEL(x_i);
+					
+					zb_pixel[0] = scan_x_z_i;
+					pixel[0] = tex.line[(scan_x_v_i >> FIXSHIFT) & w_1][(scan_x_u_i >> FIXSHIFT) & w_1];
+				}
+				else
+					KTAZ_EMPTY();
+				
+				scan_x_z_i += scan_x_step_z_i;
+				scan_x_u_i += scan_x_step_u_i;
+				scan_x_v_i += scan_x_step_v_i;
+                
+				zb_pixel = pixel.subarray(1);
+				pixel = pixel.subarray(1);
+			}
+			
+			KTAZ_CLOSE();
+			
+			scan_s.x += scan_s_step.x;
+			scan_s.z += scan_s_step.z;
+			scan_s.u += scan_s_step.u;
+			scan_s.v += scan_s_step.v;
+			
+			scan_e.x += scan_e_step.x;
+			scan_e.z += scan_e_step.z;
+			scan_e.u += scan_e_step.u;
+			scan_e.v += scan_e_step.v;
+		}
+		ve0 = verts[1];
+		ve1 = verts[2];
+	}
+}
+
+function kdr_polygon3d_f_(bmp, tex, verts0, verts1, verts2)
+{
+    verts0 = {...verts0};
+    verts1 = {...verts1};
+    verts2 = {...verts2};
+	
+    verts0.u *= tex.w;
+    verts1.u *= tex.w;
+    verts2.u *= tex.w;
+    verts0.v *= tex.h;
+    verts1.v *= tex.h;
+    verts2.v *= tex.h;
+    
+    KTAZ_RESET();
+	raster_triangle_func(bmp, tex, verts0, verts1, verts2);
+}
+
+kdr_bf_cull = 0;
+raster_triangle_func = kdr_triangle3d_f_generic;
+function kdr_polygon3d_f(bmp, tex, verts)
+{
+	if(verts.length <= 2) return;
+	
+	var ax = verts[0].x - verts[1].x;
+	var bx = verts[0].x - verts[2].x;
+	var ay = verts[0].y - verts[1].y;
+	var by = verts[0].y - verts[2].y;
+	if(kdr_bf_cull > 0 && ax * by - ay * bx > 0) return;
+	if(kdr_bf_cull < 0 && ax * by - ay * bx < 0) return;
+	
+    kdr_active_zbuf = create_bitmap_ex(32, bmp.w, bmp.h);
+    
+	if(verts.length > 3){
+		for(let i = 1; i < verts.length - 1; i++){
+			kdr_polygon3d_f_(bmp, tex, verts[0], verts[i], verts[i + 1]);
+		}
+	}
+	else kdr_polygon3d_f_(bmp, tex, verts[0], verts[1], verts[2]);
+}
+`;
+// -------------------------- RASTER CODE END ---------------------------------------------------
+
+var rasterizer_funcs = [
+    "kdr_triangle3d_f_generic",
+    "kdr_triangle3d_f_persp",
+    "kdr_triangle3d_f_persp32bpp",
+    "kdr_triangle3d_f_persp_bilinear",
+    "kdr_triangle3d_f_affinezb32bpp"
+];
+
+let drawsprite_ctx_fill_cache = {};
+function drawsprite_ctx(ctx, bmp, x, y)
+{
+    let fill_cache = drawsprite_ctx_fill_cache;
+	for(var cx = x, bx = 0; bx < bmp.w && cx < ctx.canvas.width; cx++, bx++){
+		for(var cy = y, by = 0; y < bmp.h && cy < ctx.canvas.height; cy++, by++){
+			let colour = 0, r = 0, g = 0, b = 0;
+			colour = bmp.line[by][bx];
+            if(!fill_cache[colour]){
+                if(bmp.depth == 32){
+                    r = (colour >> 16) & 0xFF;
+                    g = (colour >> 8) & 0xFF;
+                    b = (colour >> 0) & 0xFF;
+                }
+                if(bmp.depth == 16){
+                    r = ((colour >> 10) & 31) << 3;
+                    g = ((colour >>  5) & 31) << 3;
+                    b = ((colour >>  0) & 31) << 3;
+                }
+                if(bmp.depth == 8){
+                    r = palette[colour].r;
+                    g = palette[colour].g;
+                    b = palette[colour].b;
+                }
+                fill_cache[colour] = "rgb("+r+","+g+","+b+")";
+            }
+            ctx.fillStyle = fill_cache[colour];
+			ctx.fillRect(cx, cy, 1, 1);
+		}
+	}
+}
+
+function worker_rasterize(ctx, tex, verts, func)
+{
+    var use_worker = eval(worker_select.value);
+	var worker_code = editor.getValue() + allegro_code;
+    if(use_worker){
+        worker_code += `
+            self.onmessage = function(e){
+                var t0 = performance.now();
+                raster_triangle_func = eval(e.data.raster_triangle_func);
+                kdr_polygon3d_f(e.data.bmp, e.data.tex, e.data.verts);
+                var t1 = performance.now();
+                //console.log("rasterized in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
+                postMessage(e.data.bmp);
+            }
+        `;
+    }
+    else{
+        worker_code = "var foo = function(data){" + worker_code + `
+                var t0 = performance.now();
+                raster_triangle_func = eval(data.raster_triangle_func);
+                kdr_polygon3d_f(data.bmp, data.tex, data.verts);
+                var t1 = performance.now();
+                //console.log("rasterized in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
+                return data.bmp;
+        ` + "}; foo";
+    }
+    if(1){
+        var t0 = performance.now();
+        var data = {
+            bmp: create_bitmap_ex(tex.depth, ctx.canvas.width, ctx.canvas.height),
+            tex: tex,
+            verts: verts,
+            raster_triangle_func: raster_select.value,
+        };
+        var t1 = performance.now();
+        //console.log("bmp created in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
+    }
+    if(use_worker){
+        var t0;
+        blob = new Blob([worker_code], {type: 'application/javascript'});
+        var worker = new Worker(URL.createObjectURL(blob));
+        worker.onmessage = function(e){
+            var t1 = performance.now();
+            //console.log("worker returned in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
+            drawsprite_ctx(ctx, e.data, 0, 0);
+            if(func) window.requestAnimationFrame(func);
+        };
+        t0 = performance.now();
+        worker.postMessage(data);
+    }
+    else{
+        var t0 = performance.now();
+        var func = eval(worker_code);
+        var bmp = func(data);
+        var t1 = performance.now();
+        //console.log("func returned in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
+        var t0 = performance.now();
+        drawsprite_ctx(ctx, bmp, 0, 0);
+        var t1 = performance.now();
+        //console.log("drawsprite_ctx in " + (t1 - t0) + "ms (" + t1 + "-" + t0 + ")");
+        if(func) window.requestAnimationFrame(func);
+    }
+}
+
+function xor_texture(res)
+{
+    var bmp = create_bitmap_ex(32, res, res);
+    for(var x = 0; x < res; x++){
+        for(var y = 0; y < res; y++){
+            bmp.line[y][x] = (x ^ y) & 0xFF;
+        }
+    }
+    return bmp;
+}
+
+
+var editor, res_select, screen, raster_select, worker_select;
+function body_onload()
+{
+    editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/javascript");
+    editor.setValue(raster_code);
+    res_select = document.getElementById("res_select");
+    raster_select = document.getElementById("raster_select");
+    worker_select = document.getElementById("worker_select");
+    var resolutions = [[80,60],[160,100],[160,120],[320,200],[320,240],[640,480]];
+    var bitdepths = [8,32];
+    for(let i = 0; i < resolutions.length; i++){
+        let option = document.createElement("option");
+        option.text = resolutions[i][0] + "x" + resolutions[i][1];
+        option.value = "["+resolutions[i][0] + "," + resolutions[i][1]+"]";
+        res_select.add(option);
+    }
+    for(let i = 0; i < rasterizer_funcs.length; i++){
+        let option = document.createElement("option");
+        option.text = rasterizer_funcs[i];
+        option.value = rasterizer_funcs[i];
+        raster_select.add(option);
+    }
+    screen = document.getElementById("screen");
+    
+    if(localStorage.getItem("res_select".length)) res_select.value = localStorage.getItem("res_select");
+    if(localStorage.getItem("raster_select".length)) raster_select.value = localStorage.getItem("raster_select");
+    if(localStorage.getItem("worker_select".length)) raster_select.value = localStorage.getItem("worker_select");
+    
+    res_change();
+}
+
+var pitch = 0, yaw = 0;
+var obj_rot_x = 0, obj_rot_y = 0, obj_rot_z = 0;
+
+function button_run(func)
+{
+    var ctx = screen.getContext("2d");
+    var tex = xor_texture(256);
+    set_projection_viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
+    //void get_camera_matrix_f(MATRIX_f *m, float x, float y, float z, float xfront, float yfront, float zfront, float xup, float yup, float zup, float fov, float aspect)
+    var camera = matrix_f(), obj_t = matrix_f(), obj_r = matrix_f(), obj_comb = matrix_f(), comb = matrix_f();
+    
+    var dirx = sin(yaw) * cos(pitch);
+	var diry = sin(pitch);
+	var dirz = cos(yaw) * cos(pitch);
+    
+    get_camera_matrix_f(camera, 0, 0, 0, dirx, diry, dirz, 0, 1, 0, 90, ctx.canvas.width / ctx.canvas.height);
+    
+    get_translation_matrix_f(obj_t, 0, 0, 10);
+    get_rotation_matrix_f(obj_r, obj_rot_x, obj_rot_y, obj_rot_z);
+    
+    matrix_mul_f(obj_r, obj_t, obj_comb);
+    matrix_mul_f(camera, obj_comb, comb);
+    
+    var verts = [V3D_f(-1, -1, 0, 0, 0), V3D_f(1, -1, 0, 1, 0), V3D_f(1, 1, 0, 1, 1), V3D_f(-1, 1, 0, 0, 1)];
+    
+    var verts_t = verts.map(v => apply_matrix_f(comb, v));
+    var verts_proj = verts_t.map(persp_project_f);
+    worker_rasterize(ctx, tex, verts_proj, func);
+}
+
+var obj_rot_dx = 0;
+var obj_rot_dy = 0;
+var obj_rot_dz = 0;
+var obj_rot_dcounter = 0;
+
+function spin()
+{
+    if(obj_rot_dcounter == 0){
+        obj_rot_dx = (Math.random() - 0.5);
+        obj_rot_dy = (Math.random() - 0.5);
+        obj_rot_dz = (Math.random() - 0.5);
+        obj_rot_dcounter = 30;
+    }
+    obj_rot_x += obj_rot_dx;
+    obj_rot_y += obj_rot_dy;
+    obj_rot_z += obj_rot_dz;
+    obj_rot_dcounter--;
+    
+    button_run(spin);
+}
+
+function button_rot(c, a)
+{
+    window["obj_rot_" + c] += a;
+    button_run();
+}
+
+function button_spin()
+{
+    spin();
+}
+
+function res_change()
+{
+    var w = eval(res_select.value)[0];
+    var h = eval(res_select.value)[1];
+    screen.width = w;
+    screen.height = h;
+    var i = 1;
+    while(w * i < 640 && h * i < 480){
+        i++;
+    }
+    screen.style.width = (w * i) + "px";
+    screen.style.height = (h * i) + "px";
+    
+    localStorage.setItem("res_select", res_select.value);
+}
+
+function raster_change()
+{
+    localStorage.setItem("raster_select", raster_select.value);
+}
+
+function worker_change()
+{
+    localStorage.setItem("worker_select", worker_select.value);
+}
+
+</script>
+<style type="text/css" media="screen">
+#editor { 
+    position: relative;
+    width: 640px;
+    height: 480px;
+    margin: 0px;
+}
+canvas {
+    image-rendering: optimizeSpeed;             /* Older versions of FF          */
+    image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+    image-rendering: -webkit-optimize-contrast; /* Safari                        */
+    image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+    image-rendering: pixelated;                 /* Awesome future-browsers       */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+}
+</style>
+</head>
+<body onload="body_onload()">
+<table>
+<tr>
+    <td>
+        <div id="editor"></div><br>
+        <input type="button" onclick="button_run()" value="Test rasterizer">
+        <input type="button" onclick="button_spin()" value="Spin">
+        <select id="res_select" onchange="res_change()"></select>
+        <select id="raster_select" onchange="raster_change()"></select>
+        <select id="worker_select" onchange="worker_change()">
+            <option value="true">Use web worker</option>
+            <option value="false">Eval directly</option>
+        </select><br>
+         <input type="button" onclick="button_rot('x',3)" value="Rx+">
+          <input type="button" onclick="button_rot('x',-3)" value="Rx-">
+           <input type="button" onclick="button_rot('y',3)" value="Ry+">
+            <input type="button" onclick="button_rot('y',-3)" value="Ry-">
+             <input type="button" onclick="button_rot('z',3)" value="Rz+">
+              <input type="button" onclick="button_rot('z',-3)" value="Rz-">
+        <br>
+    </td>
+    <td>
+        <canvas id="screen" width="640" height="480" style="border: 1px solid black;"></canvas>
+    </td>
+</tr>
+</table>
+</body>
+</html>
