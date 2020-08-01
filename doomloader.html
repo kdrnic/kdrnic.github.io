@@ -1,0 +1,613 @@
+<html><head data-created="2020-08-01T21:53:07.912Z" data-modified="2020-08-01T21:51:56.527Z"><meta charset="UTF8"><link rel="stylesheet" href="hlstyles/default.css"><link rel="stylesheet" href="motherfucker.css"></head><body data-title="Doom level loader"><div class="article-index"><ul data-type="pages_index"><li><span>&apos;20/08/01 21:53   </span><a target="_top" href="index_doomloader.html">Doom level loader</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem3.html">NES Emulation Saga Part III</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem2.html">NES Emulation Saga Part II</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem1.html">NES Emulation Saga Part I</a></li><li><span>&apos;19/10/31 02:37   </span><a target="_top" href="index_kym.html">&#x1F3AE; Kori Yogan Mushi</a></li><li><span>&apos;19/08/03 20:43   </span><a target="_top" href="index_bespoke.html">&#x1F3AE; Bespoke Terror</a></li><li><span>&apos;19/08/03 20:32   </span><a target="_top" href="index_1hgj8.html">&#x1F3AE; Conker&apos;s BFD for Nintendo 486</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_trog.html">&#x1F3AE; TROG</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_stacker.html">&#x1F3AE; TTY Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_snake.html">&#x1F3AE; Snake</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_sm64.html">&#x1F3AE; SM64 HTML5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_ronaldo.html">&#x1F3AE; 3D Ronaldo Football</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_roguelike.html">&#x1F3AE; Batch Roguelike</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_prototype.html">&#x1F3AE; Prototype</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_nestest.html">&#x1F3AE; NEStest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_megamanblue.html">&#x1F3AE; MegaMan in the blue mountains</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD36.html">&#x1F3AE; Rune Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD31.html">&#x1F3AE; Doktornix And The Fetch Quest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29warmup.html">&#x1F3AE; Ludum Dare 29 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29.html">&#x1F3AE; Ground control to Major Tomashevsky</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23warmup.html">&#x1F3AE; Ludum Dare 23 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23.html">&#x1F3AE; Ludum Dare 23</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_keystone.html">&#x1F3AE; Keystone Kapers for NES</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_gbmine.html">&#x1F3AE; GBMINE</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_choplifter.html">&#x1F3AE; Choplifter</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_breakout.html">&#x1F3AE; 6502 breakout</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_alibaba.html">&#x1F3AE; Ali Baba and the 40 thieves</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj6.html">&#x1F3AE; 1HGJ6</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj5.html">&#x1F3AE; 1HGJ5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj4.html">&#x1F3AE; 1HGJ4</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj3.html">&#x1F3AE; 1HGJ3</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hg7.html">&#x1F3AE; 1HGJ7</a></li></ul></div>
+<h1>Loading Doom (1993) levels</h1>
+This is the narrative of my Doom level loading code.<br>
+It is coded in C, uses Allegro 4, compiles for Win32, Linux and MS-DOS, and is hosted at bitbucket <a href="https://bitbucket.org/kdrnic/doom-loader/src/master/" target="_top">(link to repository)</a>.<br>
+Download the demo <a href="files/doom.zip" target="_top">here</a>.<br>
+<img src="images/doom.png"><br>
+<h2>Target audience</h2>
+<ul>
+    <li>Those looking to port Doom or to write their own level loader for other engines</li>
+    <li>Those interested in computer geometry, BSP trees, and other such topics</li>
+    <li>The id software engine enthusiast</li>
+</ul>
+<h2>Challenges</h2>
+The original Doom engine is not a polygonal engine.<br>
+The level format stores the minimal ammount of information.
+Walls are line segments, floors are implicit between those lines.
+&quot;Modern&quot; rendering approaches universally use polygons to represent the entire level geometry.
+Libraries and engines expect will expect polygonal data built out of triangles where each vertex has 3D position, and UV coordinates.<br>
+Thus, extensive preprocessing is required to turn Doom level data into data useable in a more ordinary engine.<br>
+<h2>Similar efforts</h2>
+When starting out, I found 
+<a href="http://github.int13h.com/webgldoom/" target="_top">this WebGL Doom level loader</a>
+<a href="https://web.archive.org/web/20200801203700/http://github.int13h.com/webgldoom/" target="_top">(archive)</a>,
+and there it mentions that to bypass the challenges of doing the conversion to a polygonal format himself, he used
+<a href="http://glbsp.sourceforge.net/" target="_top">the glBSP node builder</a>
+<a href="https://web.archive.org/web/20200801204041/http://glbsp.sourceforge.net/" target="_top">(archive)</a>,
+a tool from the 1990s, that adds information to the WAD to solve this same issue.<br>
+I didn&apos;t want to depend on this tool, so I reinvented the wheel anyway.<br>
+<h2>References</h2>
+First of all, if you expect the rest of the explanation to make any sense, you better be familiar with
+<a href="https://fabiensanglard.net/doomIphone/doomClassicRenderer.php" target="_top">Fabien Sanglard&apos;s Doom source code review</a><a href="https://web.archive.org/web/20200801203350/https://fabiensanglard.net/doomIphone/doomClassicRenderer.php" target="_top">(archive)</a>,
+and also maybe his full book on the subject,
+<a href="https://fabiensanglard.net/gebbdoom/" target="_top">The Game Engine Black Book: DOOM</a><a href="https://web.archive.org/web/20200801203302/https://fabiensanglard.net/gebbdoom/" target="_top">(archive)</a>,
+which is VERY worth a read. Fabien has great credit in spreading knowledge about classic FPS engines, and I personally love his writing.<br>
+There he explains concepts such as the BSP, and how Doom rendering is different from the modern polygonal methods.<br>
+<img src="images/fabiens1.jpg"><br>
+<i>An image from his explanation of the Doom engine</i><br>
+<br>
+The most useful document in reading the WAD file format was
+<a href="files/doomspecsv1666.txt" target="_top">The Unofficial Doom specs v1.666 by Mathew S Fell, dated December 15th, 1994</a>.
+Old but great! Still an authoritative work on the topic.<br>
+Also very useful was <a href="https://doomwiki.org/" target="_top">the Doom wiki at doomwiki.org</a>, specially <a href="https://doomwiki.org/wiki/Texture_alignment" target="_top">this article</a>;
+there is also another Doom wiki hosted by Wikia, fuck Wikia.<br>
+<h2>Peculiarities of the format</h2>
+The most peculiar bit in the Doom level format is how node bounding boxes are stored, as a sequence of Y upper, Y lower, X lower, X upper coordinates.<br>
+I have no idea why Carmack picked this ordering; seems almost random.<br>
+<code class="c" data-hled="true"><span class="hljs-function"><span class="hljs-keyword">static</span> struct wad_flatface <span class="hljs-title">bboxflatface</span><span class="hljs-params">(<span class="hljs-keyword">int16_t</span> *bbox)</span>
+</span>{
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_flatface</span> <span class="hljs-title">f</span> = {</span>
+        .face = {
+            .verts = {
+                {.pos = {bbox[<span class="hljs-number">2</span>], bbox[<span class="hljs-number">0</span>], <span class="hljs-number">0</span>},},
+                {.pos = {bbox[<span class="hljs-number">3</span>], bbox[<span class="hljs-number">0</span>], <span class="hljs-number">0</span>},},
+                {.pos = {bbox[<span class="hljs-number">3</span>], bbox[<span class="hljs-number">1</span>], <span class="hljs-number">0</span>},},
+                {.pos = {bbox[<span class="hljs-number">2</span>], bbox[<span class="hljs-number">1</span>], <span class="hljs-number">0</span>},},
+            },
+            .num_verts = <span class="hljs-number">4</span>,
+        },
+    };
+    <span class="hljs-keyword">return</span> f;
+}
+</code><div style="display: none;">static struct wad_flatface bboxflatface(int16_t *bbox)
+{
+	struct wad_flatface f = {
+		.face = {
+			.verts = {
+				{.pos = {bbox[2], bbox[0], 0},},
+				{.pos = {bbox[3], bbox[0], 0},},
+				{.pos = {bbox[3], bbox[1], 0},},
+				{.pos = {bbox[2], bbox[1], 0},},
+			},
+			.num_verts = 4,
+		},
+	};
+	return f;
+}
+</div>
+<i>Code to make a quad face out of a bounding box</i><br>
+<h1>Processing sequence</h1>
+<ol>
+<li>Build the node planes for each BSP tree node</li>
+<li>Build the flat (floor and ceiling) faces</li>
+<li>Build the wall faces</li>
+</ol>
+<h2>Node planes</h2>
+The Doom level format has for each BSP node a line connecting (x,y) to (x+dx,y+dy) in the structure below:<br>
+<code class="c" data-hled="true"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_node</span>
+{</span>
+    <span class="hljs-keyword">int16_t</span>
+        x, y, dx, dy,
+        bbox_r[<span class="hljs-number">4</span>], bbox_l[<span class="hljs-number">4</span>],
+        child_r, child_l;
+};
+</code><div style="display: none;">struct wad_node
+{
+	int16_t
+		x, y, dx, dy,
+		bbox_r[4], bbox_l[4],
+		child_r, child_l;
+};
+</div>
+<br>Yet, we know that the node builder, when creating those nodes, made those lines out of existing map linedefs.<br>
+Unfortunately, not directly, for some are <i>shorter segments</i> inside a line definition.<br>
+Since this was done in fixed point, the loss in resolution causes precision issues, where a node plane and its corresponding linedef are not coplanar.<br>
+To fix this, the first step is to find a linedef corresponding to each node plane, and then use the linedef rather than the node structure to do the
+face splitting that births flat and wall faces.<br>
+<code class="c" data-hled="true"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">wad_map_build_nodeplanes</span><span class="hljs-params">(struct <span class="hljs-keyword">wad_map_build_faces_t</span> *level)</span>
+</span>{
+    <span class="hljs-comment">//Adjust for best results</span>
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> TOLERANCE_1 = <span class="hljs-number">2.0</span>;	<span class="hljs-comment">//Distance to linedef</span>
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> TOLERANCE_2 = <span class="hljs-number">1.0</span>;	<span class="hljs-comment">//Distance to linedef ends if projected outside</span>
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> TOLERANCE_3 = <span class="hljs-number">0.99</span>;	<span class="hljs-comment">//Dot product to check if projected inside</span>
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> TOLERANCE_4 = <span class="hljs-number">0.95</span>;	<span class="hljs-comment">//Dot product of node and linedef planes</span>
+    <span class="hljs-keyword">int</span> i, j, k;
+    level-&gt;nodeplanes = <span class="hljs-built_in">malloc</span>(level-&gt;num_nodes * <span class="hljs-keyword">sizeof</span>(*level-&gt;nodeplanes));
+    <span class="hljs-comment">//Note the O(n^2) naive algorithm</span>
+    <span class="hljs-keyword">for</span>(i = <span class="hljs-number">0</span>; i &lt; level-&gt;num_nodes; i++){
+        <span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_node</span> *<span class="hljs-title">node</span> = <span class="hljs-title">level</span>-&gt;<span class="hljs-title">nodes</span> + <span class="hljs-title">i</span>;</span>
+        <span class="hljs-keyword">const</span> vec3 nodev[<span class="hljs-number">3</span>] = {
+            {node-&gt;x, node-&gt;y, <span class="hljs-number">0</span>},
+            {node-&gt;x + node-&gt;dx, node-&gt;y + node-&gt;dy, <span class="hljs-number">0</span>},
+            {node-&gt;x, node-&gt;y, <span class="hljs-number">100</span>},
+        };
+        mplane nodep;
+        vec3_verts2plane(nodev, nodev + <span class="hljs-number">1</span>, nodev + <span class="hljs-number">2</span>, &amp;nodep);
+        <span class="hljs-keyword">vecc_t</span> bestscore = FLT_MAX;
+        mplane bestp;
+        
+        <span class="hljs-keyword">for</span>(j = <span class="hljs-number">0</span>; j &lt; level-&gt;num_linedefs; j++){
+            <span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_linedef</span> *<span class="hljs-title">linedef</span> = <span class="hljs-title">level</span>-&gt;<span class="hljs-title">linedefs</span> + <span class="hljs-title">j</span>;</span>
+            <span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_vertex</span> *<span class="hljs-title">start</span> = <span class="hljs-title">level</span>-&gt;<span class="hljs-title">vertices</span> + <span class="hljs-title">linedef</span>-&gt;<span class="hljs-title">start</span>;</span>
+            <span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_vertex</span> *<span class="hljs-title">end</span> = <span class="hljs-title">level</span>-&gt;<span class="hljs-title">vertices</span> + <span class="hljs-title">linedef</span>-&gt;<span class="hljs-title">end</span>;</span>
+            <span class="hljs-keyword">const</span> vec3 linev[<span class="hljs-number">3</span>] = {
+                {start-&gt;x, start-&gt;y, <span class="hljs-number">0</span>},
+                {end-&gt;x, end-&gt;y, <span class="hljs-number">0</span>},
+                {start-&gt;x, start-&gt;y, <span class="hljs-number">100</span>},
+            };
+            mplane linep;
+            vec3_verts2plane(linev, linev + <span class="hljs-number">1</span>, linev + <span class="hljs-number">2</span>, &amp;linep);
+            
+            <span class="hljs-keyword">vecc_t</span> score = <span class="hljs-number">0</span>;
+            <span class="hljs-keyword">for</span>(k = <span class="hljs-number">0</span>; k &lt; <span class="hljs-number">2</span>; k++){
+                <span class="hljs-keyword">const</span> <span class="hljs-keyword">vecc_t</span> pdist = <span class="hljs-built_in">fabs</span>(vec3_dist2plane(&amp;linep, nodev + idx_n));
+                <span class="hljs-keyword">if</span>(pdist &gt; TOLERANCE_1) <span class="hljs-keyword">break</span>;
+                
+                <span class="hljs-comment">//Also do the other checks</span>
+                <span class="hljs-comment">//[...]</span>
+                
+                score += pdist;
+            }
+            <span class="hljs-keyword">if</span>(score &lt; bestscore){
+                bestscore = score;
+                bestp = linep;
+            }
+        }
+        assert(bestscore != FLT_MAX);
+        <span class="hljs-comment">//More checks [...]</span>
+        level-&gt;nodeplanes[i] = bestp;
+    }
+}
+</code><div style="display: none;">static void wad_map_build_nodeplanes(struct wad_map_build_faces_t *level)
+{
+	//Adjust for best results
+	const int TOLERANCE_1 = 2.0;	//Distance to linedef
+	const int TOLERANCE_2 = 1.0;	//Distance to linedef ends if projected outside
+	const int TOLERANCE_3 = 0.99;	//Dot product to check if projected inside
+	const int TOLERANCE_4 = 0.95;	//Dot product of node and linedef planes
+	int i, j, k;
+	level-&gt;nodeplanes = malloc(level-&gt;num_nodes * sizeof(*level-&gt;nodeplanes));
+	//Note the O(n^2) naive algorithm
+	for(i = 0; i &lt; level-&gt;num_nodes; i++){
+		const struct wad_node *node = level-&gt;nodes + i;
+		const vec3 nodev[3] = {
+			{node-&gt;x, node-&gt;y, 0},
+			{node-&gt;x + node-&gt;dx, node-&gt;y + node-&gt;dy, 0},
+			{node-&gt;x, node-&gt;y, 100},
+		};
+		mplane nodep;
+		vec3_verts2plane(nodev, nodev + 1, nodev + 2, &amp;nodep);
+		vecc_t bestscore = FLT_MAX;
+		mplane bestp;
+		
+		for(j = 0; j &lt; level-&gt;num_linedefs; j++){
+			const struct wad_linedef *linedef = level-&gt;linedefs + j;
+			const struct wad_vertex *start = level-&gt;vertices + linedef-&gt;start;
+			const struct wad_vertex *end = level-&gt;vertices + linedef-&gt;end;
+			const vec3 linev[3] = {
+				{start-&gt;x, start-&gt;y, 0},
+				{end-&gt;x, end-&gt;y, 0},
+				{start-&gt;x, start-&gt;y, 100},
+			};
+			mplane linep;
+			vec3_verts2plane(linev, linev + 1, linev + 2, &amp;linep);
+			
+			vecc_t score = 0;
+			for(k = 0; k &lt; 2; k++){
+				const vecc_t pdist = fabs(vec3_dist2plane(&amp;linep, nodev + idx_n));
+				if(pdist &gt; TOLERANCE_1) break;
+				
+				//Also do the other checks
+				//[...]
+				
+				score += pdist;
+			}
+			if(score &lt; bestscore){
+				bestscore = score;
+				bestp = linep;
+			}
+		}
+		assert(bestscore != FLT_MAX);
+		//More checks [...]
+		level-&gt;nodeplanes[i] = bestp;
+	}
+}
+</div>
+<i>(Simplified) code to build node planes from line definitions</i><br>
+<h2>Flat faces</h2>
+The flat (ceiling and floor) faces are easy to build.<br>
+We start with a single quad face, spanning the whole map, and progressively cut it by each node plane, moving down the BSP tree,
+until each face ends up in a corresponding subsector; using a recursive function.<br>
+<code class="c" data-hled="true"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">wad_map_build_flat_faces</span><span class="hljs-params">(struct <span class="hljs-keyword">wad_map_build_faces_t</span> *bsp, <span class="hljs-keyword">int</span> node_i, rvface face)</span>
+</span>{
+    mplane linep = {};
+    <span class="hljs-comment">//Arrived at a leaf of the BSP tree</span>
+    <span class="hljs-keyword">if</span>(node_i &lt; <span class="hljs-number">0</span>){
+        <span class="hljs-keyword">int</span> ssector_i = <span class="hljs-number">32768</span> + node_i;
+        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_ssector</span> *<span class="hljs-title">ss</span> = <span class="hljs-title">bsp</span>-&gt;<span class="hljs-title">ssectors</span> + <span class="hljs-title">ssector_i</span>;</span>
+        
+        <span class="hljs-keyword">int</span> i, j, sector;
+        <span class="hljs-comment">//Cut face by every subsector segment</span>
+        <span class="hljs-keyword">for</span>(i = <span class="hljs-number">0</span>, j = ss-&gt;first_seg; i &lt; ss-&gt;num_segs; i++, j++){
+            <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_seg</span> *<span class="hljs-title">seg</span> = <span class="hljs-title">bsp</span>-&gt;<span class="hljs-title">segs</span> + <span class="hljs-title">j</span>;</span>
+            <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_linedef</span> *<span class="hljs-title">linedef</span> = <span class="hljs-title">bsp</span>-&gt;<span class="hljs-title">linedefs</span> + <span class="hljs-title">seg</span>-&gt;<span class="hljs-title">linedef</span>;</span>
+            <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_vertex</span> *<span class="hljs-title">start</span> = <span class="hljs-title">bsp</span>-&gt;<span class="hljs-title">vertices</span> + <span class="hljs-title">linedef</span>-&gt;<span class="hljs-title">start</span>;</span>
+            <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_vertex</span> *<span class="hljs-title">end</span> = <span class="hljs-title">bsp</span>-&gt;<span class="hljs-title">vertices</span> + <span class="hljs-title">linedef</span>-&gt;<span class="hljs-title">end</span>;</span>
+            <span class="hljs-keyword">const</span> vec3 linev[<span class="hljs-number">3</span>] = {
+                {start-&gt;x, start-&gt;y, <span class="hljs-number">0</span>},
+                {end-&gt;x, end-&gt;y, <span class="hljs-number">0</span>},
+                {start-&gt;x, start-&gt;y, seg-&gt;dir ? <span class="hljs-number">-100</span> : <span class="hljs-number">100</span>},
+            };
+            vec3_verts2plane(linev, linev + <span class="hljs-number">1</span>, linev + <span class="hljs-number">2</span>, &amp;linep);
+            rvface right, left;
+            rvface_split(&amp;linep, &amp;face, &amp;right, &amp;left);
+            face = right;
+        }
+        
+        <span class="hljs-comment">//Try and find sector face is in</span>
+        <span class="hljs-comment">//[...]</span>
+        
+        <span class="hljs-comment">//Set z,u,v for floor</span>
+        <span class="hljs-keyword">for</span>(i = <span class="hljs-number">0</span>; i &lt; face.num_verts; i++){
+            face.verts[i].pos.z = bsp-&gt;sectors[sector].h_floor;
+            face.verts[i].u = face.verts[i].pos.x;
+            face.verts[i].v = face.verts[i].pos.y;
+        }
+        arr_push(&amp;bsp-&gt;flatfaces, ff);
+        
+        <span class="hljs-comment">//Flip and set z for ceiling</span>
+        rvface_flip(&amp;face);
+        <span class="hljs-keyword">for</span>(i = <span class="hljs-number">0</span>; i &lt; face.num_verts; i++){
+            face.verts[i].pos.z = bsp-&gt;sectors[sector].h_ceil;
+        }
+        arr_push(&amp;bsp-&gt;flatfaces, ff);
+        <span class="hljs-keyword">return</span>;
+    }
+    
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_node</span> *<span class="hljs-title">node</span> = <span class="hljs-title">bsp</span>-&gt;<span class="hljs-title">nodes</span> + <span class="hljs-title">node_i</span>;</span>
+    linep = bsp-&gt;nodeplanes[node_i];
+    
+    <span class="hljs-comment">//Sort and send face further down BSP</span>
+    <span class="hljs-keyword">int</span> sort = rvface_sort(&amp;linep, &amp;face);
+    assert(sort != RVFACE_COPLANAR);
+    <span class="hljs-keyword">if</span>(sort == RVFACE_SPANNING){
+        rvface right, left;
+        rvface_split(&amp;linep, &amp;face, &amp;right, &amp;left);
+        wad_map_build_flat_faces(bsp, node-&gt;child_r, right);
+        wad_map_build_flat_faces(bsp, node-&gt;child_l, left);
+    }
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(sort == RVFACE_FRONT){
+        wad_map_build_flat_faces(bsp, node-&gt;child_r, face);
+    }
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(sort == RVFACE_BACK){
+        wad_map_build_flat_faces(bsp, node-&gt;child_l, face);
+    }
+    <span class="hljs-keyword">return</span>;
+}
+</code><div style="display: none;">static void wad_map_build_flat_faces(struct wad_map_build_faces_t *bsp, int node_i, rvface face){
+	mplane linep = {};
+	//Arrived at a leaf of the BSP tree
+	if(node_i &lt; 0){
+		int ssector_i = 32768 + node_i;
+		struct wad_ssector *ss = bsp-&gt;ssectors + ssector_i;
+		
+		int i, j, sector;
+		//Cut face by every subsector segment
+		for(i = 0, j = ss-&gt;first_seg; i &lt; ss-&gt;num_segs; i++, j++){
+			struct wad_seg *seg = bsp-&gt;segs + j;
+			struct wad_linedef *linedef = bsp-&gt;linedefs + seg-&gt;linedef;
+			struct wad_vertex *start = bsp-&gt;vertices + linedef-&gt;start;
+			struct wad_vertex *end = bsp-&gt;vertices + linedef-&gt;end;
+			const vec3 linev[3] = {
+				{start-&gt;x, start-&gt;y, 0},
+				{end-&gt;x, end-&gt;y, 0},
+				{start-&gt;x, start-&gt;y, seg-&gt;dir ? -100 : 100},
+			};
+			vec3_verts2plane(linev, linev + 1, linev + 2, &amp;linep);
+			rvface right, left;
+			rvface_split(&amp;linep, &amp;face, &amp;right, &amp;left);
+			face = right;
+		}
+		
+		//Try and find sector face is in
+		//[...]
+		
+		//Set z,u,v for floor
+		for(i = 0; i &lt; face.num_verts; i++){
+			face.verts[i].pos.z = bsp-&gt;sectors[sector].h_floor;
+			face.verts[i].u = face.verts[i].pos.x;
+			face.verts[i].v = face.verts[i].pos.y;
+		}
+		arr_push(&amp;bsp-&gt;flatfaces, ff);
+		
+		//Flip and set z for ceiling
+		rvface_flip(&amp;face);
+		for(i = 0; i &lt; face.num_verts; i++){
+			face.verts[i].pos.z = bsp-&gt;sectors[sector].h_ceil;
+		}
+		arr_push(&amp;bsp-&gt;flatfaces, ff);
+		return;
+	}
+	
+	struct wad_node *node = bsp-&gt;nodes + node_i;
+	linep = bsp-&gt;nodeplanes[node_i];
+	
+	//Sort and send face further down BSP
+	int sort = rvface_sort(&amp;linep, &amp;face);
+	assert(sort != RVFACE_COPLANAR);
+	if(sort == RVFACE_SPANNING){
+		rvface right, left;
+		rvface_split(&amp;linep, &amp;face, &amp;right, &amp;left);
+		wad_map_build_flat_faces(bsp, node-&gt;child_r, right);
+		wad_map_build_flat_faces(bsp, node-&gt;child_l, left);
+	}
+	else if(sort == RVFACE_FRONT){
+		wad_map_build_flat_faces(bsp, node-&gt;child_r, face);
+	}
+	else if(sort == RVFACE_BACK){
+		wad_map_build_flat_faces(bsp, node-&gt;child_l, face);
+	}
+	return;
+}
+</div>
+<i>(Simplified) code to build flat faces</i><br>
+<h2>Wall faces</h2>
+First, there is some special logic to build faces for the upper, lower, and middle segments which a wall can have.<br>
+<code class="c" data-hled="true"><span class="hljs-keyword">for</span>(i = <span class="hljs-number">0</span>; i &lt; bsp.num_linedefs; i++){
+    <span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_linedef</span> <span class="hljs-title">linedef</span> = <span class="hljs-title">bsp</span>.<span class="hljs-title">linedefs</span>[<span class="hljs-title">i</span>];</span>
+    <span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_vertex</span> <span class="hljs-title">start</span> = <span class="hljs-title">bsp</span>.<span class="hljs-title">vertices</span>[<span class="hljs-title">linedef</span>.<span class="hljs-title">start</span>], <span class="hljs-title">end</span> = <span class="hljs-title">bsp</span>.<span class="hljs-title">vertices</span>[<span class="hljs-title">linedef</span>.<span class="hljs-title">end</span>];</span>
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> length = <span class="hljs-built_in">sqrt</span>(<span class="hljs-built_in">pow</span>(start.x - end.x, <span class="hljs-number">2</span>) + <span class="hljs-built_in">pow</span>(start.y - end.y, <span class="hljs-number">2</span>));
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_wallface</span> <span class="hljs-title">right</span> = {</span>
+        .face = {
+            .verts = {
+                {.pos = {end.x,		end.y,		<span class="hljs-number">0</span>},	.u = length,			.v = <span class="hljs-number">0</span>},
+                {.pos = {start.x,	start.y,	<span class="hljs-number">0</span>},	.u = <span class="hljs-number">0</span>,					.v = <span class="hljs-number">0</span>},
+                {.pos = {start.x,	start.y,	<span class="hljs-number">0</span>},	.u = <span class="hljs-number">0</span>,					.v = <span class="hljs-number">0</span>},
+                {.pos = {end.x,		end.y,		<span class="hljs-number">0</span>},	.u = length,			.v = <span class="hljs-number">0</span>},
+            },
+            .num_verts = <span class="hljs-number">4</span>,
+        },
+        .sidedef = linedef.sidedef_r,
+    };
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_wallface</span> <span class="hljs-title">left</span> = {</span>
+        <span class="hljs-comment">//[...]</span>
+    };
+    <span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_sidedef</span>
+        *<span class="hljs-title">sidedef_r</span> = <span class="hljs-title">bsp</span>.<span class="hljs-title">sidedefs</span> + <span class="hljs-title">right</span>.<span class="hljs-title">sidedef</span>,
+        *<span class="hljs-title">sidedef_l</span> = (<span class="hljs-title">left</span>.<span class="hljs-title">sidedef</span> &gt;= 0) ? (<span class="hljs-title">bsp</span>.<span class="hljs-title">sidedefs</span> + <span class="hljs-title">left</span>.<span class="hljs-title">sidedef</span>) :</span> <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_sector</span>
+        *<span class="hljs-title">sector_r</span> = <span class="hljs-title">bsp</span>.<span class="hljs-title">sectors</span> + <span class="hljs-title">sidedef_r</span>-&gt;<span class="hljs-title">sector</span>,
+        *<span class="hljs-title">sector_l</span> = <span class="hljs-title">sidedef_l</span> ? (<span class="hljs-title">bsp</span>.<span class="hljs-title">sectors</span> + <span class="hljs-title">sidedef_l</span>-&gt;<span class="hljs-title">sector</span>) :</span> <span class="hljs-number">0</span>;
+    <span class="hljs-comment">//Sets Z for the wall segment</span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> VERTS_SETZ(a,b) <span class="hljs-comment">//[...]</span></span>
+    <span class="hljs-keyword">if</span>(sidedef_l &amp;&amp;
+        sector_l-&gt;h_ceil &lt; sector_r-&gt;h_ceil){
+        <span class="hljs-comment">//Upper texture</span>
+        VERTS_SETZ(sector_r-&gt;h_ceil, sector_l-&gt;h_ceil);
+        right.type = WAD_BSPFACE_UPPER;
+        wad_map_build_wall_faces(&amp;bsp, bsp.num_nodes - <span class="hljs-number">1</span>, right);
+    }
+    <span class="hljs-keyword">if</span>(sidedef_l &amp;&amp;
+        sector_l-&gt;h_floor &gt; sector_r-&gt;h_floor){
+        <span class="hljs-comment">//Lower texture</span>
+        VERTS_SETZ(sector_l-&gt;h_floor, sector_r-&gt;h_floor);
+        right.type = WAD_BSPFACE_LOWER;
+        wad_map_build_wall_faces(&amp;bsp, bsp.num_nodes - <span class="hljs-number">1</span>, right);
+    }
+    <span class="hljs-keyword">if</span>(<span class="hljs-built_in">strncmp</span>(sidedef_r-&gt;tex_mid, <span class="hljs-string">&quot;-&quot;</span>, <span class="hljs-number">8</span>)){
+        <span class="hljs-comment">//Middle texture</span>
+        VERTS_SETZ(sector_r-&gt;h_ceil, sector_r-&gt;h_floor);
+        right.type = WAD_BSPFACE_MIDDLE;
+        wad_map_build_wall_faces(&amp;bsp, bsp.num_nodes - <span class="hljs-number">1</span>, right);
+    }
+    <span class="hljs-comment">//The same but for the &quot;left&quot; face</span>
+    <span class="hljs-comment">//[...]</span>
+}
+</code><div style="display: none;">for(i = 0; i &lt; bsp.num_linedefs; i++){
+	const struct wad_linedef linedef = bsp.linedefs[i];
+	const struct wad_vertex start = bsp.vertices[linedef.start], end = bsp.vertices[linedef.end];
+	const int length = sqrt(pow(start.x - end.x, 2) + pow(start.y - end.y, 2));
+	struct wad_wallface right = {
+		.face = {
+			.verts = {
+				{.pos = {end.x,		end.y,		0},	.u = length,			.v = 0},
+				{.pos = {start.x,	start.y,	0},	.u = 0,					.v = 0},
+				{.pos = {start.x,	start.y,	0},	.u = 0,					.v = 0},
+				{.pos = {end.x,		end.y,		0},	.u = length,			.v = 0},
+			},
+			.num_verts = 4,
+		},
+		.sidedef = linedef.sidedef_r,
+	};
+	struct wad_wallface left = {
+		//[...]
+	};
+	const struct wad_sidedef
+		*sidedef_r = bsp.sidedefs + right.sidedef,
+		*sidedef_l = (left.sidedef &gt;= 0) ? (bsp.sidedefs + left.sidedef) : 0;
+	const struct wad_sector
+		*sector_r = bsp.sectors + sidedef_r-&gt;sector,
+		*sector_l = sidedef_l ? (bsp.sectors + sidedef_l-&gt;sector) : 0;
+	//Sets Z for the wall segment
+	#define VERTS_SETZ(a,b) //[...]
+	if(sidedef_l &amp;&amp;
+		sector_l-&gt;h_ceil &lt; sector_r-&gt;h_ceil){
+		//Upper texture
+		VERTS_SETZ(sector_r-&gt;h_ceil, sector_l-&gt;h_ceil);
+		right.type = WAD_BSPFACE_UPPER;
+		wad_map_build_wall_faces(&amp;bsp, bsp.num_nodes - 1, right);
+	}
+	if(sidedef_l &amp;&amp;
+		sector_l-&gt;h_floor &gt; sector_r-&gt;h_floor){
+		//Lower texture
+		VERTS_SETZ(sector_l-&gt;h_floor, sector_r-&gt;h_floor);
+		right.type = WAD_BSPFACE_LOWER;
+		wad_map_build_wall_faces(&amp;bsp, bsp.num_nodes - 1, right);
+	}
+	if(strncmp(sidedef_r-&gt;tex_mid, &quot;-&quot;, 8)){
+		//Middle texture
+		VERTS_SETZ(sector_r-&gt;h_ceil, sector_r-&gt;h_floor);
+		right.type = WAD_BSPFACE_MIDDLE;
+		wad_map_build_wall_faces(&amp;bsp, bsp.num_nodes - 1, right);
+	}
+	//The same but for the &quot;left&quot; face
+	//[...]
+}
+</div>
+<i>(Simplified) code to build faces for each linedef</i><br>
+Then, sending the wall faces down the tree is very similar to flat faces, but there is a special case where the wall lies on a node plane.<br>
+<code class="c" data-hled="true"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">wad_map_build_wall_faces</span><span class="hljs-params">(struct <span class="hljs-keyword">wad_map_build_faces_t</span> *bsp, <span class="hljs-keyword">int</span> node_i, struct wad_wallface lface)</span>
+</span>{
+    mplane linep;
+    <span class="hljs-comment">//Arrived at a leaf?</span>
+    <span class="hljs-keyword">if</span>(node_i &lt; <span class="hljs-number">0</span>){
+        arr_push(&amp;bsp-&gt;wallfaces, lface);
+        <span class="hljs-keyword">return</span>;
+    }
+    
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_node</span> *<span class="hljs-title">node</span> = <span class="hljs-title">bsp</span>-&gt;<span class="hljs-title">nodes</span> + <span class="hljs-title">node_i</span>;</span>
+    linep = bsp-&gt;nodeplanes[node_i];
+    
+    <span class="hljs-comment">//Sort and send face further down BSP</span>
+    <span class="hljs-keyword">int</span> sort = rvface_sort(&amp;linep, &amp;lface.face);
+    <span class="hljs-keyword">if</span>(sort == RVFACE_SPANNING){
+        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">wad_wallface</span> <span class="hljs-title">right</span> = <span class="hljs-title">lface</span>, <span class="hljs-title">left</span> = <span class="hljs-title">lface</span>;</span>
+        rvface_split(&amp;linep, &amp;lface.face, &amp;right.face, &amp;left.face);
+        wad_map_build_wall_faces(bsp, node-&gt;child_r, right);
+        wad_map_build_wall_faces(bsp, node-&gt;child_l, left);
+    }
+    <span class="hljs-keyword">if</span>(sort == RVFACE_FRONT){
+        wad_map_build_wall_faces(bsp, node-&gt;child_r, lface);
+    }
+    <span class="hljs-keyword">if</span>(sort == RVFACE_BACK){
+        wad_map_build_wall_faces(bsp, node-&gt;child_l, lface);
+    }
+    <span class="hljs-keyword">if</span>(sort == RVFACE_COPLANAR){
+        vec3 sqn;
+        vec3_sqnormal(&amp;lface.face.verts[<span class="hljs-number">0</span>].pos, &amp;lface.face.verts[<span class="hljs-number">1</span>].pos, &amp;lface.face.verts[<span class="hljs-number">2</span>].pos, &amp;sqn);
+        <span class="hljs-keyword">const</span> <span class="hljs-keyword">vecc_t</span> dot = vec3_dot(&amp;linep.normal, &amp;sqn);
+        <span class="hljs-keyword">if</span>(dot &gt; <span class="hljs-number">0</span>) wad_map_build_wall_faces(bsp, node-&gt;child_r, lface);
+        <span class="hljs-keyword">else</span> wad_map_build_wall_faces(bsp, node-&gt;child_l, lface);
+    }
+}
+</code><div style="display: none;">static void wad_map_build_wall_faces(struct wad_map_build_faces_t *bsp, int node_i, struct wad_wallface lface)
+{
+	mplane linep;
+	//Arrived at a leaf?
+	if(node_i &lt; 0){
+		arr_push(&amp;bsp-&gt;wallfaces, lface);
+		return;
+	}
+	
+	struct wad_node *node = bsp-&gt;nodes + node_i;
+	linep = bsp-&gt;nodeplanes[node_i];
+	
+	//Sort and send face further down BSP
+	int sort = rvface_sort(&amp;linep, &amp;lface.face);
+	if(sort == RVFACE_SPANNING){
+		struct wad_wallface right = lface, left = lface;
+		rvface_split(&amp;linep, &amp;lface.face, &amp;right.face, &amp;left.face);
+		wad_map_build_wall_faces(bsp, node-&gt;child_r, right);
+		wad_map_build_wall_faces(bsp, node-&gt;child_l, left);
+	}
+	if(sort == RVFACE_FRONT){
+		wad_map_build_wall_faces(bsp, node-&gt;child_r, lface);
+	}
+	if(sort == RVFACE_BACK){
+		wad_map_build_wall_faces(bsp, node-&gt;child_l, lface);
+	}
+	if(sort == RVFACE_COPLANAR){
+		vec3 sqn;
+		vec3_sqnormal(&amp;lface.face.verts[0].pos, &amp;lface.face.verts[1].pos, &amp;lface.face.verts[2].pos, &amp;sqn);
+		const vecc_t dot = vec3_dot(&amp;linep.normal, &amp;sqn);
+		if(dot &gt; 0) wad_map_build_wall_faces(bsp, node-&gt;child_r, lface);
+		else wad_map_build_wall_faces(bsp, node-&gt;child_l, lface);
+	}
+}
+</div>
+<i>(Simplified) code to cut wall faces</i><br>
+<h2>Rendition</h2>
+I first wrote an orthographic top down viewer.<br>
+I next put the generated faces into my own BSP engine, which is a WIP game engine.<br>
+All textures had to be scaled to a power of 2, along other small issues.<br>
+I included code to collapse empty leafs, which seem to happen occasionally. One example is the green armour alcove in E1M3.<br>
+<code class="c" data-hled="true"><span class="hljs-keyword">for</span>(i = <span class="hljs-number">0</span>; i &lt; bsp-&gt;num_nodes; i++){
+    bspnode *node = bsp-&gt;nodes + i;
+    bspnode *parent = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">int</span> parent_child = <span class="hljs-number">-1</span>;
+    <span class="hljs-keyword">for</span>(j = <span class="hljs-number">0</span>; j &lt; bsp-&gt;num_nodes; j++){
+        parent = bsp-&gt;nodes + j;
+        <span class="hljs-keyword">for</span>(k = <span class="hljs-number">0</span>; k &lt; <span class="hljs-number">2</span>; k++){
+            <span class="hljs-keyword">if</span>(parent-&gt;children[k] == i){
+                parent_child = k;
+                <span class="hljs-keyword">break</span>;
+            }
+        }
+        <span class="hljs-keyword">if</span>(k &lt; <span class="hljs-number">2</span>) <span class="hljs-keyword">break</span>;
+    }
+    <span class="hljs-keyword">if</span>(j == bsp-&gt;num_nodes) <span class="hljs-keyword">continue</span>;
+    <span class="hljs-keyword">int</span> empty_child = <span class="hljs-number">-1</span>;
+    <span class="hljs-keyword">for</span>(j = <span class="hljs-number">0</span>; j &lt; <span class="hljs-number">2</span>; j++){
+        <span class="hljs-keyword">if</span>(BSPNODE_ISLEAF(node-&gt;children[j])){
+            <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> leaf_i = BSPNODE_TO_LEAF(node-&gt;children[j]);
+            <span class="hljs-keyword">const</span> bspleaf *leaf = bsp-&gt;leafs + leaf_i;
+            <span class="hljs-keyword">if</span>(leaf-&gt;last_face &lt; leaf-&gt;first_face){
+                empty_child = j;
+                <span class="hljs-keyword">break</span>;
+            }
+        }
+    }
+    <span class="hljs-keyword">if</span>(j == <span class="hljs-number">2</span>) <span class="hljs-keyword">continue</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> other_child = !empty_child;
+    parent-&gt;children[parent_child] = node-&gt;children[other_child];
+}
+</code><div style="display: none;">for(i = 0; i &lt; bsp-&gt;num_nodes; i++){
+	bspnode *node = bsp-&gt;nodes + i;
+	bspnode *parent = 0;
+	int parent_child = -1;
+	for(j = 0; j &lt; bsp-&gt;num_nodes; j++){
+		parent = bsp-&gt;nodes + j;
+		for(k = 0; k &lt; 2; k++){
+			if(parent-&gt;children[k] == i){
+				parent_child = k;
+				break;
+			}
+		}
+		if(k &lt; 2) break;
+	}
+	if(j == bsp-&gt;num_nodes) continue;
+	int empty_child = -1;
+	for(j = 0; j &lt; 2; j++){
+		if(BSPNODE_ISLEAF(node-&gt;children[j])){
+			const int leaf_i = BSPNODE_TO_LEAF(node-&gt;children[j]);
+			const bspleaf *leaf = bsp-&gt;leafs + leaf_i;
+			if(leaf-&gt;last_face &lt; leaf-&gt;first_face){
+				empty_child = j;
+				break;
+			}
+		}
+	}
+	if(j == 2) continue;
+	const int other_child = !empty_child;
+	parent-&gt;children[parent_child] = node-&gt;children[other_child];
+}
+</div>
+<i>Code to collapse empty leafs</i><br>
+I further added Potential Visibility Set a la Quake (see Michael Abrash&apos;s Black Book for a description of its use in Quake) generation. Works well,
+but for a few maps it takes forever to compile, or much more than the others at any rate. I can&apos;t yet tell what exactly causes those maps to
+misbehave, but it seems to be the maps created last (Ultimate Doom and Doom II).<br>
+<ul>
+<li>E4M3</li><li>E4M5</li><li>E4M6</li><li>E4M8</li><li>E4M9</li>
+<li>MAP14</li><li>MAP15</li><li>MAP20</li><li>MAP24</li><li>MAP29</li>
+</ul>
+The portals from the PVS generation can be used for pathfinding.<br>
+I also implemented loading the THINGS lump, thus enemies and pickups are visible.<br>
+<h2>Future</h2>
+The current implementation lacks support for working doors, but it shouldn&apos;t be hard to add.<br>
+Transparent walls don&apos;t work properly.<br>
+The renderer could be optimized to use a column-based rasterizer, which would be much faster.<br>
+A full Doom source port could be built from this.<br>
+I hope to use this to create levels for small, jam-sized 3D games.
+
+
+</body></html>

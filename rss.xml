@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 21 Nov 2019 23:43:19 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 01 Aug 2020 21:54:39 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -104,6 +104,15 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Tue, 23 Jul 2019 22:18:02 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/choplifter.png" length="0" type="image/png"/>
+        </item>
+        <item>
+            <title><![CDATA[Doom level loader]]></title>
+            <description><![CDATA[This is the narrative of my Doom level loading code.It is coded in C, uses Allegro 4, compiles for Win32, Linux and MS-DOS, and is hosted at...]]></description>
+            <link>https://kdrnic.github.io/index_doomloader.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_doomloader.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Sat, 01 Aug 2020 21:53:07 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/doom.png" length="0" type="image/png"/>
         </item>
         <item>
             <title><![CDATA[Game: GBMINE]]></title>
