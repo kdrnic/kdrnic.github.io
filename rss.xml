@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 01 Aug 2020 21:54:39 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 06 Dec 2020 22:27:49 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -122,6 +122,15 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Tue, 23 Jul 2019 22:18:02 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/db.png" length="0" type="image/png"/>
+        </item>
+        <item>
+            <title><![CDATA[gifcap library]]></title>
+            <description><![CDATA[This is a small C language animated GIF writer library.It is available at , which includes a demo.It is based on .I have improved upon it by...]]></description>
+            <link>https://kdrnic.github.io/index_gifcap.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_gifcap.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Sun, 06 Dec 2020 22:27:49 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/mandelbrot1.gif" length="0" type="image/gif"/>
         </item>
         <item>
             <title><![CDATA[Game: Keystone Kapers for NES]]></title>
