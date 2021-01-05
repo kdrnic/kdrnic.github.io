@@ -4,14 +4,8 @@
         <description><![CDATA[RSS feed for GWTB]]></description>
         <link>http://github.com/dylang/node-rss</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 05 Jan 2021 21:15:33 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 05 Jan 2021 21:31:11 GMT</lastBuildDate>
         <language><![CDATA[en]]></language>
-        <item>
-            <title><![CDATA[Jump to a strip......]]></title>
-            <link>http://www.blastwave-comic.com/index.php?p=comic&amp;nro=</link>
-            <guid isPermaLink="true">http://www.blastwave-comic.com/index.php?p=comic&amp;nro=</guid>
-            <pubDate>Wed, 16 Dec 2020 02:00:00 GMT</pubDate>
-        </item>
         <item>
             <title><![CDATA[#78 Overkill...]]></title>
             <link>http://www.blastwave-comic.com/index.php?p=comic&amp;nro=90</link>
@@ -526,6 +520,7 @@
             <title><![CDATA[#5. Yellows...]]></title>
             <link>http://www.blastwave-comic.com/index.php?p=comic&amp;nro=5</link>
             <guid isPermaLink="true">http://www.blastwave-comic.com/index.php?p=comic&amp;nro=5</guid>
+            <pubDate>Tue, 19 Dec 2006 02:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[#4. It&apos;s a rat...]]></title>
