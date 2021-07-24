@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 06 Dec 2020 22:27:49 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 24 Jul 2021 22:18:16 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -248,6 +248,15 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Tue, 23 Jul 2019 22:18:03 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/nesdev3.gif" length="0" type="image/gif"/>
+        </item>
+        <item>
+            <title><![CDATA[OPL3 MIDI player]]></title>
+            <description><![CDATA[This project is ....]]></description>
+            <link>https://kdrnic.github.io/index_OPL.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_OPL.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Sat, 24 Jul 2021 21:25:15 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/kdrnic.jpg" length="0" type="image/jpeg"/>
         </item>
         <item>
             <title><![CDATA[Game: Prototype]]></title>
