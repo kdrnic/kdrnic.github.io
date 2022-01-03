@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 24 Jul 2021 22:18:16 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 03 Jan 2022 23:33:24 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -95,6 +95,15 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Tue, 23 Jul 2019 22:18:02 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/breakout.png" length="0" type="image/png"/>
+        </item>
+        <item>
+            <title><![CDATA[C++ Commodore 64 floating point library]]></title>
+            <description><![CDATA[This is an experiment in 1. using C++ operator overloading to implement software floating point arithmetics and 2. measuring the accuracy an...]]></description>
+            <link>https://kdrnic.github.io/index_c64floats.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_c64floats.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Mon, 03 Jan 2022 23:33:23 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/mandelbrot_c64_600x450.png" length="0" type="image/png"/>
         </item>
         <item>
             <title><![CDATA[Game: Choplifter]]></title>
