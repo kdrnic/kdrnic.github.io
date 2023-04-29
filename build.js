@@ -6,6 +6,9 @@ cheerio = require('cheerio');
 //RSS feed
 var RSS = require('rss');
 
+//To call curl - used by Wayback Machine link archiver
+const child_process = require('child_process');
+
 var feed = new RSS({
 	title: "kdrnic's page",
 	description: "kdrnic's page",
@@ -175,6 +178,57 @@ DoPass(function(filename, $){
 	if(!$("link[href='motherfucker.css']").length){
 		$('head').append("<link rel='stylesheet' href='motherfucker.css'>");
 	}
+	
+	//Perform Wayback Machine archiving of links
+	let numToArchive = 0, numArchived = 0;
+	$("a").each(function(idx, el){
+		let url = $(el).attr("href");
+		let archive = $(el).attr('data-archive');
+		
+		//Only archive links which ask for it
+		if(typeof archive === 'undefined') return;
+		//Don't rearchive links
+		if(archive == "true") return
+		//Fail for links without HREF set
+		if(!url){
+			console.warn("Link without URL asked for Wayback Machine archiving, ignored");
+			return;
+		}
+		
+		//Helper to print error message
+		let archivingError = function(msg){
+			console.warn('Wayback Machine archiving failed: "'+url+'", '+msg.toString());
+		}
+		
+		//Helper to push link to archive URL
+		let pushArchiveLink = function(url){
+			$(el).after($("<a href='"+url+"'><sup>[archive]</sup></a>"));
+			$(el).attr('data-archive', 'true');
+		}
+		
+		//Catch errors in curl-calling and JSON parsing
+		try{
+			//I use curl because it is easier than getting a synchronous HTTPS request
+			//See https://archive.org/help/wayback_api.php
+			let curlData = child_process.execSync('curl --silent "https://archive.org/wayback/available?url='+url+'"');
+			
+			//Parse JSON
+			let json = JSON.parse(curlData);
+			
+			let snapshots = json.archived_snapshots;
+			//Check if URL archive is available
+			if((!snapshots.hasOwnProperty("closest")) || (!snapshots.closest.available)){
+				archivingError("URL archive not available");
+			}
+			else{
+				//Finally create the link to archived version
+				pushArchiveLink(snapshots.closest.url);
+			}
+		}
+		catch(err){
+			archivingError(err);
+		}
+	});
 	
 	//Force target on all links
 	$("a").each(function(idx, el){

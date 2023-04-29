@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 03 Jan 2022 23:33:24 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 29 Apr 2023 23:19:35 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -77,6 +77,15 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Tue, 23 Jul 2019 22:18:02 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/2x1.png" length="0" type="image/png"/>
+        </item>
+        <item>
+            <title><![CDATA[Reverse engineering a DOS game B17 Flying Fortress]]></title>
+            <description><![CDATA[ is a 1992 flight simulation/crew management game published by Microprose for MS-DOS (later also for Amiga and Atari ST).It was featured as ...]]></description>
+            <link>https://kdrnic.github.io/index_b17.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_b17.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Sat, 29 Apr 2023 22:19:33 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/bsev6.png" length="0" type="image/png"/>
         </item>
         <item>
             <title><![CDATA[Game: Bespoke Terror]]></title>

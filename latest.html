@@ -1,349 +1,175 @@
-<html><head data-created="2022-01-03T23:33:23.756Z" data-modified="2022-01-03T23:32:47.934Z"><meta charset="UTF8"><link rel="stylesheet" href="hlstyles/default.css"><link rel="stylesheet" href="motherfucker.css"></head><body data-title="C++ Commodore 64 floating point library"><div class="article-index"><ul data-type="pages_index"><li><span>&apos;22/01/03 23:33   </span><a target="_top" href="index_c64floats.html">C++ Commodore 64 floating point library</a></li><li><span>&apos;21/07/24 21:25   </span><a target="_top" href="index_OPL.html">OPL3 MIDI player</a></li><li><span>&apos;20/12/06 22:27   </span><a target="_top" href="index_gifcap.html">gifcap library</a></li><li><span>&apos;20/08/01 21:53   </span><a target="_top" href="index_doomloader.html">Doom level loader</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem3.html">NES Emulation Saga Part III</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem2.html">NES Emulation Saga Part II</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem1.html">NES Emulation Saga Part I</a></li><li><span>&apos;19/10/31 02:37   </span><a target="_top" href="index_kym.html">&#x1F3AE; Kori Yogan Mushi</a></li><li><span>&apos;19/08/03 20:43   </span><a target="_top" href="index_bespoke.html">&#x1F3AE; Bespoke Terror</a></li><li><span>&apos;19/08/03 20:32   </span><a target="_top" href="index_1hgj8.html">&#x1F3AE; Conker&apos;s BFD for Nintendo 486</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_trog.html">&#x1F3AE; TROG</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_stacker.html">&#x1F3AE; TTY Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_snake.html">&#x1F3AE; Snake</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_sm64.html">&#x1F3AE; SM64 HTML5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_ronaldo.html">&#x1F3AE; 3D Ronaldo Football</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_roguelike.html">&#x1F3AE; Batch Roguelike</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_prototype.html">&#x1F3AE; Prototype</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_nestest.html">&#x1F3AE; NEStest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_megamanblue.html">&#x1F3AE; MegaMan in the blue mountains</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD36.html">&#x1F3AE; Rune Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD31.html">&#x1F3AE; Doktornix And The Fetch Quest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29warmup.html">&#x1F3AE; Ludum Dare 29 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29.html">&#x1F3AE; Ground control to Major Tomashevsky</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23warmup.html">&#x1F3AE; Ludum Dare 23 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23.html">&#x1F3AE; Ludum Dare 23</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_keystone.html">&#x1F3AE; Keystone Kapers for NES</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_gbmine.html">&#x1F3AE; GBMINE</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_choplifter.html">&#x1F3AE; Choplifter</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_breakout.html">&#x1F3AE; 6502 breakout</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_alibaba.html">&#x1F3AE; Ali Baba and the 40 thieves</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj6.html">&#x1F3AE; 1HGJ6</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj5.html">&#x1F3AE; 1HGJ5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj4.html">&#x1F3AE; 1HGJ4</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj3.html">&#x1F3AE; 1HGJ3</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hg7.html">&#x1F3AE; 1HGJ7</a></li></ul></div>
-<h1>Floating point arithmetics from the Commodore 64 in C++</h1>
-<img src="images/mandelbrot_c64_600x450.png"><br>
-This is an experiment in 1. using C++ operator overloading to implement software floating point arithmetics and 2. measuring the accuracy and performance of the Commodore 64&apos;s floating point library.<br>
-It takes the <a href="index_nesem1.html" target="_top">6502 core I developed for my NES emulator</a>, using it to emulate a Commodore 64 making calls to the kernel&apos;s floating point arithmetic routines.<br>
-The interface, a C++ class, can be used more or less like a regular float.<br>
-It is available at <a href="https://github.com/kdrnic/c64floats" target="_top">this github repository</a>, which includes a mandelbrot generator demo, which was used to generate the image above.
-The mandelbrot code is very similar to that for <a href="index_gifcap.html" target="_top">the gifcap library</a>.<br>
-<br>
-<h2>The interface</h2>
-The main interface is just a class with a bunch of operators overloaded:<br>
-<code class="cpp" data-hled="true">
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C64Float</span>
-{</span>
-    <span class="hljs-comment">//(slightly abridged)</span>
-    <span class="hljs-keyword">public</span>:
-    C64Float <span class="hljs-keyword">operator</span> *(<span class="hljs-keyword">const</span> C64Float other) <span class="hljs-keyword">const</span>;
-    C64Float <span class="hljs-keyword">operator</span> +(<span class="hljs-keyword">const</span> C64Float other) <span class="hljs-keyword">const</span>;
-    C64Float <span class="hljs-keyword">operator</span> -(<span class="hljs-keyword">const</span> C64Float other) <span class="hljs-keyword">const</span>;
-    C64Float <span class="hljs-keyword">operator</span> /(<span class="hljs-keyword">const</span> C64Float other) <span class="hljs-keyword">const</span>;
-    <span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span> &gt;(<span class="hljs-keyword">const</span> C64Float other) <span class="hljs-keyword">const</span>;
-    <span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span> ==(<span class="hljs-keyword">const</span> C64Float other) <span class="hljs-keyword">const</span>;
-    <span class="hljs-function"><span class="hljs-keyword">operator</span> <span class="hljs-title">int</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
-    C64Float <span class="hljs-keyword">operator</span> -() <span class="hljs-keyword">const</span>;
-    C64Float <span class="hljs-keyword">operator</span> *=(<span class="hljs-keyword">const</span> C64Float other){ *<span class="hljs-keyword">this</span> = *<span class="hljs-keyword">this</span> * other; <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>; }
-    C64Float <span class="hljs-keyword">operator</span> +=(<span class="hljs-keyword">const</span> C64Float other){ *<span class="hljs-keyword">this</span> = *<span class="hljs-keyword">this</span> + other; <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>; }
-    C64Float <span class="hljs-keyword">operator</span> /=(<span class="hljs-keyword">const</span> C64Float other){ *<span class="hljs-keyword">this</span> = *<span class="hljs-keyword">this</span> / other; <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>; }
-    C64Float <span class="hljs-keyword">operator</span> -=(<span class="hljs-keyword">const</span> C64Float other){ *<span class="hljs-keyword">this</span> = *<span class="hljs-keyword">this</span> - other; <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>; }
-    C64Float <span class="hljs-keyword">operator</span> ++(){ *<span class="hljs-keyword">this</span> += unit; <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>; }
-    C64Float <span class="hljs-keyword">operator</span> --(){ *<span class="hljs-keyword">this</span> -= unit; <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>; }
-    <span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span> &lt;(C64Float other)  <span class="hljs-keyword">const</span>{ <span class="hljs-keyword">return</span> !((*<span class="hljs-keyword">this</span>) == other) &amp;&amp; !((*<span class="hljs-keyword">this</span>) &gt; other); }
-    C64Float(<span class="hljs-keyword">int</span> i);
-    C64Float(<span class="hljs-keyword">double</span> d);
-};
-</code><div style="display: none;">
-class C64Float
-{
-    //(slightly abridged)
-	public:
-	C64Float operator *(const C64Float other) const;
-	C64Float operator +(const C64Float other) const;
-	C64Float operator -(const C64Float other) const;
-	C64Float operator /(const C64Float other) const;
-	bool operator &gt;(const C64Float other) const;
-	bool operator ==(const C64Float other) const;
-	operator int() const;
-	C64Float operator -() const;
-	C64Float operator *=(const C64Float other){ *this = *this * other; return *this; }
-	C64Float operator +=(const C64Float other){ *this = *this + other; return *this; }
-	C64Float operator /=(const C64Float other){ *this = *this / other; return *this; }
-	C64Float operator -=(const C64Float other){ *this = *this - other; return *this; }
-	C64Float operator ++(){ *this += unit; return *this; }
-	C64Float operator --(){ *this -= unit; return *this; }
-	bool operator &lt;(C64Float other)  const{ return !((*this) == other) &amp;&amp; !((*this) &gt; other); }
-	C64Float(int i);
-	C64Float(double d);
-};
-</div>
-<br>
-The lib also includes overloads for the common math.h/cmath functions (those which are available in the C64) and a <a href="https://en.cppreference.com/w/cpp/language/user_literal" target="_top">user-defined literal thingamabob</a> for convenience:<br>
-<code class="cpp" data-hled="true">
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">round</span><span class="hljs-params">(C64Float f)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">abs</span><span class="hljs-params">(C64Float f)</span></span>; 
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">sqrt</span><span class="hljs-params">(C64Float f)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">atan</span><span class="hljs-params">(C64Float f)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">tan</span><span class="hljs-params">(C64Float f)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">exp</span><span class="hljs-params">(C64Float f)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">pow</span><span class="hljs-params">(C64Float f1, C64Float f2)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">log</span><span class="hljs-params">(C64Float f)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">sin</span><span class="hljs-params">(C64Float f)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">cos</span><span class="hljs-params">(C64Float f)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">log2</span><span class="hljs-params">(C64Float f)</span></span>;
-<span class="hljs-function"><span class="hljs-keyword">static</span> C64Float <span class="hljs-title">log10</span><span class="hljs-params">(C64Float f)</span></span>;
-C64Float <span class="hljs-keyword">operator</span> <span class="hljs-string">&quot;&quot;</span> _C64F(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *);
-</code><div style="display: none;">
-static C64Float round(C64Float f);
-static C64Float abs(C64Float f); 
-static C64Float sqrt(C64Float f);
-static C64Float atan(C64Float f);
-static C64Float tan(C64Float f);
-static C64Float exp(C64Float f);
-static C64Float pow(C64Float f1, C64Float f2);
-static C64Float log(C64Float f);
-static C64Float sin(C64Float f);
-static C64Float cos(C64Float f);
-static C64Float log2(C64Float f);
-static C64Float log10(C64Float f);
-C64Float operator &quot;&quot; _C64F(const char *);
-</div>
-<h2>Internals</h2>
-Internally it works by emulating a partial Commodore 64 as mentioned.
-Modifying the code from the NES emulator to behave sufficiently like a Commodore 64 wasn&apos;t very difficult, since the core was sufficiently machine-agnostic.
-Since actual IO is not necessary It is enough to map some addresses to ROM, and to simulate a copy of a routine to zero-page RAM which the Commodore 64 does on its boot code (which we don&apos;t use).
-<code class="cpp" data-hled="true">
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C64Memory</span> :</span> <span class="hljs-keyword">public</span> Memory
-{
-    <span class="hljs-keyword">public</span>:
-    <span class="hljs-keyword">uint8_t</span> ram[<span class="hljs-number">64</span> * <span class="hljs-number">1024</span>];
-    <span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">uint8_t</span> rom_kernal[<span class="hljs-number">8</span> * <span class="hljs-number">1024</span>];
-    <span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">uint8_t</span> rom_basic[<span class="hljs-number">8</span> * <span class="hljs-number">1024</span>];
-    <span class="hljs-keyword">virtual</span> MemoryByte <span class="hljs-keyword">operator</span>[](<span class="hljs-built_in">std</span>::<span class="hljs-keyword">size_t</span> address)
-    {
-        <span class="hljs-function">MemoryByte <span class="hljs-title">mb</span><span class="hljs-params">(<span class="hljs-keyword">this</span>)</span></span>;
-        mb.addr = address;
-        mb.wptr = ram + address;
-        mb.ptr = ram + address;
-        <span class="hljs-keyword">switch</span>(address){
-            <span class="hljs-keyword">case</span> <span class="hljs-number">0xA000</span> ... <span class="hljs-number">0xBFFF</span>:
-                mb.ptr = rom_basic + address - <span class="hljs-number">0xA000</span>;
-                <span class="hljs-keyword">break</span>;
-            <span class="hljs-keyword">case</span> <span class="hljs-number">0xE000</span> ... <span class="hljs-number">0xFFFF</span>:
-                mb.ptr = rom_kernal + address - <span class="hljs-number">0xE000</span>;
-                <span class="hljs-keyword">break</span>;
-            <span class="hljs-keyword">default</span>:
-                <span class="hljs-keyword">break</span>;
-        }
-        <span class="hljs-keyword">return</span> mb;
-    }
-    <span class="hljs-comment">//[...]</span>
-    C64Memory() : ram{}
-    {
-        <span class="hljs-comment">//Copy CHRGET</span>
-        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">size_t</span> src = <span class="hljs-number">0xE3A2</span>, dst = <span class="hljs-number">0x73</span>; src &lt;= <span class="hljs-number">0xE3BE</span>; src++, dst++){
-            ram[dst] = (*<span class="hljs-keyword">this</span>)[src];
-        }
-    }
-};
-</code><div style="display: none;">
-class C64Memory : public Memory
-{
-	public:
-	uint8_t ram[64 * 1024];
-	static const uint8_t rom_kernal[8 * 1024];
-	static const uint8_t rom_basic[8 * 1024];
-	virtual MemoryByte operator[](std::size_t address)
-	{
-		MemoryByte mb(this);
-		mb.addr = address;
-		mb.wptr = ram + address;
-		mb.ptr = ram + address;
-		switch(address){
-			case 0xA000 ... 0xBFFF:
-				mb.ptr = rom_basic + address - 0xA000;
-				break;
-			case 0xE000 ... 0xFFFF:
-				mb.ptr = rom_kernal + address - 0xE000;
-				break;
-			default:
-				break;
-		}
-		return mb;
-	}
-	//[...]
-	C64Memory() : ram{}
-	{
-		//Copy CHRGET
-		for(size_t src = 0xE3A2, dst = 0x73; src &lt;= 0xE3BE; src++, dst++){
-			ram[dst] = (*this)[src];
-		}
-	}
-};
-</div>
-<br>
-Some small bugs occurred when I called the wrong routine addresses and before I realized I had to copy CHRGET as above.
-To debug this, I used <a href="https://vice-emu.sourceforge.io/vice_12.html" target="_top">the VICE emulator&apos;s monitor</a> and modified the 6502 logger to create output in the same style, allowing for easy comparison and quickly finding the divergence point.
-<br>
-<br>
-Then, each operation is done by assembling and running a small 6502 program which calls the Kernal routines:<br>
-<code class="cpp" data-hled="true">
-C64Float C64Float::<span class="hljs-keyword">operator</span> *(<span class="hljs-keyword">const</span> C64Float other) <span class="hljs-keyword">const</span>
-{
-    <span class="hljs-keyword">size_t</span> addrFAC, addrARG;
-    <span class="hljs-keyword">return</span> NewProg()
-        .getAddr(addrFAC)
-        .pushFloat(*<span class="hljs-keyword">this</span>)
-        .getAddr(addrARG)
-        .pushFloat(other)
-        .begin()
-        .pushMOVFM(addrFAC)
-        .pushFMUL(addrARG)
-        .pushMOVMF(addrFAC)
-        .execute()
-        .retFloat(addrFAC);
-}
-</code><div style="display: none;">
-C64Float C64Float::operator *(const C64Float other) const
-{
-	size_t addrFAC, addrARG;
-	return NewProg()
-		.getAddr(addrFAC)
-		.pushFloat(*this)
-		.getAddr(addrARG)
-		.pushFloat(other)
-		.begin()
-		.pushMOVFM(addrFAC)
-		.pushFMUL(addrARG)
-		.pushMOVMF(addrFAC)
-		.execute()
-		.retFloat(addrFAC);
-}
-</div>
-<br>
-&quot;NewProg&quot; is just a convenience function to create new C64Prog class instances. C64Prog has several small methods which are strung together to assemble and execute a 6502 program.<br>
-<code class="cpp" data-hled="true">
-    C64Prog C64Prog::pushLDA(<span class="hljs-keyword">uint8_t</span> val){    <span class="hljs-keyword">return</span> pushBytes(<span class="hljs-number">0xA9</span>, val); }
-    C64Prog C64Prog::pushAddrAY(<span class="hljs-keyword">size_t</span> addr){ <span class="hljs-keyword">return</span> pushLDA(addr &amp; <span class="hljs-number">0xFF</span>u).pushLDY(addr &gt;&gt; <span class="hljs-number">8u</span>); }
-    C64Prog C64Prog::pushFMUL(<span class="hljs-keyword">size_t</span> addr){   <span class="hljs-keyword">return</span> pushAddrAY(addr).pushJSR(<span class="hljs-number">0xBA28</span>); }
-</code><div style="display: none;">
-    C64Prog C64Prog::pushLDA(uint8_t val){    return pushBytes(0xA9, val); }
-    C64Prog C64Prog::pushAddrAY(size_t addr){ return pushLDA(addr &amp; 0xFFu).pushLDY(addr &gt;&gt; 8u); }
-    C64Prog C64Prog::pushFMUL(size_t addr){   return pushAddrAY(addr).pushJSR(0xBA28); }
-</div>
-<br>
-Here, the magic constant 0xBA28 is the address of the kernal routine we want, which can be looked up in a Commodore 64 reference.<br><br>
-Each C64Float goes in and out as 5 bytes:<br>
-<code class="cpp" data-hled="true">
-C64Prog C64Prog::pushFloat(<span class="hljs-keyword">const</span> C64Float f)
-{
-    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">size_t</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-keyword">sizeof</span>(f.val); i++){
-        pushBytes(f.val[i]);
-    }
-    <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>;
-}
-C64Prog C64Prog::popFloat(<span class="hljs-keyword">size_t</span> addr, C64Float &amp;f)
-{
-    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">size_t</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-keyword">sizeof</span>(f.val); i++){
-        f.val[i] = ram[addr + i];
-    }
-    <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>;
-}
-C64Float C64Prog::retFloat(<span class="hljs-keyword">size_t</span> addr)
-{
-    C64Float f;
-    popFloat(addr, f);
-    <span class="hljs-keyword">return</span> f;
-}
-</code><div style="display: none;">
-C64Prog C64Prog::pushFloat(const C64Float f)
-{
-    for(size_t i = 0; i &lt; sizeof(f.val); i++){
-        pushBytes(f.val[i]);
-    }
-    return *this;
-}
-C64Prog C64Prog::popFloat(size_t addr, C64Float &amp;f)
-{
-    for(size_t i = 0; i &lt; sizeof(f.val); i++){
-        f.val[i] = ram[addr + i];
-    }
-    return *this;
-}
-C64Float C64Prog::retFloat(size_t addr)
-{
-    C64Float f;
-    popFloat(addr, f);
-    return f;
-}
-</div>
-<br>
-Those 5 bytes consist of an 8bit exponent, a 31bit mantissa and a sign bit, allowing the following conversion to regular floating point:<br>
-<code class="cpp" data-hled="true">
-<span class="hljs-function"><span class="hljs-keyword">double</span> <span class="hljs-title">C64FloatToDouble</span><span class="hljs-params">(C64Float f)</span>
-</span>{
-    <span class="hljs-keyword">if</span>(!f.val[<span class="hljs-number">0</span>]) <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>;
-    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> mantissa =
-        (((f.val[<span class="hljs-number">1</span>] &amp; <span class="hljs-number">0x7F</span>) | <span class="hljs-number">0x80</span>u) &lt;&lt; <span class="hljs-number">24</span>) +
-        (f.val[<span class="hljs-number">2</span>] &lt;&lt; <span class="hljs-number">16</span>) +
-        (f.val[<span class="hljs-number">3</span>] &lt;&lt; <span class="hljs-number">8</span>) +
-        (f.val[<span class="hljs-number">4</span>] &lt;&lt; <span class="hljs-number">0</span>);
-    <span class="hljs-keyword">int</span> <span class="hljs-built_in">exp</span> = f.val[<span class="hljs-number">0</span>];
-    <span class="hljs-built_in">exp</span> -= <span class="hljs-number">0x81</span>;
-    <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">pow</span>(<span class="hljs-number">2.0</span>, <span class="hljs-built_in">exp</span>) * <span class="hljs-keyword">double</span>(mantissa) / <span class="hljs-keyword">double</span>(<span class="hljs-number">0x80</span>u &lt;&lt; <span class="hljs-number">24</span>);
-}
-</code><div style="display: none;">
-double C64FloatToDouble(C64Float f)
-{
-	if(!f.val[0]) return 0.0;
-	unsigned int mantissa =
-		(((f.val[1] &amp; 0x7F) | 0x80u) &lt;&lt; 24) +
-		(f.val[2] &lt;&lt; 16) +
-		(f.val[3] &lt;&lt; 8) +
-		(f.val[4] &lt;&lt; 0);
-	int exp = f.val[0];
-	exp -= 0x81;
-	return std::pow(2.0, exp) * double(mantissa) / double(0x80u &lt;&lt; 24);
-}
-</div>
-<br>
-<h2>Performance and accuracy</h2>
-The performance obviously is piss-poor. The mandelbrot code, the same unoptimized one from <a href="index_gifcap.html" target="_top">the gifcap demo</a>, pushes it to its limits:<br>
-<code class="cpp" data-hled="true">
-<span class="hljs-keyword">for</span>(iY=<span class="hljs-number">0</span>;iY&lt;iYmax;iY++){
-    Cy=CyMin + floatType(iY) *PixelHeight;
-    <span class="hljs-keyword">if</span>(<span class="hljs-built_in">abs</span>(Cy)&lt; PixelHeight/floatType(<span class="hljs-number">2</span>)) Cy=f0; <span class="hljs-comment">/* Main antenna */</span>
-    <span class="hljs-keyword">for</span>(iX=<span class="hljs-number">0</span>,Cx=CxMin;iX&lt;iXmax;iX++,Cx+=PixelWidth){
-        <span class="hljs-comment">/* initial value of orbit = critical point Z= 0 */</span>
-        Zx=f0;
-        Zy=f0;
-        Zx2=Zx*Zx;
-        Zy2=Zy*Zy;
-        <span class="hljs-comment">/* */</span>
-        <span class="hljs-keyword">for</span>(Iteration=<span class="hljs-number">0</span>;Iteration&lt;IterationMax &amp;&amp; ((Zx2+Zy2)&lt;ER2);Iteration++){
-            Zy=f2*Zx*Zy + Cy;
-            Zx=Zx2-Zy2 +Cx;
-            Zx2=Zx*Zx;
-            Zy2=Zy*Zy;
-        };
-        PutPixel(bmp, iX, iY, CalcColor(Iteration));
-    }
-}
-</code><div style="display: none;">
-for(iY=0;iY&lt;iYmax;iY++){
-    Cy=CyMin + floatType(iY) *PixelHeight;
-    if(abs(Cy)&lt; PixelHeight/floatType(2)) Cy=f0; /* Main antenna */
-    for(iX=0,Cx=CxMin;iX&lt;iXmax;iX++,Cx+=PixelWidth){
-        /* initial value of orbit = critical point Z= 0 */
-        Zx=f0;
-        Zy=f0;
-        Zx2=Zx*Zx;
-        Zy2=Zy*Zy;
-        /* */
-        for(Iteration=0;Iteration&lt;IterationMax &amp;&amp; ((Zx2+Zy2)&lt;ER2);Iteration++){
-            Zy=f2*Zx*Zy + Cy;
-            Zx=Zx2-Zy2 +Cx;
-            Zx2=Zx*Zx;
-            Zy2=Zy*Zy;
-        };
-        PutPixel(bmp, iX, iY, CalcColor(Iteration));
-    }
-}
-</div>
-<br>
-It took 34 minutes to render the 600x450 image above this article, by emulating 27460104375 machine cycles of the 6502.
-That would take 7 hours and a half in a real life Commodore 64.
-Even though I limited the max iterations to a mere 25.<br>
-<br>
-The floating-point accuracy, in this and other tests, is shown to be quite good.
-Comparing to a regular &quot;double&quot; version of the code, the only change is in images with odd dimensions where the centre line will evaluate slightly different:<br>
-<img src="images/mandelbrot_c64_20x15.gif"><img src="images/mandelbrot_c64_60x45.gif"><br><br>
-In other tests, I find the most inaccurate operation seems to be the multiplication.
-Overall the accuracy is much like a regular double and way better than a float, as expected from the 31bit mantissa of the format.<br>
-<h2>Acknowledgments</h2>
-The following resources were extremely useful when making this:<br>
+<html><head data-created="2023-04-29T22:19:33.501Z" data-modified="2023-04-29T22:17:06.812Z"><meta charset="UTF8"><link rel="stylesheet" href="hlstyles/default.css"><link rel="stylesheet" href="motherfucker.css"></head><body data-title="Reverse engineering a DOS game B17 Flying Fortress"><div class="article-index"><ul data-type="pages_index"><li><span>&apos;23/04/29 22:19   </span><a target="_top" href="index_b17.html">Reverse engineering a DOS game B17 Flying Fortress</a></li><li><span>&apos;22/01/03 23:33   </span><a target="_top" href="index_c64floats.html">C++ Commodore 64 floating point library</a></li><li><span>&apos;21/07/24 21:25   </span><a target="_top" href="index_OPL.html">OPL3 MIDI player</a></li><li><span>&apos;20/12/06 22:27   </span><a target="_top" href="index_gifcap.html">gifcap library</a></li><li><span>&apos;20/08/01 21:53   </span><a target="_top" href="index_doomloader.html">Doom level loader</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem3.html">NES Emulation Saga Part III</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem2.html">NES Emulation Saga Part II</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem1.html">NES Emulation Saga Part I</a></li><li><span>&apos;19/10/31 02:37   </span><a target="_top" href="index_kym.html">&#x1F3AE; Kori Yogan Mushi</a></li><li><span>&apos;19/08/03 20:43   </span><a target="_top" href="index_bespoke.html">&#x1F3AE; Bespoke Terror</a></li><li><span>&apos;19/08/03 20:32   </span><a target="_top" href="index_1hgj8.html">&#x1F3AE; Conker&apos;s BFD for Nintendo 486</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_trog.html">&#x1F3AE; TROG</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_stacker.html">&#x1F3AE; TTY Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_snake.html">&#x1F3AE; Snake</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_sm64.html">&#x1F3AE; SM64 HTML5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_ronaldo.html">&#x1F3AE; 3D Ronaldo Football</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_roguelike.html">&#x1F3AE; Batch Roguelike</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_prototype.html">&#x1F3AE; Prototype</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_nestest.html">&#x1F3AE; NEStest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_megamanblue.html">&#x1F3AE; MegaMan in the blue mountains</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD36.html">&#x1F3AE; Rune Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD31.html">&#x1F3AE; Doktornix And The Fetch Quest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29warmup.html">&#x1F3AE; Ludum Dare 29 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29.html">&#x1F3AE; Ground control to Major Tomashevsky</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23warmup.html">&#x1F3AE; Ludum Dare 23 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23.html">&#x1F3AE; Ludum Dare 23</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_keystone.html">&#x1F3AE; Keystone Kapers for NES</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_gbmine.html">&#x1F3AE; GBMINE</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_choplifter.html">&#x1F3AE; Choplifter</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_breakout.html">&#x1F3AE; 6502 breakout</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_alibaba.html">&#x1F3AE; Ali Baba and the 40 thieves</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj6.html">&#x1F3AE; 1HGJ6</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj5.html">&#x1F3AE; 1HGJ5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj4.html">&#x1F3AE; 1HGJ4</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj3.html">&#x1F3AE; 1HGJ3</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hg7.html">&#x1F3AE; 1HGJ7</a></li></ul></div>
+<a href="https://www.mobygames.com/game/1756/b-17-flying-fortress/" target="_top">B-17 Flying Fortress</a> is a 1992 flight simulation/crew management game published by Microprose for MS-DOS (later also for Amiga and Atari ST).<br>
+It was featured as <a href="https://www.dosgameclub.com/b17-flying-fortress/" target="_top">the January 2023 game by DOS Game Club</a>.<br>
+It is a bit slow/boring for my tastes, and I feel the flying itself is not focused on. However, DGC user <b>Spoonboy</b> is a great fan.
+He was fascinated by the idea of encountering the legendary <a href="https://en.wikipedia.org/wiki/Messerschmitt_Me_262" target="_top">Messerschmitt Me 262</a> late-war German jet fighter in-game;
+specially after someone found a reference to them inside binary game files.<br>
+He <a href="https://dosgame.club/@Spoonboy/110083369943270602" target="_top">eventually found them</a> during normal play - it seems they appear fleetingly, and only by the last two or so missions.<br><br>
+<center><img src="images/bsev6.png"><br>A Me262 in game</center><br><br>
+Still, looking for the strings as well sent me on a wild goose chase to look for and extract 3D models and other data from the game, which I am going to recount.<br>
+<h1>The game files</h1>
+<center><img src="images/bsev7.png"><br>All of the game&apos;s files</center><br><br>
+Aside from the executable file (B17.EXE), what are probably sound drivers (ROLAND.CAT and ADLIB.CAT) and a couple text files, it seems all the game data is inside those binary files whose names start with an underscore.<br>
+<h1>The _INDEX file</h1>
+Running Unix <a href="https://man7.org/linux/man-pages/man1/strings.1.html" target="_top">strings</a> on the executable found nothing particularly interesting, nor on the other underscored files, but on <b>_INDEX</b> it found references to the Me262:<br><br>
+<pre>C:\dosbox\b17&gt;strings _INDEX | grep me262
+#shpeme262
+shpeme262new</pre><br>
+Note the <b>shpe</b> prefix.<br>
+I then used <a href="https://mh-nexus.de/en/hxd/" target="_top">HxD Hex editor</a> to examine the _INDEX file. It starts, very appropriately, with what seems to an index to the other underscored files. There are 28 (0x1C) such files.<br>
+<center><img src="images/bsev1.png"><br>Head of _INDEX</center><br><br>
+Moving down, it contains all the way to the end a list of named resources (including <b>shpeme262new</b>), each entry is 22 bytes in total.<br>
+<center><img src="images/bsev2.png"><br>22 byte long resource entries</center><br><br>
+Each resource names has one out of nine different preffixes:<br><br>
+<table>
+<tbody><tr><td>bmap</td><td>Bitmaps, such as 320x200 background images</td></tr>
+<tr><td>data</td><td>Seem to contain mostly string data such as crew names</td></tr>
+<tr><td>sprt</td><td>Sprites, probably with animation and transparent areas</td></tr>
+<tr><td>shpe</td><td>Shapes, i.e. 3D models</td></tr>
+<tr><td>mppr</td><td>Maps?</td></tr>
+<tr><td>dots</td><td>Also map related?</td></tr>
+<tr><td>font</td><td>Fonts probably</td></tr>
+<tr><td>sdrv</td><td>Sound driver data? Sound samples?</td></tr>
+<tr><td>tune</td><td>Songs</td></tr>
+</tbody></table>
+Lets look at a single resource. I chose to focus on <b>bmapdeaduk</b>. As the name implies, it is displayed when you crash while still over the United Kingdom, and die (there is a random chance crashing injures the bailing out crew which shows a different image). A different one is used when you crash over Germany.<br>
+<center><img src="images/bsev4.png"><br><b>bmapdeaduk</b> in-game, after crashing and dying on the United Kingdom</center><br><br>
+In the _INDEX file it looks like this:<br>
+<center><img src="images/bsev3.png"><br><b>bmapdeaduk</b> entry in the _INDEX file</center><br><br>
+I was able to guess (and later confirm those guesses) the meaning of each of the values in the entry:<br><br>
+<table>
+<tbody><tr><td>Hex value</td>                                                        <td>Value (minding endianness)</td><td>Meaning</td></tr>
+<tr><td style="color:rgb(237,28,36);">62 6D 61 70 64 65 61 64 75 6B 20 20</td><td></td>                          <td>12 bytes</td><td>Resource name with prefix, right-padded with spaces (ASCII 0x20)</td></tr>
+<tr><td style="color:rgb(34,177,76);">19</td>                                 <td>25</td>                        <td>1 byte</td><td>Those go from 0x01 to 0x1C (1 to 28), specifying the underscored file in which the resource is stored</td></tr>
+<tr><td style="color:rgb(255,127,39);">03</td>                                <td>3</td>                         <td>1 byte</td><td>Which decompression routine to use (4 kinds, so 0,1,2, or 3)</td></tr>
+<tr><td style="color:rgb(255,242,0);">C4 E9 00 00</td>                        <td>59844</td>                     <td>4 bytes = 1 dword</td><td>Offset within the data file where the resource is stored</td></tr>
+<tr><td style="color:rgb(255,174,201);">7C C5</td>                            <td>50556</td>                     <td>2 bytes = 1 word</td><td>Compressed (stored) length</td></tr>
+<tr><td style="color:rgb(63,72,204);">31 FD</td>                              <td>64817</td>                     <td>2 bytes = 1 word</td><td>Uncompressed length</td></tr>
+</tbody></table><br>
+Having guessed there was compression, I tried <a href="http://aluigi.altervista.org/quickbms.htm" data-archive="true" target="_top">QuickBMS comtype scanner</a><a href="http://web.archive.org/web/20230427144744/https://aluigi.altervista.org/quickbms.htm" target="_top"><sup>[archive]</sup></a> on extracted compressed resources, trying a 1000 different algorithms, but to no avail, only garbage data out.<br>
+<h1>Logging with the DOSBox debugger</h1>
+I then used the DOSBox debugger to go looking for the decompression routine.<br>
+<center><img src="images/bsev8.png"><br>The DOSBox debugger looks like this</center><br><br>
+There were two guides which were very useful in understanding how to use it, <a href="https://github.com/joncampbell123/dosbox-x/blob/master/README.debugger" data-archive="true" target="_top">one by DOSBox-X</a><a href="http://web.archive.org/web/20230301152735/https://github.com/joncampbell123/dosbox-x/blob/master/README.debugger" target="_top"><sup>[archive]</sup></a> and <a href="https://www.vogons.org/viewtopic.php?t=3944" target="_top" data-archive="true">one from VOGONS forum</a><a href="http://web.archive.org/web/20230330143408/https://www.vogons.org/viewtopic.php?t=3944" target="_top"><sup>[archive]</sup></a>.<br>
+With <b>rnlf&apos;s</b> help I also understood one has to add those to <b>dosbox.conf</b>, so that one uses direct emulation rather than the recompiler, and with simple execution order, so that the log &quot;makes sense&quot; and the instruction pointer doesn&apos;t &quot;jump around&quot;.<br>
+<pre>[cpu]
+core=normal
+cputype=386</pre><br>
+I then got a savestate set up of the plane crashing into the ground, which I knew would trigger a loading of <b>bmapdeaduk</b>. I fired up the debugger, loaded this save state, and used the LOG command to create a huge 1.5GB CPU log of the whole post-crash sequence.<br>
+<center><img src="images/bsev5.png"><br>The CPU log looks like this</center><br><br>
+In the CPU log file, I could look for file accesses. This is easy - in MS-DOS file operations all go through <a href="http://spike.scu.edu.au/~barry/interrupts.html" data-archive="true" target="_top">interrupt 0x21</a><a href="http://web.archive.org/web/20230329121339/http://spike.scu.edu.au/~barry/interrupts.html" target="_top"><sup>[archive]</sup></a>.<br>
+I grep&apos;ed the log for &quot;int 21&quot; and was left with a nice list of all file operations.<br>
+<pre>17EE:00004DEB int 21 ;open                                                             EAX:00003D02 ECX:00000000 EDX:00000237 EDI:0000023F ES:9F7C
+17EE:00004DEB int 21 ;seek  file=5 origin=SEEK_SET offset=0000552B (tuneamusic2)       AX:4200 CX:0000 DX:552B DI:0000 ES:50BC
+17EE:00004DEB int 21 ;read  file=5 size=00000E13 (tuneamusic2.length) buffer=50BC:0000 AX:3FBC CX:0E13 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;close file=5                                                     AX:3E13 CX:0E13 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;open                                                             AX:3D02 CX:0000 DX:0237 DI:023F ES:9F7C
+17EE:00004DEB int 21 ;seek  file=5 origin=SEEK_SET offset=0000376D (datamendstr2)      AX:4200 CX:0000 DX:376D DI:0000 ES:50BC
+17EE:00004DEB int 21 ;read  file=5 size=00000C41                      buffer=50BC:0000 AX:3FBC CX:0C41 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;close file=5                                                     AX:3E41 CX:0C41 DX:0000 DI:0000 ES:50BC
+7ED7:00008139 int 21 ;open                                                             AX:3D00 CX:0000 DX:0816 DI:0000 ES:E699
+7ED7:00008154 int 21 ;seek  file=5 origin=SEEK_SET offset=00000028                     AX:4200 CX:0000 DX:0028 DI:0000 ES:E699
+7ED7:00008162 int 21 ;read  file=5 size=00000008                                       AX:3F28 CX:0008 DX:0820 DI:0000 ES:E699
+7ED7:00008174 int 21 ;seek  file=5 origin=SEEK_SET offset=0000C38E                     AX:4200 CX:0000 DX:C38E DI:0000 ES:E699
+7ED7:00008185 int 21 ;read  file=5 size=0000060D                                       AX:3F8E CX:060D DX:0828 DI:0000 ES:E699
+7ED7:0000819B int 21 ;close file=5                                                     AX:3E29 CX:060D DX:0828 DI:0000 ES:E699
+17EE:00004DEB int 21 ;open                                                             AX:3D02 CX:060D DX:05A5 DI:05AE ES:9F7C
+17EE:00004DEB int 21 ;seek  file=5 origin=SEEK_SET offset=00000299 (bmapleft_on)       AX:4200 CX:0000 DX:0299 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;read  file=5 size=00000294                                       AX:3FBC CX:0294 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;close file=5                                                     AX:3E94 CX:0294 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;open                                                             AX:3D02 CX:0000 DX:05A5 DI:05AE ES:9F7C
+17EE:00004DEB int 21 ;seek  file=5 origin=SEEK_SET offset=0000E9C4 (bmapdeaduk.offset) AX:4200 CX:0000 DX:E9C4 DI:0000 ES:86F6
+17EE:00004DEB int 21 ;read  file=5 size=0000C57C (bmapdeaduk.length)  buffer=86F6:0000 AX:3FF6 CX:C57C DX:0000 DI:0000 ES:86F6
+17EE:00004DEB int 21 ;close file=5                                                     AX:3E7C CX:C57C DX:0000 DI:0000 ES:86F6</pre><br>
+So the game fetches and plays a sad song <b>tuneamusic2</b>, reads up a Mission End String from <b>datamendstr2</b>, and then fetches <b>bmapdeaduk</b>. The latter is left at address 86F6:0000. I searched the log for operations on this address, and found this:<br>
+<pre>17EE:000057C7 repe movsw             CX:62C0 SI:0000 DI:0000 DS:86F6 ES:726F</pre><br>
+The &quot;repe movsw&quot; is actually a &quot;rep movsw&quot; as <b>rnlf</b> said. This is in essence a memcpy of 0x000062C0 words = 50560 bytes (bmapdeaduk.length) from 86F6:0000 to 726F:0000.<br>
+More log searching and I found this bit:<br>
+<pre>17EE:000053C0 mov  ax,es           AX:726E BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+17EE:000053C2 inc  ax              AX:86F5 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+17EE:000053C3 mov  es,ax           AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+17EE:000053C5 mov  ax,ds           AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053C7 or   ax,di           AX:EA25 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053C9 je   000053CD ($+2)  AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053CB mov  [di],es         AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053CD clc                  AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053CE retf                 AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005120 mov  ax,es           AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005122 pop  bp              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005123 pop  di              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005124 pop  si              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005125 pop  dx              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005126 pop  cx              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005127 pop  bx              AX:86F6 BX:0FD5 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005128 pop  es              AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005129 pop  ds              AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+17EE:0000512A retf                 AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+200F:00005A1B jc   00005A49 ($+2c) AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+200F:00005A1D mov  es,ax           AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+200F:00005A1F xor  di,di           AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+200F:00005A21 mov  al,[si+07]      AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:0000 DS:EA25 ES:86F6
+200F:00005A24 mov  bx,[si+0A]      AX:8603 BX:0FD4 CX:C57C SI:5AE0 DI:0000 DS:EA25 ES:86F6
+200F:00005A27 mov  si,cs:[5259]    AX:8603 BX:FD31 CX:C57C SI:5AE0 DI:0000 DS:EA25 ES:86F6
+200F:00005A2C mov  ds,[si]         AX:8603 BX:FD31 CX:C57C SI:5D90 DI:0000 DS:EA25 ES:86F6
+200F:00005A2E xor  si,si           AX:8603 BX:FD31 CX:C57C SI:5D90 DI:0000 DS:726F ES:86F6
+200F:00005A30 call 4F05:10B7       AX:8603 BX:FD31 CX:C57C SI:0000 DI:0000 DS:726F ES:86F6</pre><br>
+Which is the set up for, and calling of, the resource decompression routine.<br>
+<h1>Disassembling</h1>
+I got <a href="https://www.scummvm.org/news/20180331/" data-archive="true" target="_top">a version of IDA disassembler from ScummVM website</a><a href="http://web.archive.org/web/20230228221155/https://www.scummvm.org/news/20180331/" target="_top"><sup>[archive]</sup></a> that is freeware but also old enough to still support 16bit DOS executables.<br>
+<center><img src="images/bsev9.png"><br>The decompression routine at 4F05:10B7 in IDA</center><br><br>
+I then had some false starts thinking of properly reimplementing the routine in C, but it was taking too much work.<br>
+<h1>Reassembling</h1>
+So I had the idea to write a shell around the disassembled code from IDA. I picked <a href="https://www.nasm.us/" target="_top">NASM</a> as the most recommended assembler around.<br>
+Since I was going to need more than 64k bytes of RAM to hold compressed and uncompressed data, I had to create DOS EXE files rather than COM files.
+<a href="https://www.nasm.us/doc/nasmdoc9.html" data-archive="true" target="_top">This section of NASM docs</a><a href="http://web.archive.org/web/20230316072058/https://www.nasm.us/doc/nasmdoc9.html" target="_top"><sup>[archive]</sup></a> describes how but its linker suggestions weren&apos;t any good.<br>
+I used the linker from <a href="https://open-watcom.github.io/" target="_top">OpenWatcom v2</a>.<br>
+OpenWatcom v2 (at least in Windows) requires some environment setting, which can be done like this from a batch file, where OpenWatcom v2 is installed to &quot;.\Utilities\OWv2&quot;:<br>
+<pre>set PATH=%PATH%;%~dp0Utilities\OWv2\BINNT;%~dp0Utilities\OWv2\BINW
+set INCLUDE=%~dp0Utilities\OWv2\H;%~dp0Utilities\OWv2\H\NT;%~dp0Utilities\OWv2\H\NT\DIRECTX;%~dp0Utilities\OWv2\H\NT\DDK
+set WATCOM=%~dp0Utilities\OWv2
+set EDPATH=%~dp0Utilities\OWv2\EDDAT
+set WWINHELP=%~dp0Utilities\OWv2\BINW
+set WHTMLHELP=%~dp0Utilities\OWv2\BINNT\HELP
+set WIPFC=%~dp0Utilities\OWv2\WIPFC</pre><br>
+And then one can build a MS-DOS 16bit executable from an assembly file like this:<br>
+<pre>nasm -f obj -o main.obj main.asm
+wlink option quiet name xtract.exe format dos file main.obj</pre><br>
+I then wrote the skeleton of a command line utility to
 <ul>
-<li><a href="https://www.c64-wiki.com/wiki/Floating_point_arithmetic" target="_top">Floating Point Arithmetic</a> on the C64-Wiki</li>
-<li><a href="https://codebase64.org/doku.php?id=base:kernal_floating_point_mathematics" target="_top">Floating Point Math</a> page from Codebase64</li>
-<li><a href="https://www.pagetable.com/c64ref/c64disasm/" target="_top">C64 BASIC &amp; KERNAL ROM Disassembly</a> - Commented and explained</li>
+<li>Get a resource name and output file from the command line arguments</li>
+<li>Open _INDEX and find the 22 byte resource entry</li>
+<li>Open the data file and load the compressed resource to one free segment</li>
+<li>Call the decompression routine and decompress the resource to another free segment</li>
+<li>Write the decompressed resource to the output file</li>
 </ul>
+<center><img src="images/bsev10.png"><br>Using XTRACT utility in DOSBox</center><br><br>
+It was written very much in baby&apos;s first assembly program style. The openly available book <a href="https://www.plantation-productions.com/Webster/www.artofasm.com/DOS/ch13/CH13-9.html#HEADING9-1" data-archive="true" target="_top">The Art of Assembly</a><a href="http://web.archive.org/web/20190115040122/http://www.plantation-productions.com:80/Webster/www.artofasm.com/DOS/ch13/CH13-9.html" target="_top"><sup>[archive]</sup></a> was very useful.<br>
+The finished utility works correctly, and since it is a DOS program is effectively cross-platform (as long as DOSBox is available).<br>
+<center><a href="files/b17xtract.zip" target="_top"><table><tbody><tr><td><img src="images/dosrul__.gif"></td><td>DOWNLOAD XTRACT UTILITY</td></tr></tbody></table></a></center><br>
+<h1>Dead ends</h1>
+Now after all this effort, it would be cool if I had something to show for it... but I don&apos;t. All resources seem to be in internal ad hoc formats.<br>
+<ul>
+<li>bmap and sprt resources are in a bitplane format well suited to mode X, but a bit hard to make sense of</li>
+<li>data resources are mostly uninteresting strings</li>
+<li>I can&apos;t make sense of shpe resources</li>
+<li>TRiD32 says font resources are PCX files but they aren&apos;t</li>
+<li>tune resources are not MIDI files or any well known format</li>
+</ul>
+<center><img src="images/bsev11.png"><br>An attempt at converting bmapdeaduk</center><br><br>
+Shape resources specifically which motivated the whole thing are quite large, even the smallest ones:<br>
+<center><img src="images/bsev12.png"><br>The smallest shpe resources</center><br><br>
+I have a few theories about the shape resources.<br>
+<ul>
+<li><b>No texture coordinates</b> and all details even wing roundels are polygon-based</li>
+<li><b>Polygons have arbitrary vertex count</b> rather than being limited to triangles, for efficiency in a software renderer</li>
+<li>Each polygon/face has a <b>single byte for colour</b> and <b>no normal vector</b> given the flat unshaded look of the game</li>
+<li>There are not only polygons but also <b>line segments</b> such as those forming the Me262 canopy</li>
+<li>Rather than a vertex count there could be a <b>terminator byte(s)</b></li>
+<li>Rather than a polygon count there could be a <b>terminator byte(s)</b></li>
+<li>Each <b>vertex is 3 words = 12 total bytes</b> long in 8.8 fixed point format</li>
+<li>There could be <b>LOD data</b> that is simpler or more complex geometry according to distance from camera</li>
+<li>There is <b>a header</b> but hard to tell how many bytes long and if it has any meaning</li>
+</ul><br>
+Lastly, here is a link to a file which I used while working on this: <a href="files/b17log.txt" target="_top">NOTES.TXT</a>.
+
 </body></html>

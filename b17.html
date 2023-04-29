@@ -1,0 +1,176 @@
+<html><head data-created="2023-04-29T22:19:33.501Z" data-modified="2023-04-29T22:17:06.812Z"><meta charset="UTF8"><link rel="stylesheet" href="hlstyles/default.css"><link rel="stylesheet" href="motherfucker.css"></head><body data-title="Reverse engineering a DOS game B17 Flying Fortress"><div class="article-index"><ul data-type="pages_index"><li><span>&apos;23/04/29 22:19   </span><a target="_top" href="index_b17.html">Reverse engineering a DOS game B17 Flying Fortress</a></li><li><span>&apos;22/01/03 23:33   </span><a target="_top" href="index_c64floats.html">C++ Commodore 64 floating point library</a></li><li><span>&apos;21/07/24 21:25   </span><a target="_top" href="index_OPL.html">OPL3 MIDI player</a></li><li><span>&apos;20/12/06 22:27   </span><a target="_top" href="index_gifcap.html">gifcap library</a></li><li><span>&apos;20/08/01 21:53   </span><a target="_top" href="index_doomloader.html">Doom level loader</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem3.html">NES Emulation Saga Part III</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem2.html">NES Emulation Saga Part II</a></li><li><span>&apos;19/11/19 06:06   </span><a target="_top" href="index_nesem1.html">NES Emulation Saga Part I</a></li><li><span>&apos;19/10/31 02:37   </span><a target="_top" href="index_kym.html">&#x1F3AE; Kori Yogan Mushi</a></li><li><span>&apos;19/08/03 20:43   </span><a target="_top" href="index_bespoke.html">&#x1F3AE; Bespoke Terror</a></li><li><span>&apos;19/08/03 20:32   </span><a target="_top" href="index_1hgj8.html">&#x1F3AE; Conker&apos;s BFD for Nintendo 486</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_trog.html">&#x1F3AE; TROG</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_stacker.html">&#x1F3AE; TTY Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_snake.html">&#x1F3AE; Snake</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_sm64.html">&#x1F3AE; SM64 HTML5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_ronaldo.html">&#x1F3AE; 3D Ronaldo Football</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_roguelike.html">&#x1F3AE; Batch Roguelike</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_prototype.html">&#x1F3AE; Prototype</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_nestest.html">&#x1F3AE; NEStest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_megamanblue.html">&#x1F3AE; MegaMan in the blue mountains</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD36.html">&#x1F3AE; Rune Stacker</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD31.html">&#x1F3AE; Doktornix And The Fetch Quest</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29warmup.html">&#x1F3AE; Ludum Dare 29 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD29.html">&#x1F3AE; Ground control to Major Tomashevsky</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23warmup.html">&#x1F3AE; Ludum Dare 23 Warmup</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_LD23.html">&#x1F3AE; Ludum Dare 23</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_keystone.html">&#x1F3AE; Keystone Kapers for NES</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_gbmine.html">&#x1F3AE; GBMINE</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_choplifter.html">&#x1F3AE; Choplifter</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_breakout.html">&#x1F3AE; 6502 breakout</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_alibaba.html">&#x1F3AE; Ali Baba and the 40 thieves</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj6.html">&#x1F3AE; 1HGJ6</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj5.html">&#x1F3AE; 1HGJ5</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj4.html">&#x1F3AE; 1HGJ4</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hgj3.html">&#x1F3AE; 1HGJ3</a></li><li><span>&apos;19/07/23 22:18   </span><a target="_top" href="index_1hg7.html">&#x1F3AE; 1HGJ7</a></li></ul></div>
+<h1>Reverse engineering a DOS game: B17 Flying Fortress</h1>
+<a href="https://www.mobygames.com/game/1756/b-17-flying-fortress/" target="_top">B-17 Flying Fortress</a> is a 1992 flight simulation/crew management game published by Microprose for MS-DOS (later also for Amiga and Atari ST).<br>
+It was featured as <a href="https://www.dosgameclub.com/b17-flying-fortress/" target="_top">the January 2023 game by DOS Game Club</a>.<br><br>
+It is a bit slow/boring for my tastes, and I feel the flying itself is not focused on. However, DGC user <b>Spoonboy</b> is a great fan.
+He was fascinated by the idea of encountering the legendary <a href="https://en.wikipedia.org/wiki/Messerschmitt_Me_262" target="_top">Messerschmitt Me 262</a> late-war German jet fighter in-game;
+specially after someone found a reference to them inside binary game files.<br>
+He <a href="https://dosgame.club/@Spoonboy/110083369943270602" target="_top">eventually found them</a> during normal play - it seems they appear fleetingly, and only by the last two or so missions.<br><br>
+<center><img src="images/bsev6.png"><br>A Me262 in game</center><br><br>
+Still, looking for the strings as well sent me on a wild goose chase to look for and extract 3D models and other data from the game, which I am going to recount (I told about this on a <a href="https://dosgame.club/@kdrnic/110075125639747507">Mastodon thread</a> as I was doing it, but this will be more detailed).<br>
+<h1>The game files</h1>
+<center><img src="images/bsev7.png"><br>All of the game&apos;s files</center><br><br>
+Aside from the executable file (B17.EXE), what are probably sound drivers (ROLAND.CAT and ADLIB.CAT) and a couple text files, it seems all the game data is inside those binary files whose names start with an underscore.<br>
+<h1>The _INDEX file</h1>
+Running Unix <a href="https://man7.org/linux/man-pages/man1/strings.1.html" target="_top">strings</a> on the executable found nothing particularly interesting, nor on the other underscored files, but on <b>_INDEX</b> it found references to the Me262:<br><br>
+<pre>C:\dosbox\b17&gt;strings _INDEX | grep me262
+#shpeme262
+shpeme262new</pre><br>
+Note the <b>shpe</b> prefix.<br>
+I then used <a href="https://mh-nexus.de/en/hxd/" target="_top">HxD Hex editor</a> to examine the _INDEX file. It starts, very appropriately, with what seems to an index to the other underscored files. There are 28 (0x1C) such files.<br>
+<center><img src="images/bsev1.png"><br>Head of _INDEX</center><br><br>
+Moving down, it contains all the way to the end a list of named resources (including <b>shpeme262new</b>), each entry is 22 bytes in total.<br>
+<center><img src="images/bsev2.png"><br>22 byte long resource entries</center><br><br>
+Each resource names has one out of nine different preffixes:<br><br>
+<table>
+<tbody><tr><td>bmap</td><td>Bitmaps, such as 320x200 background images</td></tr>
+<tr><td>data</td><td>Seem to contain mostly string data such as crew names</td></tr>
+<tr><td>sprt</td><td>Sprites, probably with animation and transparent areas</td></tr>
+<tr><td>shpe</td><td>Shapes, i.e. 3D models</td></tr>
+<tr><td>mppr</td><td>Maps?</td></tr>
+<tr><td>dots</td><td>Also map related?</td></tr>
+<tr><td>font</td><td>Fonts probably</td></tr>
+<tr><td>sdrv</td><td>Sound driver data? Sound samples?</td></tr>
+<tr><td>tune</td><td>Songs</td></tr>
+</tbody></table>
+Lets look at a single resource. I chose to focus on <b>bmapdeaduk</b>. As the name implies, it is displayed when you crash while still over the United Kingdom, and die (there is a random chance crashing injures the bailing out crew which shows a different image). A different one is used when you crash over Germany.<br>
+<center><img src="images/bsev4.png"><br><b>bmapdeaduk</b> in-game, after crashing and dying on the United Kingdom</center><br><br>
+In the _INDEX file it looks like this:<br>
+<center><img src="images/bsev3.png"><br><b>bmapdeaduk</b> entry in the _INDEX file</center><br><br>
+I was able to guess (and later confirm those guesses) the meaning of each of the values in the entry:<br><br>
+<table>
+<tbody><tr><td>Hex value</td>                                                        <td>Value (minding endianness)</td><td>Meaning</td></tr>
+<tr><td style="color:rgb(237,28,36);">62 6D 61 70 64 65 61 64 75 6B 20 20</td><td></td>                          <td>12 bytes</td><td>Resource name with prefix, right-padded with spaces (ASCII 0x20)</td></tr>
+<tr><td style="color:rgb(34,177,76);">19</td>                                 <td>25</td>                        <td>1 byte</td><td>Those go from 0x01 to 0x1C (1 to 28), specifying the underscored file in which the resource is stored</td></tr>
+<tr><td style="color:rgb(255,127,39);">03</td>                                <td>3</td>                         <td>1 byte</td><td>Which decompression routine to use (4 kinds, so 0,1,2, or 3)</td></tr>
+<tr><td style="color:rgb(255,242,0);">C4 E9 00 00</td>                        <td>59844</td>                     <td>4 bytes = 1 dword</td><td>Offset within the data file where the resource is stored</td></tr>
+<tr><td style="color:rgb(255,174,201);">7C C5</td>                            <td>50556</td>                     <td>2 bytes = 1 word</td><td>Compressed (stored) length</td></tr>
+<tr><td style="color:rgb(63,72,204);">31 FD</td>                              <td>64817</td>                     <td>2 bytes = 1 word</td><td>Uncompressed length</td></tr>
+</tbody></table><br>
+Having guessed there was compression, I tried <a href="http://aluigi.altervista.org/quickbms.htm" data-archive="true" target="_top">QuickBMS comtype scanner</a><a href="http://web.archive.org/web/20230427144744/https://aluigi.altervista.org/quickbms.htm" target="_top"><sup>[archive]</sup></a> on extracted compressed resources, trying a 1000 different algorithms, but to no avail, only garbage data out.<br>
+<h1>Logging with the DOSBox debugger</h1>
+I then used the DOSBox debugger to go looking for the decompression routine.<br>
+<center><img src="images/bsev8.png"><br>The DOSBox debugger looks like this</center><br><br>
+There were two guides which were very useful in understanding how to use it, <a href="https://github.com/joncampbell123/dosbox-x/blob/master/README.debugger" data-archive="true" target="_top">one by DOSBox-X</a><a href="http://web.archive.org/web/20230301152735/https://github.com/joncampbell123/dosbox-x/blob/master/README.debugger" target="_top"><sup>[archive]</sup></a> and <a href="https://www.vogons.org/viewtopic.php?t=3944" target="_top" data-archive="true">one from VOGONS forum</a><a href="http://web.archive.org/web/20230330143408/https://www.vogons.org/viewtopic.php?t=3944" target="_top"><sup>[archive]</sup></a>.<br>
+With <b>rnlf&apos;s</b> help I also understood one has to add those to <b>dosbox.conf</b>, so that one uses direct emulation rather than the recompiler, and with simple execution order, so that the log &quot;makes sense&quot; and the instruction pointer doesn&apos;t &quot;jump around&quot;.<br>
+<pre>[cpu]
+core=normal
+cputype=386</pre><br>
+I then got a savestate set up of the plane crashing into the ground, which I knew would trigger a loading of <b>bmapdeaduk</b>. I fired up the debugger, loaded this save state, and used the LOG command to create a huge 1.5GB CPU log of the whole post-crash sequence.<br>
+<center><img src="images/bsev5.png"><br>The CPU log looks like this</center><br><br>
+In the CPU log file, I could look for file accesses. This is easy - in MS-DOS file operations all go through <a href="http://spike.scu.edu.au/~barry/interrupts.html" data-archive="true" target="_top">interrupt 0x21</a><a href="http://web.archive.org/web/20230329121339/http://spike.scu.edu.au/~barry/interrupts.html" target="_top"><sup>[archive]</sup></a>.<br>
+I grep&apos;ed the log for &quot;int 21&quot; and was left with a nice list of all file operations.<br>
+<pre>17EE:00004DEB int 21 ;open                                                             AX:3D02 CX:0000 DX:0237 DI:023F ES:9F7C
+17EE:00004DEB int 21 ;seek  file=5 origin=SEEK_SET offset=0000552B (tuneamusic2)       AX:4200 CX:0000 DX:552B DI:0000 ES:50BC
+17EE:00004DEB int 21 ;read  file=5 size=00000E13 (tuneamusic2.length) buffer=50BC:0000 AX:3FBC CX:0E13 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;close file=5                                                     AX:3E13 CX:0E13 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;open                                                             AX:3D02 CX:0000 DX:0237 DI:023F ES:9F7C
+17EE:00004DEB int 21 ;seek  file=5 origin=SEEK_SET offset=0000376D (datamendstr2)      AX:4200 CX:0000 DX:376D DI:0000 ES:50BC
+17EE:00004DEB int 21 ;read  file=5 size=00000C41                      buffer=50BC:0000 AX:3FBC CX:0C41 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;close file=5                                                     AX:3E41 CX:0C41 DX:0000 DI:0000 ES:50BC
+7ED7:00008139 int 21 ;open                                                             AX:3D00 CX:0000 DX:0816 DI:0000 ES:E699
+7ED7:00008154 int 21 ;seek  file=5 origin=SEEK_SET offset=00000028                     AX:4200 CX:0000 DX:0028 DI:0000 ES:E699
+7ED7:00008162 int 21 ;read  file=5 size=00000008                                       AX:3F28 CX:0008 DX:0820 DI:0000 ES:E699
+7ED7:00008174 int 21 ;seek  file=5 origin=SEEK_SET offset=0000C38E                     AX:4200 CX:0000 DX:C38E DI:0000 ES:E699
+7ED7:00008185 int 21 ;read  file=5 size=0000060D                                       AX:3F8E CX:060D DX:0828 DI:0000 ES:E699
+7ED7:0000819B int 21 ;close file=5                                                     AX:3E29 CX:060D DX:0828 DI:0000 ES:E699
+17EE:00004DEB int 21 ;open                                                             AX:3D02 CX:060D DX:05A5 DI:05AE ES:9F7C
+17EE:00004DEB int 21 ;seek  file=5 origin=SEEK_SET offset=00000299 (bmapleft_on)       AX:4200 CX:0000 DX:0299 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;read  file=5 size=00000294                                       AX:3FBC CX:0294 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;close file=5                                                     AX:3E94 CX:0294 DX:0000 DI:0000 ES:50BC
+17EE:00004DEB int 21 ;open                                                             AX:3D02 CX:0000 DX:05A5 DI:05AE ES:9F7C
+17EE:00004DEB int 21 ;seek  file=5 origin=SEEK_SET offset=0000E9C4 (bmapdeaduk.offset) AX:4200 CX:0000 DX:E9C4 DI:0000 ES:86F6
+17EE:00004DEB int 21 ;read  file=5 size=0000C57C (bmapdeaduk.length)  buffer=86F6:0000 AX:3FF6 CX:C57C DX:0000 DI:0000 ES:86F6
+17EE:00004DEB int 21 ;close file=5                                                     AX:3E7C CX:C57C DX:0000 DI:0000 ES:86F6</pre><br>
+So the game fetches and plays a sad song <b>tuneamusic2</b>, reads up a Mission End String from <b>datamendstr2</b>, and then fetches <b>bmapdeaduk</b>. The latter is left at address 86F6:0000. I searched the log for operations on this address, and found this:<br>
+<pre>17EE:000057C7 repe movsw             CX:62C0 SI:0000 DI:0000 DS:86F6 ES:726F</pre><br>
+The &quot;repe movsw&quot; is actually a &quot;rep movsw&quot; as <b>rnlf</b> said. This is in essence a memcpy of 0x000062C0 words = 50560 bytes (bmapdeaduk.length) from 86F6:0000 to 726F:0000.<br>
+More log searching and I found this bit:<br>
+<pre>17EE:000053C0 mov  ax,es           AX:726E BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+17EE:000053C2 inc  ax              AX:86F5 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+17EE:000053C3 mov  es,ax           AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+17EE:000053C5 mov  ax,ds           AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053C7 or   ax,di           AX:EA25 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053C9 je   000053CD ($+2)  AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053CB mov  [di],es         AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053CD clc                  AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:000053CE retf                 AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005120 mov  ax,es           AX:FAED BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005122 pop  bp              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005123 pop  di              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005124 pop  si              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005125 pop  dx              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005126 pop  cx              AX:86F6 BX:0FD5 CX:C50E SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005127 pop  bx              AX:86F6 BX:0FD5 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005128 pop  es              AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+17EE:00005129 pop  ds              AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+17EE:0000512A retf                 AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+200F:00005A1B jc   00005A49 ($+2c) AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+200F:00005A1D mov  es,ax           AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F5
+200F:00005A1F xor  di,di           AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:5AEC DS:EA25 ES:86F6
+200F:00005A21 mov  al,[si+07]      AX:86F6 BX:0FD4 CX:C57C SI:5AE0 DI:0000 DS:EA25 ES:86F6
+200F:00005A24 mov  bx,[si+0A]      AX:8603 BX:0FD4 CX:C57C SI:5AE0 DI:0000 DS:EA25 ES:86F6
+200F:00005A27 mov  si,cs:[5259]    AX:8603 BX:FD31 CX:C57C SI:5AE0 DI:0000 DS:EA25 ES:86F6
+200F:00005A2C mov  ds,[si]         AX:8603 BX:FD31 CX:C57C SI:5D90 DI:0000 DS:EA25 ES:86F6
+200F:00005A2E xor  si,si           AX:8603 BX:FD31 CX:C57C SI:5D90 DI:0000 DS:726F ES:86F6
+200F:00005A30 call 4F05:10B7       AX:8603 BX:FD31 CX:C57C SI:0000 DI:0000 DS:726F ES:86F6</pre><br>
+Which is the set up for, and calling of, the resource decompression routine.<br>
+<h1>Disassembling</h1>
+I got <a href="https://www.scummvm.org/news/20180331/" data-archive="true" target="_top">a version of IDA disassembler from ScummVM website</a><a href="http://web.archive.org/web/20230228221155/https://www.scummvm.org/news/20180331/" target="_top"><sup>[archive]</sup></a> that is freeware but also old enough to still support 16bit DOS executables.<br>
+<center><img src="images/bsev9.png"><br>The decompression routine at 4F05:10B7 in IDA</center><br><br>
+I then had some false starts thinking of properly reimplementing the routine in C, but it was taking too much work.<br>
+<h1>Reassembling</h1>
+So I had the idea to write a shell around the disassembled code from IDA. I picked <a href="https://www.nasm.us/" target="_top">NASM</a> as the most recommended assembler around.<br>
+Since I was going to need more than 64k bytes of RAM to hold compressed and uncompressed data, I had to create DOS EXE files rather than COM files.
+<a href="https://www.nasm.us/doc/nasmdoc9.html" data-archive="true" target="_top">This section of NASM docs</a><a href="http://web.archive.org/web/20230316072058/https://www.nasm.us/doc/nasmdoc9.html" target="_top"><sup>[archive]</sup></a> describes how but its linker suggestions weren&apos;t any good.<br>
+I used the linker from <a href="https://open-watcom.github.io/" target="_top">OpenWatcom v2</a>.<br>
+OpenWatcom v2 (at least in Windows) requires some environment setting, which can be done like this from a batch file, where OpenWatcom v2 is installed to &quot;.\Utilities\OWv2&quot;:<br>
+<pre>set PATH=%PATH%;%~dp0Utilities\OWv2\BINNT;%~dp0Utilities\OWv2\BINW
+set INCLUDE=%~dp0Utilities\OWv2\H;%~dp0Utilities\OWv2\H\NT;%~dp0Utilities\OWv2\H\NT\DIRECTX;%~dp0Utilities\OWv2\H\NT\DDK
+set WATCOM=%~dp0Utilities\OWv2
+set EDPATH=%~dp0Utilities\OWv2\EDDAT
+set WWINHELP=%~dp0Utilities\OWv2\BINW
+set WHTMLHELP=%~dp0Utilities\OWv2\BINNT\HELP
+set WIPFC=%~dp0Utilities\OWv2\WIPFC</pre><br>
+And then one can build a MS-DOS 16bit executable from an assembly file like this:<br>
+<pre>nasm -f obj -o main.obj main.asm
+wlink option quiet name xtract.exe format dos file main.obj</pre><br>
+I then wrote the skeleton of a command line utility to
+<ul>
+<li>Get a resource name and output file from the command line arguments</li>
+<li>Open _INDEX and find the 22 byte resource entry</li>
+<li>Open the data file and load the compressed resource to one free segment</li>
+<li>Call the decompression routine and decompress the resource to another free segment</li>
+<li>Write the decompressed resource to the output file</li>
+</ul>
+<center><img src="images/bsev10.png"><br>Using XTRACT utility in DOSBox</center><br><br>
+It was written very much in baby&apos;s first assembly program style. The openly available book <a href="https://www.plantation-productions.com/Webster/www.artofasm.com/DOS/ch13/CH13-9.html#HEADING9-1" data-archive="true" target="_top">The Art of Assembly</a><a href="http://web.archive.org/web/20190115040122/http://www.plantation-productions.com:80/Webster/www.artofasm.com/DOS/ch13/CH13-9.html" target="_top"><sup>[archive]</sup></a> was very useful.<br>
+The finished utility works correctly, and since it is a DOS program is effectively cross-platform (as long as DOSBox is available).<br>
+<center><a href="files/b17xtract.zip" target="_top"><table><tbody><tr><td><img src="images/dosrul__.gif"></td><td>DOWNLOAD XTRACT UTILITY</td></tr></tbody></table></a></center><br>
+<h1>Dead ends</h1>
+Now after all this effort, it would be cool if I had something to show for it... but I don&apos;t. All resources seem to be in internal ad hoc formats.<br>
+<ul>
+<li>bmap and sprt resources are in a bitplane format well suited to mode X, but a bit hard to make sense of</li>
+<li>data resources are mostly uninteresting strings</li>
+<li>I can&apos;t make sense of shpe resources</li>
+<li>TRiD32 says font resources are PCX files but they aren&apos;t</li>
+<li>tune resources are not MIDI files or any well known format</li>
+</ul>
+<center><img src="images/bsev11.png"><br>An attempt at converting bmapdeaduk</center><br><br>
+Shape resources specifically which motivated the whole thing are quite large, even the smallest ones:<br>
+<center><img src="images/bsev12.png"><br>The smallest shpe resources</center><br><br>
+I have a few theories about the shape resources.<br>
+<ul>
+<li><b>No texture coordinates</b> and all details even wing roundels are polygon-based</li>
+<li><b>Polygons have arbitrary vertex count</b> rather than being limited to triangles, for efficiency in a software renderer</li>
+<li>Each polygon/face has a <b>single byte for colour</b> and <b>no normal vector</b> given the flat unshaded look of the game</li>
+<li>There are not only polygons but also <b>line segments</b> such as those forming the Me262 canopy</li>
+<li>Rather than a vertex count there could be a <b>terminator byte(s)</b></li>
+<li>Rather than a polygon count there could be a <b>terminator byte(s)</b></li>
+<li>Each <b>vertex is 3 words = 12 total bytes</b> long in 8.8 fixed point format</li>
+<li>There could be <b>LOD data</b> that is simpler or more complex geometry according to distance from camera</li>
+<li>There is <b>a header</b> but hard to tell how many bytes long and if it has any meaning</li>
+</ul><br>
+Lastly, here is a link to a file which I used while working on this: <a href="files/b17log.txt" target="_top">NOTES.TXT</a>.
+
+</body></html>
