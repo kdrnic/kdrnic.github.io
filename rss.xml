@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 29 Apr 2023 23:19:35 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 14 May 2023 21:42:34 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -131,6 +131,15 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Sat, 01 Aug 2020 21:53:07 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/doom.png" length="0" type="image/png"/>
+        </item>
+        <item>
+            <title><![CDATA[256-byte x86 fire demo]]></title>
+            <description><![CDATA[After messing around with x86 Assembly for , I had the desire to code one of those classic fire demos -like .Many years ago, when learning t...]]></description>
+            <link>https://kdrnic.github.io/index_firedemo.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_firedemo.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Sun, 14 May 2023 20:37:14 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/fire6.gif" length="0" type="image/gif"/>
         </item>
         <item>
             <title><![CDATA[Game: GBMINE]]></title>
