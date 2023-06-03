@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 03 Jun 2023 23:21:09 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 03 Jun 2023 23:29:53 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -142,7 +142,7 @@
             <enclosure url="https://kdrnic.github.io/images/fire6.gif" length="0" type="image/gif"/>
         </item>
         <item>
-            <title><![CDATA[GB Assembly Test]]></title>
+            <title><![CDATA[Game: GB Assembly Test]]></title>
             <description><![CDATA[Very simple score attack game made while learning Assembly for the Game Boy. I have previously made .Some things I tackled:...]]></description>
             <link>https://kdrnic.github.io/index_gbasm.html</link>
             <guid isPermaLink="true">https://kdrnic.github.io/index_gbasm.html</guid>
