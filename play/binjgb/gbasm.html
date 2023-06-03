@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!-- copied from
+https://github.com/chrismaltby/gb-studio/blob/v2beta/appData/js-emulator/index.html
+(see LICENSE.gbstudio)
+-->
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="simple.css">
+  <title>binjgb (simple)</title>
+</head>
+<body>
+  <div id="game">
+    <canvas id="mainCanvas" width="160" height="144">No Canvas Support</canvas>
+  </div>
+  <div id="controller">
+    <div id="controller_dpad">
+      <div id="controller_left"></div>
+      <div id="controller_right"></div>
+      <div id="controller_up"></div>
+      <div id="controller_down"></div>
+    </div>
+    <div id="controller_select" class="capsuleBtn">Select</div>
+    <div id="controller_start" class="capsuleBtn">Start</div>
+    <div id="controller_b" class="roundBtn">B</div>
+    <div id="controller_a" class="roundBtn">A</div>
+  </div>
+  <script src="binjgb.js"></script>
+  <script>
+// User configurable.
+const ROM_FILENAME = 'gbasm.gb';
+const ENABLE_FAST_FORWARD = true;
+const ENABLE_REWIND = true;
+const ENABLE_PAUSE = false;
+const ENABLE_SWITCH_PALETTES = true;
+const OSGP_DEADZONE = 0.1;    // On screen gamepad deadzone range
+const CGB_COLOR_CURVE = 2;    // 0: none, 1: Sameboy "Emulate Hardware" 2: Gambatte/Gameboy Online
+// List of DMG palettes to switch between. By default it includes all 84
+// built-in palettes. If you want to restrict this, change it to an array of
+// the palettes you want to use and change DEFAULT_PALETTE_IDX to the index of the
+// default palette in that list.
+//
+// Example: (only allow one palette with index 16):
+//   const DEFAULT_PALETTE_IDX = 0;
+//   const PALETTES = [16];
+//
+// Example: (allow three palettes, 16, 32, 64, with default 32):
+//   const DEFAULT_PALETTE_IDX = 1;
+//   const PALETTES = [16, 32, 64];
+//
+const DEFAULT_PALETTE_IDX = 8;
+  </script>
+  <script src="simple.js"></script>
+</body>

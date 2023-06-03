@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 14 May 2023 21:42:34 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 03 Jun 2023 23:21:09 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -71,12 +71,12 @@
         </item>
         <item>
             <title><![CDATA[Game: Ali Baba and the 40 thieves]]></title>
-            <description><![CDATA[Made for the 3rd GBJAM....]]></description>
+            <description><![CDATA[Made for the 3rd GBJAM.I wrote this with the version of GBDK that was current back then.It had an ancient version of the SDCC compiler, full...]]></description>
             <link>https://kdrnic.github.io/index_alibaba.html</link>
             <guid isPermaLink="true">https://kdrnic.github.io/index_alibaba.html</guid>
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Tue, 23 Jul 2019 22:18:02 GMT</pubDate>
-            <enclosure url="https://kdrnic.github.io/images/2x1.png" length="0" type="image/png"/>
+            <enclosure url="https://kdrnic.github.io/images/kdrnic.jpg" length="0" type="image/jpeg"/>
         </item>
         <item>
             <title><![CDATA[Reverse engineering a DOS game B17 Flying Fortress]]></title>
@@ -142,6 +142,15 @@
             <enclosure url="https://kdrnic.github.io/images/fire6.gif" length="0" type="image/gif"/>
         </item>
         <item>
+            <title><![CDATA[GB Assembly Test]]></title>
+            <description><![CDATA[Very simple score attack game made while learning Assembly for the Game Boy. I have previously made .Some things I tackled:...]]></description>
+            <link>https://kdrnic.github.io/index_gbasm.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_gbasm.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Sat, 03 Jun 2023 22:37:21 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/kdrnic.jpg" length="0" type="image/jpeg"/>
+        </item>
+        <item>
             <title><![CDATA[Game: GBMINE]]></title>
             <description><![CDATA[A real-time, raytraced, low-resolution &quot;cube world&quot; aka voxel aka Minecraft rendering engine. Features some simple world generation. The alg...]]></description>
             <link>https://kdrnic.github.io/index_gbmine.html</link>
@@ -158,6 +167,15 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Sun, 06 Dec 2020 22:27:49 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/mandelbrot1.gif" length="0" type="image/gif"/>
+        </item>
+        <item>
+            <title><![CDATA[kdrgbtags, a ctags-style tool for RGBDS]]></title>
+            <description><![CDATA[While writing my , I noticed I was missing some source code navigation help.When coding in C I make heavy use of  together with  to navigate...]]></description>
+            <link>https://kdrnic.github.io/index_kdrgbtags.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_kdrgbtags.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Sat, 03 Jun 2023 23:20:39 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/kdrnic.jpg" length="0" type="image/jpeg"/>
         </item>
         <item>
             <title><![CDATA[Game: Keystone Kapers for NES]]></title>
