@@ -4,8 +4,14 @@
         <description><![CDATA[RSS feed for GWTB]]></description>
         <link>http://github.com/dylang/node-rss</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 17 Feb 2023 21:26:10 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 11 Sep 2023 20:47:21 GMT</lastBuildDate>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[#81 Knife Fight...]]></title>
+            <link>http://www.blastwave-comic.com/index.php?p=comic&amp;nro=93</link>
+            <guid isPermaLink="true">http://www.blastwave-comic.com/index.php?p=comic&amp;nro=93</guid>
+            <pubDate>Mon, 11 Sep 2023 03:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[#80 You! You?...]]></title>
             <link>http://www.blastwave-comic.com/index.php?p=comic&amp;nro=92</link>
