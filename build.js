@@ -5,10 +5,17 @@ fs = require('fs');
 cheerio = require('cheerio');
 //RSS feed
 var RSS = require('rss');
+//Used for checksumming
+const crypto = require('crypto');
+//Used for JSON src_ db
+var writeFileAtomic = require('write-file-atomic');
+//Used for thumbnailing
+var imgjs = require('image-js');
 
 //To call curl - used by Wayback Machine link archiver
 const child_process = require('child_process');
 
+//RSS feed configuration
 var feed = new RSS({
 	title: "kdrnic's page",
 	description: "kdrnic's page",
@@ -22,8 +29,6 @@ var feed = new RSS({
 //Name of code highlighter style sheet
 var hlcss = "hlstyles/default.css";
 
-var filenames = fs.readdirSync("./");
-
 //Keep article titles
 var filetitles = {};
 //Keep article creation dates
@@ -32,19 +37,14 @@ var filedates = {};
 //Skip processing those files
 
 //Skips certain files
-var skip_filenames = /^(index|latest|(index_.+))\.html/;
+//index.html		"Landing" page
+//latest.html		Latest article page
+//index_*.html		Individual already processed article "frame" pages
+//src_*.html		Individual unprocessed article source files (NEW 2026 feature)
+var skip_filenames = /^(index|latest|(index_.+)|(src_.+))\.html/;
 
 //When ordering filenames, those files are last (must include those which will have indices of articles)
 var last_filenames = [];
-
-//Sort files
-filenames.sort(function(a, b){
-	var priority_a = 0;
-	var priority_b = 0;
-	priority_a += last_filenames.includes(a);
-	priority_b += last_filenames.includes(b);
-	return priority_a - priority_b;
-});
 
 //Configure highlighter
 hljs.configure({
@@ -64,6 +64,7 @@ hljs.configure({
 	],
 });
 
+//This is used in two passes, see FirstPass and SecondPass
 function DoPass(func){
 	for(var fn of filenames){
 		if(skip_filenames.test(fn)) continue;
@@ -82,7 +83,7 @@ function DoPass(func){
 			fs.writeFileSync(fn, $.html());
 		}
 		catch(e){
-			console.log("Failed for file " + fn, e);
+			console.error("Failed for file " + fn, func, e);
 		}
 	}
 }
@@ -113,17 +114,110 @@ function WriteIndex_(filename, card){
 	fs.writeFileSync("index_" + filename, $.html());
 }
 
+//Checksum used to set data-checksum
+function Checksum(data) {
+  return crypto.createHash('sha256').update(data).digest('hex');
+}
+
+//"Copy" (but not really just a copy) every src_*.html file to *.html
+function ZerothPass(){
+	let zerothFilenames = fs.readdirSync("./");
+	let fnRegex = /^src_(.+\.html)$/;
+	
+	//Read database JSON
+	let dbFn = "src_db.json";
+	let db = {};
+	if(fs.existsSync(dbFn)){
+		let dbTxt = fs.readFileSync(dbFn);
+		db = JSON.parse(dbTxt);
+	}
+	
+	for(var fn of zerothFilenames){
+		//Process only source files
+		let fns = fn.match(fnRegex);
+		if(fns === null) continue;
+		
+		//Find filenames from regex matches
+		let srcFn = fns[0];
+		let dstFn = fns[1];
+		
+		//Get database object
+		if(!db[srcFn]) db[srcFn] = {};
+		let srcDb = db[srcFn];
+		
+		//Ensure a creation date
+		if(!srcDb["created"]){
+			//Creation/publishing date in YYYY MM DD format
+			srcDb["created"] = (new Date().toISOString());
+		}
+		
+		//"Copy" src to dst
+		try{
+			let filetext = fs.readFileSync(srcFn);
+			
+			//JQuery like API
+			let dst$ = cheerio.load(filetext);
+			//Add creation date, etc.
+			if(!dst$('head')) dst$('html').prepend('head');
+			let dstHead = dst$('head');
+			dstHead.attr('data-created', srcDb["created"]);
+			//Avoid stupid charset error message
+			if(!dst$("meta[charset='UTF8']").length) dstHead.append("<meta charset='UTF8'>");
+			
+			//Remove data-modified, so modification date doesn't change the checksum
+			if(dstHead.attr('data-modified')){
+				dstHead.removeAttr('data-modified');
+			}
+			//Calculate new checksum
+			let newChecksum = Checksum(dst$.html());
+			//Set 'data-checksum' to new value and compare to old value
+			let oldChecksum = srcDb["checksum"];
+			srcDb["checksum"] = newChecksum;
+			if(oldChecksum != newChecksum){
+				//If checksums prove modification, set modification date
+				let dateStr = (new Date().toISOString());
+				srcDb["modified"] = dateStr;
+			}
+			//Set modification date on HTML
+			dstHead.attr('data-modified', srcDb["modified"]);
+			
+			//Write to dstFn
+			fs.writeFileSync(dstFn, dst$.html());
+		}
+		catch(e){
+			console.error(`Failed copy from ${srcFn} to ${dstFn}`, e);
+		}
+	}
+	
+	//Write database JSON
+	writeFileAtomic(dbFn, JSON.stringify(db));
+}
+ZerothPass();
+
+//Prepare filenames array for DoPass
+var filenames = fs.readdirSync("./");
+//Sort files
+filenames.sort(function(a, b){
+	var priority_a = 0;
+	var priority_b = 0;
+	priority_a += last_filenames.includes(a);
+	priority_b += last_filenames.includes(b);
+	return priority_a - priority_b;
+});
+
+
 //First pass - most processing
-DoPass(function(filename, $){
+function FirstPass(filename, $){
 	//Always have <head> tag
 	if(!$('head')) $('html').prepend('head');
 	//Creation/publishing date in YYYY MM DD format
 	if(!$('head').attr('data-created')) $('head').attr('data-created', (new Date().toISOString()));
-	filedates[filename] = $('head').attr('data-created');
-	//Modification date
-	if(!$('head').attr('data-modified')) $('head').attr('data-modified', (new Date(fs.statSync(filename).mtime).toISOString()));
 	//Avoid stupid charset error message
 	if(!$("meta[charset='UTF8']").length) $('head').append("<meta charset='UTF8'>");
+	//Read creation date
+	filedates[filename] = $('head').attr('data-created');
+	//Ensure it has a modification date
+	if(!$('head').attr('data-modified')) $('head').attr('data-modified', (new Date(fs.statSync(filename).mtime).toISOString()));
 	//If this is an article it must have a title
 	if($('body').attr('data-title')) filetitles[filename] = $('body').attr('data-title');
 	
@@ -180,7 +274,6 @@ DoPass(function(filename, $){
 	}
 	
 	//Perform Wayback Machine archiving of links
-	let numToArchive = 0, numArchived = 0;
 	$("a").each(function(idx, el){
 		let url = $(el).attr("href");
 		let archive = $(el).attr('data-archive');
@@ -273,10 +366,10 @@ DoPass(function(filename, $){
 			'url': image,
 		}
 	});
-});
+}
 
 //Second pass - add articles' index
-DoPass(function(filename, $){
+function SecondPass(filename, $){
 	//Creates indices of articles
 	$("ul[data-type='pages_index']").each(function(idx, el){
 		var codes = [];
@@ -306,7 +399,10 @@ DoPass(function(filename, $){
 		
 		$(el).append(codes.join(""));
 	});
-});
+}
+
+DoPass(FirstPass);
+DoPass(SecondPass);
 
 //Copy newest page to latest.html
 var filedates_arr = [];

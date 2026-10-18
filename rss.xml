@@ -9,7 +9,7 @@
             <link>https://kdrnic.github.io</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 03 Jun 2023 23:29:53 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 18 Oct 2026 15:18:56 GMT</lastBuildDate>
         <atom:link href="https://kdrnic.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[2019 kdrnic]]></copyright>
         <language><![CDATA[en]]></language>
@@ -365,6 +365,15 @@
             <dc:creator><![CDATA[kdrnic]]></dc:creator>
             <pubDate>Tue, 23 Jul 2019 22:18:03 GMT</pubDate>
             <enclosure url="https://kdrnic.github.io/images/screenshot_frame3002.png" length="0" type="image/png"/>
+        </item>
+        <item>
+            <title><![CDATA[Game: TROG 3D kdrnic's labyrinth]]></title>
+            <description><![CDATA[&quot;TROG 3D : kdrnic&apos;s labyrinth&quot; is a game for MS-DOS and MS-Windows 95 and above.It is a First-Person Shooter in a vague fantasy setting.Part...]]></description>
+            <link>https://kdrnic.github.io/index_trog3d.html</link>
+            <guid isPermaLink="true">https://kdrnic.github.io/index_trog3d.html</guid>
+            <dc:creator><![CDATA[kdrnic]]></dc:creator>
+            <pubDate>Sun, 18 Oct 2026 14:04:18 GMT</pubDate>
+            <enclosure url="https://kdrnic.github.io/images/gamedos_025.png" length="0" type="image/png"/>
         </item>
     </channel>
 </rss>

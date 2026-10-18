@@ -1,9 +1,15 @@
+:root {
+	color-scheme: light dark;
+	--bg-color: light-dark(#fff, #222);
+	--text-color: light-dark(#444, #eee);
+}
 body{
 	margin: 2.5vw auto auto 27vw;
 	max-width: 51vw;
 	line-height: 1.6;
 	font-size: 1.125em;
-	color:#444;
+	background-color: var(--bg-color);
+	color: var(--text-color);
 	padding: 0.625em
 }
 h1,h2,h3{
@@ -19,9 +25,12 @@ code{
 	border-style: solid;
 	border-color: #444 #777 #777 #444;
 	white-space: pre-wrap;
+	background-color: #eee;
+	color: #333;
 }
 .article-index{
-    border: solid 1px black;
+	background-color: #444;
+    border: solid 1px var(--text-color);
     white-space: nowrap;
     margin-right: 1vw;
     width: 25vw;
