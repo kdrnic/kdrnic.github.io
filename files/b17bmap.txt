@@ -1,0 +1,420 @@
+B-17 Flying Fortress - bmap, sprt and shpe resources
+====================================================
+
+Addendum to the "Reverse engineering a DOS game: B17 Flying Fortress" article.
+Describes the bmap container (backgrounds such as bmapdeaduk, crew heads,
+cockpit buttons, the 8x6 font, the 60 nav-map tiles, ...), the raw sprt
+sprite format, and the shpe bytecode display list used for the 3D models.
+b17img.py in this directory implements the bmap/sprt decoder, b17shpe.py the
+shape decoder and renderer.
+
+
+Where the information comes from
+--------------------------------
+Not from guessing byte layouts: the game's mode-X blitter does the work in
+GAME\DRIVERS\WGA.DRV, subroutine at file offset 0x1D65 (the driver is a
+resident-style blob, so those are file offsets), with a 4-byte-per-count table
+of chunk sizes at 0x269D.  Its inner loop sets the VGA sequencer map mask with
+a rotating bit (rol ah,1) and advances the destination (adc di,cx), which is
+what tells us the payload is split across planes and re-phased on every run.
+
+A first attempt at decoding, reading the decompressed resource as plain
+320x200 8bpp, produces four squeezed copies of the picture side by side - each
+80-byte "row" is really one 320-pixel plane, i.e. every fourth pixel.
+
+
+Container header (20 bytes)
+---------------------------
+   0x00  word   width
+   0x02  word   height
+   0x04  word   0
+   0x06  word   0
+   0x08  byte   0
+   0x09  byte   format byte        0x81 for the 8bpp planar bitmaps
+   0x0A  word   destination X      (0 when the bitmap is full screen)
+   0x0C  word   destination Y
+   0x0E  word   payload length     (decompressed length - 20)
+   0x14  ...    payload
+
+This is the same header for a 320x200 background, a 24x20 crew head and an
+8x6 font glyph; only the width and height differ.
+
+
+Payload: RLE rows of plane-split bytes
+--------------------------------------
+The payload is a sequence of runs, row by row.  Each run is
+
+    [skip] [count] [bytes]
+
+skip  = number of transparent pixels (the blitter simply does not write them,
+        so the previous screen shows through; b17img.py leaves them at
+        palette index 0)
+count = number of pixels carried by this run
+bytes = count palette indices, but stored one VGA plane at a time
+
+A row ends as soon as the running x reaches the width.  That can happen in two
+ways, and the difference matters:
+
+  * after a [count] run: skip + count lands exactly on the width, and the next
+    byte is the skip of the following row;
+  * after a [skip] alone: the row is transparent to its right edge, so there is
+    no count byte at all - the next byte already belongs to the next row.
+
+A decoder that always reads a [skip][count] pair up front consumes one byte too
+many for the second case.  bmapdeaduk never ends a row with a pure skip, so the
+simplified decoder still produced a correct picture for it; every crew head and
+font glyph does, which is how the bug showed up once all 831 bitmaps were run
+through the decoder.
+
+For a run of N pixels starting at x the bytes are split into four chunks in
+plane order, starting at plane (x & 3):
+
+    for i in 0..3:
+        plane  = (x + i) & 3
+        size   = (N + 3 - i) / 4        integer division
+        offset = (x + i) / 4
+        copy size payload bytes to plane[offset .. offset + size - 1]
+
+The four sizes always add up to N, which is why the payload is one byte per
+pixel in the end - the split only says where each byte goes.
+
+Byte b of plane p is therefore the palette index of pixel 4*b + p:
+
+    pixel(x) = plane[x & 3][x >> 2]
+
+This rotation matters.  Most bmapdeaduk rows are two runs, the second starting
+at x = 255, so its chunk order is planes 3,0,1,2 instead of 0,1,2,3 -
+assembling each row as four contiguous 80-byte slices silently produces
+garbage for those rows.
+
+
+Palettes
+--------
+Palette resources hold a short header and then 256 entries of 6-bit VGA RGB:
+
+    768 bytes, 3 per entry, each channel 0..63
+
+    channel8 = channel6 * 255 / 63
+
+The header length differs by family: bmapdukpal is 792 bytes (24 + 768),
+while the sprt palettes are 788 bytes (20 + 768), so it is simplest to take
+the 768 colour bytes from the end of the resource.
+
+Naming is not systematic but predictable enough to guess: bmapdeaduk ->
+bmapdukpal, bmapdeadger -> bmapdgerpal, sprtb17over -> sprtb17pal.
+
+
+sprt resources (16-byte header, raw pixels)
+-------------------------------------------
+The 88 sprt* resources use a shorter header and no compression of their own:
+
+    0x00  word   width
+    0x02  word   height
+    0x08  byte   8
+    0x09  byte   0x02             (format byte; bmaps use 0x81)
+    0x10  ...    width * height palette indices, row by row
+
+They are engine/wing damage overlays (sprteng1ok, sprteng1fire, ...), radio
+and instrument sprites, and one full 320x200 top-down B-17 (sprtb17over).
+All 81 non-palette sprt resources are exactly 16 + width * height bytes.
+
+
+Coverage
+--------
+_INDEX holds 1497 resources.  All of them decompress with XTRACT.EXE, and the
+decompressed sizes match the raw sizes stored in _INDEX.  Of those:
+
+    bmap   862   831 bitmaps + 31 palettes   all 831 bitmaps decode exactly
+    sprt    88    81 sprites + 7 palettes    all 81 sprites decode exactly
+    mppr   404   not bitmaps (coordinate/region data)
+    shpe   109   3D models, magic 0x1234, still unsolved
+    data    22   game data
+    font     4   proportional font data
+    tune     4   music
+    sdrv     3   sound driver data
+    dots     1   dither patterns
+
+"Decode exactly" means the run walk consumes the payload byte for byte and
+never needs a guess: 831/831 bmap bitmaps and 81/81 sprt sprites.  The 259
+distinct bitmap sizes range from 8x1 to 320x200, including the 60 128x128
+nav-map tiles, the 160x200 instrument panels, the 216x119 map window and the
+8x6 bitmap font.
+
+
+Verification
+------------
+The decoded bmapdeaduk is pixel-for-pixel the picture shown when the game
+displays it; compare images/bmapdeaduk_vs_ingame.png (decoded bitmap above the
+in-game capture).  The two transparent gaps in bmapdeaduk (row 33, x = 224,
+one pixel; row 34, x = 224, two pixels) are the only non-opaque pixels and show
+the previous frame in game.
+
+The gallery images are the same decoder applied to the whole set:
+images/bmapgallery.png (all 39 320x200 bitmaps), images/bmapnavtiles.png (all
+60 nav-map tiles), images/bmapsprites.png (53 crew heads, 68 cockpit buttons,
+80 font glyphs).
+
+
+Using the extractor
+-------------------
+Prerequisites:
+
+  * a copy of the game (the GAME directory with _INDEX and the data files)
+  * XTRACT.EXE from files/b17xtract.zip in this repository, unpacked
+  * DOSBox-X, either on PATH or passed with --dosbox
+  * Python 3, no third-party modules
+
+    python3 b17img.py bmapdeaduk --scale 2
+    python3 b17img.py bmapdeadger --palette bmapdgerpal --scale 2
+    python3 b17img.py bmaphead1 --palette bmapdukpal --scale 4
+    python3 b17img.py sprtb17over --palette sprtb17pal
+
+It parses _INDEX, copies _INDEX, XTRACT.EXE and the data file into a scratch
+directory, and runs XTRACT headless (SDL_VIDEODRIVER=dummy) so the original
+decompression routines are used unchanged.  Handy options: --game, --work,
+--xtract, --dosbox, --out, --scale, --keep.
+
+Sample output:
+    bmapdeaduk: file=_missend algo=3 offset=59844 stored=50556 raw=64817
+    palette: bmapdukpal
+    wrote bmapdeaduk.png (320x200 x2)
+
+
+shpe resources: the 3D models
+=============================
+A shpe resource is not packed geometry: it is a bytecode display list that
+B17.EXE interprets.  The model is built, transformed and drawn by the opcode
+handlers, which is why the raw bytes look like noise.
+
+Magic is 0x1234; the loader also accepts 0x5678 (an alternate form).
+
+Header (the loader reads only these three words)
+    0x00  word  magic
+    0x02  word  offset of the primary display list
+    0x04  word  offset of the alternate display list (used when [0x1286]=0xFF)
+
+The rest of the front of the file is ignored by the loader.  A zero magic
+means "not a shape": shpepalette is 7031 bytes of zeros and the loader skips
+it.
+
+The loader is at file 0x153A2.  It sets es to the resource segment and di to
+the list offset chosen above, then runs
+
+    0x153D9  mov  es,[0x105C]          ; shape workspace
+    0x153DD  mov  bl,es:[di]
+    0x153E0  xor  bh,bh
+    0x153E2  inc  di
+    0x153E3  call word [bx+0x17DE]
+    0x153E7  jmp  0x153D9
+
+DS:0x17DE is a 57-entry table of near pointers (file 0x4FDE).  The table is
+word addressed, so the stream stores 2*opcode and entry N belongs to byte 2N:
+0x00, 0x02, ... 0x70.
+
+
+Opcodes
+-------
+Operand sizes below were read off the individual handlers.  CALL/RET,
+relative jumps and the conditional prefixes (0x30/0x32 with 0x34/0x36) are
+control flow; the rest build vertices, normals, LOD tables and polygons.
+
+  byte  operand bytes   used?  meaning
+  0x00  8 + 2*count     yes    polygon: word0 test, word1 vertex, word2 skip,
+                               then count, attr, count vertex offsets
+  0x02  word            no     goto, di = operand_start + rel16
+  0x04  word            yes    call, di = operand_start + rel16
+  0x06  -               yes    ret
+  0x08  word            yes    -
+  0x0A  3 words         yes    -
+  0x0C  6 words         yes    box/primitive (see below)
+  0x0E  2 words         no     -
+  0x10  2 words         no     -
+  0x12  word            yes    detail threshold
+  0x14  variable        yes    vertex construction (see below)
+  0x16  variable        yes    normals: word count, word base, count*3 words
+  0x18  variable        yes    face/edge list (see below)
+  0x1A  -               no     -
+  0x1C  -               no     -
+  0x1E  word            no     -
+  0x20  word            no     -
+  0x22  word            yes    detail shift
+  0x24  3 words         yes    drawing attribute record
+  0x26  variable        yes    LOD table: word count, count*2 words
+  0x28  3 words         yes    conditional on [0x1064]
+  0x2A  3 words         no     conditional on a vertex attribute
+  0x2C  3 words         yes    conditional on a vertex attribute
+  0x2E  word            no     goto
+  0x30  3 words         no     conditional prefix
+  0x32  3 words         yes    conditional prefix
+  0x34  -               yes    else marker for 0x30
+  0x36  -               yes    else marker for 0x32
+  0x38  -               yes    end of list
+  0x3A  6 words         yes    box/primitive (general form of 0x0C)
+  0x3C  2 words         yes    conditional on [0x1050]
+  0x3E  2 words         yes    conditional on [0x1050]
+  0x40  2 words         no     -
+  0x42  9 bytes         yes    -
+  0x44  19 bytes        yes    direct draw primitive
+  0x46  word            yes    mark vertex visible
+  0x48  word            yes    mark vertex invisible
+  0x4A  3 words         no     conditional on [0x104E]
+  0x4C  2 words         no     state-dependent conditional
+  0x4E  3 words         yes    conditional on [0x104E], skip when outside
+  0x50  3 words         no     conditional on [0x104E]
+  0x52  14 bytes        yes    direct draw primitive
+  0x54  24 bytes        no     direct draw primitive
+  0x56  -               no     -
+  0x58  -               no     -
+  0x5A  -               no     -
+  0x5C  -               no     exit
+  0x5E  12 bytes        no     -
+  0x60  3 words         yes    attribute-mask conditional
+  0x62  3 words         yes    attribute-mask conditional
+  0x64  3 words         no     attribute-mask conditional
+  0x66  3 words         no     attribute-mask conditional
+  0x68  5 bytes         yes    -
+  0x6A  2 words         no     conditional jump, two absolute targets
+  0x6C  2 words         yes    conditional jump, two absolute targets
+  0x6E  -               yes    increment the depth counter [0x1062]
+  0x70  -               yes    decrement the depth counter [0x1062]
+
+"used" is whether any of the 109 shipped shape resources contains the opcode.
+
+
+Box primitives (0x0C and 0x3A)
+------------------------------
+    word count, signed ex, ey, ez, base, stride
+
+For the common single-box form (count=1, base=0, stride=0x10) the handler
+generates eight corners and stores them in the shape's vertex array at
+base+0x10 .. base+0x80, using all sign combinations of the three extents:
+
+    0x10 (-x,+y,-z)     0x20 (+x,+y,-z)
+    0x30 (+x,-y,-z)     0x40 (-x,-y,-z)
+    0x50 (-x,+y,+z)     0x60 (+x,+y,+z)
+    0x70 (+x,-y,+z)     0x80 (-x,-y,+z)
+
+The in-between words (+0x1E, +0x2E, ... +0x8E) hold per-corner flags and are
+zeroed.  This is why a shape's 0x18 and 0x00 lists can refer to vertices 0x10,
+0x20, 0x320, 0x340 and so on even though the file contains no coordinates at
+those offsets: the coordinates are computed at load/draw time.
+
+count > 1 goes down a different path (0x2A91) that indexes an instance table
+and draws primitive copies; it is not decoded here.
+
+
+Vertex construction (0x14)
+--------------------------
+    word count, then count items
+
+An item starts with a selector byte, indexed straight into the 6-entry table
+at CS:0x2D43, so the selector is 2*subop:
+
+  0x00  copy       dest = src1                        5 bytes
+  0x02  midpoint   dest = (src1 + src2) / 2           7 bytes
+  0x04  add        dest = src1 + src2                 7 bytes
+  0x06  subtract   dest = src1 - src2                 7 bytes
+  0x08  negate     dest = -src1                       5 bytes
+  0x0A  transform  dest = M * (src1, src2, src3)      9 bytes
+
+dest, src1, src2, src3 are 16-bit vertex offsets.  This is how a model gets
+everything between the eight box corners: edge midpoints, duplicated corners,
+negated corners for a mirrored half, and linear combinations of three corners.
+
+
+Face/edge lists (0x18)
+----------------------
+    word count, then count entries
+
+Each entry begins with a signed word and is either 6 or 4 bytes:
+
+  word > 0   6 bytes: word, vertex1, vertex2   (a segment)
+  word <= 0  4 bytes: word, vertex              (a single point / attribute)
+
+The runtime projects the vertices and calls the line routine at 0x5D6B, so
+this is the wireframe detail: window frames, railings, the edges of a cube.
+Vertex 0x1FE is special: the loader writes 0x7FFF to its visibility word at
+es:[0x21FE], and the renderer treats it as a sentinel.
+
+
+Polygons (0x00)
+---------------
+    word0  attribute/visibility test value
+    word1  vertex index
+    word2  skip distance
+    count  number of vertices
+    attr   drawing attribute
+    count * word  vertex offsets
+
+If the visibility byte of vertex word1 does not match word0's low byte, the
+handler does di += word2 and returns, so word2 is the length of the block to
+skip.  Otherwise it draws a filled polygon of count vertices.  A polygon
+record is 9 + 2*count bytes including the opcode.
+
+
+Worked example: shpecube
+------------------------
+shpecube is 325 bytes and is the cleanest possible shape:
+
+  000e  0c 01 00 a0 00 a0 00 a0 00 00 00 10 00
+         box, count=1, extents 160/160/160, base=0, stride=0x10
+  001b  22 02 00            detail shift
+  001e  12 20 03            detail threshold 0x0320
+  0021  26 02 00 00 10 00 00 00 20 00 00
+         LOD table, 2 entries
+  002c  46 fe 01            mark vertex 0x1FE visible
+  002f  24 02 d0 17 00 17 d1   \
+  0036  24 01 d0 16 00 16 d3    |
+  003d  24 00 0c 08 00 08 d5    > six 6-byte attribute records
+  0044  24 0a 11 45 00 45 0b    |
+  004b  24 0b 68 91 00 91 03    |
+  0052  24 0c a5 0e 00 0e 09   /
+  0059  6e                  increment depth counter [0x1062]
+  005a  14 03 00 ...        build 3 vertices from the box corners
+  0072  16 03 00 00 00 ...  3 normals
+  0089  44 ...               direct draw
+  009d  52 ...               direct draw
+  00ac  52 ...
+  00bb  52 ...
+  00ca  52 ...
+  00d9  70                  decrement depth counter [0x1062]
+  00da  04 03 00            call 0xde
+  00de  4e 01 00 02 00 65 00   if detail in [1,2] fall through
+  00e5  18 11 00 ...        edge list, 17 entries
+  0144  06                  ret
+
+The 17-entry edge list is the cube: 4-byte "move/attribute" entries alternate
+with 6-byte segments between corners 0x10..0x80 and the sentinel 0x1FE.
+
+
+What the decoder was checked against
+------------------------------------
+All 109 shpe resources were extracted with XTRACT and walked.  108 reach a
+clean RET/END/EXIT.  The 109th, shpepalette, is 7031 zero bytes (magic 0) and
+is skipped by the loader, so it is not a shape.  Across the 108:
+
+  * 108 boxes in the count=1/base=0/stride=0x10 form
+  * 3111 polygon opcodes (0x00)
+  * 6766 reconstructed vertices (box corners plus 0x14 constructions)
+
+Rebuilding the local frame from the box corners and 0x14 items and filling the
+0x00 polygons gives recognisable models: shpefw190 is unmistakably an FW 190,
+shpeb17_ a B-17, and shpecube a cube.
+
+
+Using the decoder
+-----------------
+b17shpe.py in this directory needs an already-decompressed resource.  Use the
+same XTRACT step as for bmap:
+
+    xtract shpecube R0000.BIN
+
+Then disassemble the display list or render a PNG:
+
+    python3 b17shpe.py R0000.BIN
+    python3 b17shpe.py R0000.BIN --png shpecube.png --size 900
+
+The renderer is a static read of the local frame: it projects with a fixed
+isometric view and does not emulate the game's orientation matrix, clipping or
+detail selection.  Polygons whose vertices are missing from the reconstructed
+set are dropped.
