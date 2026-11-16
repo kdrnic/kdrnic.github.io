@@ -172,5 +172,58 @@ I have a few theories about the shape resources.<br>
 <li>There is <b>a header</b> but hard to tell how many bytes long and if it has any meaning</li>
 </ul><br>
 Lastly, here is a link to a file which I used while working on this: <a href="files/b17log.txt" target="_top">NOTES.TXT</a>.
+<h1>Addendum: the bmap format, solved</h1>
+The first bullet of the dead ends turned out to be friendlier than it looked. At least for <b>bmap</b>, the payload is not bit-packed bitplanes at all: it is <b>one byte per pixel</b>, split across the four VGA write planes and reassembled run by run. Reading a decompressed bmap as plain 8bpp is exactly what produces the four squeezed copies in the screenshot above - each 80-byte "line" is one full 320 pixel plane, that is, every fourth pixel.<br>
+The layout was not found by brute force: it is what the mode-X blitter in <b>GAME\DRIVERS\WGA.DRV</b> does (routine at file offset 0x1D65, with its per-count table of chunk sizes at 0x269D). The inner loop rotates the sequencer map mask (<i>rol ah,1</i>) and advances the destination with <i>adc di,cx</i>, which pins down both the chunk sizes and the plane rotation.<br><br>
+<b>Container header (20 bytes)</b><br>
+<pre>0x00 word  width              320
+0x02 word  height             200
+0x04 word  0
+0x06 word  0
+0x08 byte  0
+0x09 byte  format byte        0x81 for these 8bpp planar bitmaps
+0x0A word  destination X      (0 for a full screen bitmap)
+0x0C word  destination Y
+0x0E word  payload length     (decompressed length - 20)
+0x14 ...   payload</pre><br>
+<b>Payload</b><br>
+Rows, top to bottom, each a sequence of runs:
+<pre>[skip] [count] [bytes]</pre>
+<i>skip</i> transparent pixels (the blitter does not write them, so the previous screen shows through), then <i>count</i> pixels. A row ends as soon as x reaches the width - either at the end of a run's bytes, or right after a <i>skip</i> alone, in which case the row is transparent to the right edge and <b>there is no count byte</b>: the next byte already belongs to the next row.<br>
+The bytes of a run are per plane, not per pixel. A run of N pixels starting at x is split into four chunks, written in plane order starting from plane (x &amp; 3):
+<pre>for i in 0..3:
+    plane  = (x + i) &amp; 3
+    size   = (N + 3 - i) / 4     integer division
+    offset = (x + i) / 4
+    copy size payload bytes to plane[offset .. offset + size - 1]</pre>
+Byte b of plane p is then the palette index of pixel 4*b + p:
+<pre>pixel(x) = plane[x &amp; 3][x &gt;&gt; 2]</pre>
+The rotation matters: most <b>bmapdeaduk</b> rows are two runs, and the second one starts at x = 255, so its chunk order is planes 3,0,1,2 instead of 0,1,2,3. Assembling each row as four contiguous 80-byte slices quietly produces garbage for those rows.<br><br>
+<b>Palettes</b><br>
+Palette resources (<b>bmapdukpal</b>, <b>bmapdgerpal</b>) reuse the front of the same header and then hold 256 entries of 6-bit VGA RGB, <b>channel = value * 255 / 63</b>. bmapdukpal is 792 bytes: 24 bytes of header plus 768 bytes of colour; the sprt palettes use a 20-byte header, so it is simplest to take the 768 colour bytes from the end of the resource. The names are not systematic, but guessable: bmapdeaduk uses bmapdukpal, bmapdeadger uses bmapdgerpal, sprtb17over uses sprtb17pal.<br><br>
+<center><img src="images/bmapdeaduk.png"><br><b>bmapdeaduk</b> decoded (320x200, shown at 2x)</center><br><br>
+<center><img src="images/bmapdeaduk_vs_ingame.png"><br>decoded <b>bmapdeaduk</b> above the in-game capture</center><br><br>
+The same code decodes the Germany variant, which is a useful check that nothing is specific to one file:<br>
+<center><img src="images/bmapdeadger.png"><br><b>bmapdeadger</b> decoded</center><br><br>
+Two transparent gaps remain in bmapdeaduk (one pixel at row 33, x = 224 and two at row 34); in game they show the previous frame through the bitmap.<br><br>
+Every bmap shares this header, from the 39 full-screen 320x200 pictures down to 24x20 crew heads and 8x6 font glyphs. Run over the whole resource table, the decoder consumes the payload exactly: <b>831 of 831 bitmaps</b> (862 bmap resources minus 31 palettes), including the 60 128x128 nav-map tiles, the four 160x200 instrument panels and the 216x119 map window.<br>
+<center><img src="images/bmapgallery.png"><br>all 39 full-screen (320x200) bmap bitmaps</center><br><br>
+<center><img src="images/bmapnavtiles.png"><br>all 60 nav-map tiles (128x128)</center><br><br>
+<center><img src="images/bmapsprites.png"><br>53 crew heads (24x20), 68 cockpit buttons (24x22) and the 8x6 font</center><br><br>
+The 88 <b>sprt</b> resources are a simpler variant: a 16-byte header (format byte 0x02) followed by width x height palette indices, no runs at all. They are the engine and wing damage overlays, radio and instrument faces, and one full-screen top-down B-17; all 81 non-palette sprt resources are exactly 16 + width x height bytes.<br><br>
+The extractor below keeps XTRACT for the decompression step, run headless in DOSBox-X (<i>SDL_VIDEODRIVER=dummy</i>), then does the rest with the Python standard library: parse _INDEX, walk the runs, reassemble the planes, write a PNG. It handles the raw sprt variant and palettes too.
+<center><a href="files/b17img.py" target="_top">b17img.py</a> - usage: <i>python3 b17img.py bmapdeaduk --scale 2</i><br>
+<a href="files/b17bmap.txt" target="_top">BMAP FORMAT NOTES</a></center><br><br>
+<h1>Addendum: the shpe format, solved</h1>
+The 3D models were the other dead end, and they turn out not to be packed meshes at all. A <b>shpe</b> resource is a bytecode display list, interpreted by B17.EXE itself, which is why the bytes look like noise. The loader (file 0x153A2) reads only three words - magic 0x1234, the offset of a primary list, and the offset of an alternate list used for one detail setting - and then dispatches one byte at a time through a 57-entry table of near pointers at DS:0x17DE. The table is word-indexed, so the stream stores <b>2*opcode</b>.<br><br>
+That gives 57 instructions: <b>0x00</b> is a polygon, <b>0x0C</b> and <b>0x3A</b> a box primitive, <b>0x14</b> builds vertices out of other vertices, <b>0x18</b> is a wireframe/edge list, and <b>0x04</b>/<b>0x06</b> are call and return. The box handler writes eight corners at +0x10..+0x80 from three extents and all sign combinations, so a shape can refer to vertices 0x10, 0x20, 0x320, 0x340... that never appear in the file - the coordinates are computed. Everything else is built from those corners by the 0x14 items: copy, midpoint, add, subtract, negate, and a three-vertex transform. A face is then a count plus vertex offsets, guarded by a per-vertex visibility test.<br><br>
+Rebuilding that frame from the display list and filling the 0x00 polygons is enough to see the models. <b>shpecube</b> is a literal cube made from one box, and <b>shpefw190</b> is unmistakably an FW 190. All 109 resources were extracted and walked; <b>108 reach a clean RET/END/EXIT</b>. The last one, <b>shpepalette</b>, is 7031 zero bytes with magic 0, which the loader skips - it is a placeholder, not a shape.<br><br>
+<center><img src="images/shpecube.png"><br><b>shpecube</b>: one 0x0C box, drawn by its 0x18 edge list</center><br><br>
+<center><img src="images/shpebox1.png"><br><b>shpebox1</b>: the same box form with 0x00 polygons over it</center><br><br>
+<center><img src="images/shpefw190.png"><br><b>shpefw190</b> reconstructed from its display list</center><br><br>
+<center><img src="images/shpegallery.png"><br>FW 190, Me 262, Cheyenne, B-17 / bridge gate, Notre-Dame, government block, palace / church, hangar, truck, submarine pen</center><br><br>
+The decoder and renderer are stdlib-only Python and work on a resource already unpacked by XTRACT:
+<center><a href="files/b17shpe.py" target="_top">b17shpe.py</a> - usage: <i>python3 b17shpe.py R0000.BIN --png shpecube.png</i><br>
+<a href="files/b17bmap.txt" target="_top">BMAP / SPRT / SHPE FORMAT NOTES</a></center><br><br>
 
 </body></html>
